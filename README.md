@@ -24,3 +24,4 @@ Edit files in this repo and commit. The installed paths are symlinks, so changes
 - `cross-review/` holds the model list and script behind the review-with-* skills.
 - `links` lists every managed symlink as `source target`.
 - `check.sh` verifies each skill has a valid SKILL.md, is in `links`, and links into every tool unless listed as tool-specific.
+- Name a tool-specific skill `<purpose>-with-<tool>`, for example `review-with-codex`, so agents can find it by name.
