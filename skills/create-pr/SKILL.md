@@ -89,4 +89,15 @@ EOF
 )"
 ```
 
+## Step 3b: Dependent PRs form a GitHub stack
+
+If this branch builds on another branch whose PR is not merged, target that branch with `--base`, then link the chain as a native GitHub stack. Do not leave dependent PRs as loose base-branch chains.
+
+```bash
+gh extension list | grep -q gh-stack || gh extension install github/gh-stack
+gh stack link --base <trunk> <bottom-pr> ... <top-pr>   # oldest first, e.g. gh stack link --base main 10 20 30
+```
+
+Verify with `gh api repos/<owner>/<repo>/pulls/<n> --jq .stack`. Start a new stack with `gh stack init` and `gh stack submit` when you build the chain from scratch.
+
 ## Step 4: Return the PR URL
