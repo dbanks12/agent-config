@@ -4,3 +4,4 @@ instructions/AGENTS.md    ~/.codex/AGENTS.md
 skills/brief              ~/.claude/skills/brief
 skills/brief              ~/.codex/skills/brief
 skills/create-pr          ~/.claude/skills/create-pr
+skills/herdr ~/.claude/skills/herdr
