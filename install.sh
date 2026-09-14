@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Link each entry in ./links into place. --check reports drift and changes nothing.
+# Link each entry in ./links into place, then run check.sh. --check reports drift and links nothing.
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -30,4 +30,6 @@ while read -r src dst; do
 done < "$root/links"
 
 [[ $backed_up -eq 1 ]] && echo "backups: $backups"
+git -C "$root" config core.hooksPath hooks
+"$root/check.sh" || failed=1
 exit $failed
