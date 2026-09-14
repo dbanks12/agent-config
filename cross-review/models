@@ -1,0 +1,13 @@
+# Model names that trigger the cross-tool review skills.
+# Format: <family> <name>   families: claude | openai
+# Edit by hand or via update-models.sh, then run `update-models.sh render`.
+claude Claude
+claude Anthropic
+claude Fable
+claude Opus
+claude Sonnet
+claude Haiku
+openai Codex
+openai OpenAI
+openai GPT
+openai astra

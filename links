@@ -5,3 +5,6 @@ skills/brief              ~/.claude/skills/brief
 skills/brief              ~/.codex/skills/brief
 skills/create-pr          ~/.claude/skills/create-pr
 skills/herdr ~/.claude/skills/herdr
+skills/review-with-codex  ~/.claude/skills/review-with-codex
+skills/review-with-claude ~/.codex/skills/review-with-claude
+cross-review              ~/.config/cross-review

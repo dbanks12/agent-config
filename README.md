@@ -19,4 +19,5 @@ Edit files in this repo and commit. The installed paths are symlinks, so changes
 
 - `instructions/AGENTS.md` is the global instruction file for both tools.
 - `skills/` holds shared skills.
+- `cross-review/` holds the model list and script behind the review-with-* skills.
 - `links` lists every managed symlink as `source target`.
