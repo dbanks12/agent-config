@@ -31,6 +31,14 @@ Use a quoted heredoc to prevent shell expansion. Every mode is read-only. The sc
 
 The names that trigger this skill live in `~/.config/cross-review/models`. To add one, run `~/.config/cross-review/update-models.sh add claude <name> <alias>`. It re-renders the descriptions of the skills that trigger on model names.
 
+## Fable fallback
+
+The runner checks the weekly Fable limit before a run that would use Fable, which includes a run with no `-m`. If the limit is at 90 percent or more, the runner switches to Opus and prints `Fable usage is near limit (NN%). Using Opus instead of Fable.` Relay that line to the user.
+
+If the user named Fable explicitly, pass `--pin`. The runner then uses Fable regardless of the limit. Do not pass `--pin` when you chose Fable yourself or when no model was named.
+
+`~/.config/cross-review/fable-usage.sh` prints the current percent. `fable-usage.sh --near` exits 0 at or above the limit.
+
 ## Effort
 
 `-e` takes low, medium, high, xhigh, or max. Use high for reviews. Leave it unset for a quick question.

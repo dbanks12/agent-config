@@ -34,7 +34,7 @@ The installer backs up the replaced local file.
 
 - `instructions/AGENTS.md` is the global instruction file for both tools.
 - `skills/` holds shared skills. Link each into both tools unless it is tool-specific.
-- `cross-review/` holds the model list and the runner scripts (`claude.sh`, `codex.sh`) behind the cross-tool skills.
+- `cross-review/` holds the model list, the runner scripts (`claude.sh`, `codex.sh`), and `fable-usage.sh`, which reads the weekly Fable limit so the Claude runner and the council fall back to Opus at 90 percent.
 - `settings/` holds the complete Codex and Claude settings files, including machine-specific paths and trust entries.
 - `links` lists every managed symlink as `source target`.
 - `check.sh` verifies each skill has a valid SKILL.md, is in `links`, and links into every tool unless listed as tool-specific.

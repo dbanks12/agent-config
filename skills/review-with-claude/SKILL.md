@@ -24,7 +24,7 @@ Do not edit files or implement fixes during this skill. Run the reviewer once. D
 
 ## Code review
 
-Pass the base as a range: `--target <base>...HEAD` for a branch, `--target <sha>` for one commit, `--target HEAD` for the working tree. A PR number or path also works. With no `--target` the built-in review diffs against the branch's upstream, which is empty once the branch is pushed. Use `-e high`. Pass `-m` only when the user names a model.
+Pass the base as a range: `--target <base>...HEAD` for a branch, `--target <sha>` for one commit, `--target HEAD` for the working tree. A PR number or path also works. With no `--target` the built-in review diffs against the branch's upstream, which is empty once the branch is pushed. Use `-e high`. Pass `-m` only when the user names a model. Pass `--pin` only when the user names Fable, so the Fable fallback in `call-claude` does not swap it for Opus.
 
 ```bash
 ~/.config/cross-review/claude.sh code-review -e high --target main...HEAD

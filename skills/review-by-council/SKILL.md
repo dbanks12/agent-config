@@ -22,6 +22,8 @@ Default seats, each at effort high:
 
 The user can name other seats or another effort. A seat whose CLI is missing is skipped and named in the report. Read `call-claude` and `call-codex` for model names and flags.
 
+Fable seat and the weekly limit: before launch, run `~/.config/cross-review/fable-usage.sh --near`. If it exits 0 and the user did not name Fable, drop the fable seat and print `Fable usage is near limit. Dropping Fable agent from council.` The other seats run as normal. If the user named Fable, keep the seat and pass `--pin` to its runner.
+
 Every seat is a separate process with no memory of this session. The chair gives a seat the target only. It never gives a seat suspected findings, the author's conclusions, or another seat's output.
 
 ## Review kind
@@ -31,7 +33,7 @@ Every seat is a separate process with no memory of this session. The chair gives
 
 ## Run
 
-1. Launch every seat at once in the background. Send each seat's output to its own file. Record each seat's exit status. A bare `wait` returns 0 even when a seat failed.
+1. Check the Fable limit as described under Seats. Then launch every seat at once in the background. Send each seat's output to its own file. Record each seat's exit status. A bare `wait` returns 0 even when a seat failed.
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"; out=$(mktemp -d); pids=(); seats=()
