@@ -24,12 +24,17 @@ Run this command as the normal Codex user:
 ./linux/install-codex-sandbox.sh
 ```
 
-The script uses sudo to install and load `agent-config-bwrap` under `/etc/apparmor.d/`.
-The profile permits `/usr/bin/bwrap` to create user namespaces.
-This exception applies to all callers of that executable.
+The script follows [OpenAI's Ubuntu instructions](https://learn.chatgpt.com/docs/sandboxing#prerequisites).
+It installs `apparmor-profiles` and `apparmor-utils` through apt.
+It copies Ubuntu's `bwrap-userns-restrict` profile from `/usr/share/apparmor/extra-profiles/` into `/etc/apparmor.d/` and loads it.
+The profile allows Bubblewrap to create namespaces and restricts namespace creation by its child programs.
 Codex still sets its filesystem and network limits through Bubblewrap.
 The system-wide namespace restriction stays enabled.
 AppArmor loads the installed profile on subsequent boots.
+
+The script stops if another file under `/etc/apparmor.d/` mentions `/usr/bin/bwrap`.
+Inspect that file before proceeding. Duplicate executable attachments can prevent either profile from applying.
+The check covers literal executable paths. Inspect aliases or variable-based attachments separately if your host uses them.
 
 The script then tests read-only and workspace-write sandboxes as the normal user.
 The tests require successful reads, correct write boundaries, and blocked access to a live host network listener.
@@ -66,11 +71,11 @@ See [Ubuntu's AppArmor documentation](https://documentation.ubuntu.com/security/
 Unload the profile:
 
 ```sh
-sudo apparmor_parser --remove /etc/apparmor.d/agent-config-bwrap
+sudo apparmor_parser --remove /etc/apparmor.d/bwrap-userns-restrict
 ```
 
 Remove the installed file:
 
 ```sh
-sudo rm /etc/apparmor.d/agent-config-bwrap
+sudo rm /etc/apparmor.d/bwrap-userns-restrict
 ```
