@@ -2,6 +2,16 @@
 
 This file and the shared skills live in `dbanks12/agent-config`. Paths under `~/.claude` and `~/.codex` are symlinks into that repo. Edit there and commit. Link each skill into both tools unless it is tool-specific.
 
+# Sandbox rule
+
+When you launch Codex or Claude Code yourself, from a skill, a script, a pane, or a subprocess, keep its sandbox and approvals on.
+
+- Never pass `--yolo`, `--dangerously-bypass-approvals-and-sandbox`, `--dangerously-bypass-hook-trust`, or `sandbox_mode="danger-full-access"` to Codex. Use `--sandbox read-only` for reviews and questions. Use `-a never -s workspace-write` for unattended work that edits files.
+- Never pass `--dangerously-skip-permissions` to Claude Code. Use `--permission-mode plan` for read-only work.
+- If the Codex sandbox fails to start (`bwrap: loopback: Failed RTM_NEWADDR`), stop and fix the host with `linux/install-codex-sandbox.sh`. Do not retry without the sandbox.
+
+This rule is about processes you start. It does not change code that a project under review ships.
+
 # Karpathy guidelines
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.

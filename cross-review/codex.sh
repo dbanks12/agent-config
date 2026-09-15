@@ -13,7 +13,7 @@
 # `codex review` takes either a target flag or stdin instructions, not both.
 set -euo pipefail
 
-models_file="${XDG_CONFIG_HOME:-$HOME/.config}/cross-review/models"
+models_file="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/models"
 
 usage() { sed -n '3,13p' "$0" >&2; exit 2; }
 
@@ -40,7 +40,7 @@ done
 [[ "$mode" == prompt && ${#target[@]} -gt 0 ]] && usage
 
 # Resolve a short name (astra) to the CLI model (gpt-6-astra) via the models file.
-if [[ -n "$model" && -f "$models_file" ]]; then
+if [[ -n "$model" ]]; then
   resolved="$(awk -v n="$model" 'tolower($1)=="openai" && tolower($2)==tolower(n) { print $3 }' "$models_file")"
   [[ -n "$resolved" ]] && model="$resolved"
 fi
@@ -53,42 +53,36 @@ config=()
 [[ -n "$model" ]] && config+=(-c "model=\"$model\"")
 [[ -n "$effort" ]] && config+=(-c "model_reasoning_effort=\"$effort\"")
 
-sandbox_failed() {  # sandbox_failed <output-file>: true if the local sandbox broke the run
-  grep -Eqi 'sandbox.{0,80}(loopback|setup|configure|failed)|loopback.{0,80}(sandbox|configure|failed)|bwrap:' "$1"
+status=0
+# The sandbox is never bypassed. If it cannot start, fix the host and rerun.
+sandbox_check() {  # sandbox_check <output-file>: exit 3 if the local sandbox broke the run
+  if grep -Eqi 'sandbox.{0,80}(loopback|setup|configure|failed)|loopback.{0,80}(sandbox|configure|failed)|bwrap:' "$1"; then
+    echo "The Codex sandbox failed to start, so this run is unreliable. Fix the host with agent-config/linux/install-codex-sandbox.sh and rerun. The sandbox is never bypassed." >&2
+    exit 3
+  fi
 }
 
 if [[ "$mode" == prompt ]]; then
   cat > "$tmp/prompt.txt"
-  run() {  # run <sandbox-flag>
-    ENGINEERING_CROSS_MODEL_REVIEW_ACTIVE=1 timeout 30m codex exec \
-      --cd "$repo_root" "$1" "${config[@]}" --ephemeral --color never - < "$tmp/prompt.txt"
-  }
-  if [[ "${ENGINEERING_CODEX_YOLO:-0}" == 1 ]]; then run --dangerously-bypass-approvals-and-sandbox; exit $?; fi
-  status=0
-  run --sandbox=read-only | tee "$tmp/out.txt" || status=$?
-  if [[ $status -ne 0 ]] || sandbox_failed "$tmp/out.txt"; then
-    echo "The Codex sandbox failed. Retrying this read-only call without the local sandbox." >&2
-    run --dangerously-bypass-approvals-and-sandbox
-  fi
-  exit
+  ENGINEERING_CROSS_MODEL_REVIEW_ACTIVE=1 timeout 30m codex exec \
+    --cd "$repo_root" --sandbox=read-only "${config[@]}" --ephemeral --color never - < "$tmp/prompt.txt" \
+    | tee "$tmp/out.txt" || status=$?
+  sandbox_check "$tmp/out.txt"
+  exit "${status:-0}"
 fi
 
-# code-review: Codex's built-in review. Pin the sandbox to read-only; a model override can change the default.
+# code-review: Codex's built-in review. The sandbox is pinned to read-only; a model override can change the default.
 if [[ ${#target[@]} -eq 0 ]]; then
   cat > "$tmp/prompt.txt"
   [[ -s "$tmp/prompt.txt" ]] || { echo "code-review needs a target flag or instructions on stdin." >&2; exit 2; }
 fi
-run() {  # run [extra -c overrides]
+run() {
   if [[ ${#target[@]} -gt 0 ]]; then
-    ENGINEERING_CROSS_MODEL_REVIEW_ACTIVE=1 timeout 30m codex review "${target[@]}" "${config[@]}" "$@"
+    ENGINEERING_CROSS_MODEL_REVIEW_ACTIVE=1 timeout 30m codex review "${target[@]}" "${config[@]}" -c 'sandbox_mode="read-only"'
   else
-    ENGINEERING_CROSS_MODEL_REVIEW_ACTIVE=1 timeout 30m codex review "${config[@]}" "$@" - < "$tmp/prompt.txt"
+    ENGINEERING_CROSS_MODEL_REVIEW_ACTIVE=1 timeout 30m codex review "${config[@]}" -c 'sandbox_mode="read-only"' - < "$tmp/prompt.txt"
   fi
 }
-if [[ "${ENGINEERING_CODEX_YOLO:-0}" == 1 ]]; then run -c 'sandbox_mode="danger-full-access"'; exit $?; fi
-status=0
-run -c 'sandbox_mode="read-only"' | tee "$tmp/out.txt" || status=$?
-if [[ $status -ne 0 ]] || sandbox_failed "$tmp/out.txt"; then
-  echo "The Codex sandbox failed. Retrying this read-only review without the local sandbox." >&2
-  run -c 'sandbox_mode="danger-full-access"'
-fi
+run | tee "$tmp/out.txt" || status=$?
+sandbox_check "$tmp/out.txt"
+exit "${status:-0}"

@@ -3,13 +3,18 @@
 # Lives in agent-config/cross-review. Called by the call-claude, review-with-claude, and review-by-council skills.
 #
 #   claude.sh prompt      [-m MODEL] [-e EFFORT]                       < prompt
-#   claude.sh code-review [-m MODEL] [-e EFFORT] [--target <pr#|branch|path>]
+#   claude.sh code-review [-m MODEL] [-e EFFORT] [--target <base>...HEAD|<sha>|<pr#>|<branch>|<path>]
 #
-# MODEL is a Claude alias (fable, opus, sonnet) or a full model name.
+# MODEL is a name from the models file next to this script (fable, opus, ...),
+# a Claude alias, or a full model name.
 # EFFORT is low, medium, high, xhigh, or max.
 # code-review runs Claude Code's built-in /code-review skill. With no --target
-# it reviews the current branch's diff. It takes no extra instructions.
+# it diffs against the branch's upstream, which is empty on a pushed branch.
+# Pass --target main...HEAD to review a branch against main. It takes no
+# extra instructions.
 set -euo pipefail
+
+models_file="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/models"
 
 usage() { sed -n '3,11p' "$0" >&2; exit 2; }
 
@@ -33,6 +38,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 [[ "$mode" == prompt && -n "$target" ]] && usage
+
+# Resolve a short name (Fable) to the CLI model (fable) via the models file.
+if [[ -n "$model" ]]; then
+  resolved="$(awk -v n="$model" 'tolower($1)=="claude" && tolower($2)==tolower(n) { print $3 }' "$models_file")"
+  [[ -n "$resolved" ]] && model="$resolved"
+fi
 
 cd "$repo_root"
 common=(--print --permission-mode plan --strict-mcp-config --no-chrome --no-session-persistence --output-format text)

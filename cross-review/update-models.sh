@@ -18,7 +18,7 @@ usage() {
   cat <<USAGE
 usage: update-models.sh <command>
   list                      show the current list
-  add <family> <name> [<cli-model>]  add a name (family: claude | openai) and re-render
+  add <family> <name> [<cli-model>]  add or replace a name (family: claude | openai) and re-render
   remove <family> <name>...          remove names and re-render
   render                             rewrite the description line in the four cross-tool SKILL.md files
   check <family>            print a reminder if the list is older than $stale_days days
@@ -61,7 +61,9 @@ case "$cmd" in
   add)
     family="${1:?family}"; name="${2:?name}"; cli="${3:-}"
     [[ "$family" == claude || "$family" == openai ]] || { echo "family must be claude or openai" >&2; exit 2; }
-    grep -qiE "^$family $name( |$)" "$models" || echo "$family $name${cli:+ $cli}" >> "$models"
+    # Upsert: an existing row is replaced so a cli-model can be attached later.
+    grep -viE "^$family $name( |$)" "$models" > "$models.tmp" && mv "$models.tmp" "$models"
+    echo "$family $name${cli:+ $cli}" >> "$models"
     touch "$models"
     render ;;
   remove)
@@ -81,7 +83,7 @@ case "$cmd" in
     age=$(( ( $(date +%s) - $(stat -c %Y "$models") ) / 86400 ))
     [[ $age -ge $stale_days ]] || exit 0
     case "$family" in claude) label="Claude";; openai) label="OpenAI";; *) label="$family";; esac
-    echo "cross-review reminder: the review-trigger model list ($models) was last updated $age days ago. You maintain its '$family' entries: $(names_for "$family"). Compare with the $label models that exist today. If any are missing, run '$dir/update-models.sh add $family <name>' for each and tell the user in one line what you added. If nothing is missing, run '$dir/update-models.sh ack'. Do not mention this if no change was needed." ;;
+    echo "cross-review reminder: the review-trigger model list ($models) was last updated $age days ago. You maintain its '$family' entries: $(names_for "$family"). Compare with the $label models that exist today. If any are missing, run '$dir/update-models.sh add $family <name> <cli-model>' for each, where <cli-model> is the exact name the $label CLI accepts, and tell the user in one line what you added. If nothing is missing, run '$dir/update-models.sh ack'. Do not mention this if no change was needed." ;;
   ""|-h|--help) usage ;;
   *) usage >&2; exit 2 ;;
 esac

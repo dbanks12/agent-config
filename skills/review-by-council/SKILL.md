@@ -13,12 +13,12 @@ Findings are not put to a vote. A finding that one seat raised and the verifier 
 
 Default seats, each at effort high:
 
-| Seat  | Runner                                  |
-|-------|-----------------------------------------|
-| fable | `~/.config/cross-review/claude.sh -m fable -e high` |
-| opus  | `~/.config/cross-review/claude.sh -m opus -e high`  |
-| astra | `~/.config/cross-review/codex.sh -m astra -e high`  |
-| sol   | `~/.config/cross-review/codex.sh -m sol -e high`    |
+| Seat  | Runner (`<mode>` is `code-review` or `prompt`)          |
+|-------|----------------------------------------------------------|
+| fable | `~/.config/cross-review/claude.sh <mode> -m fable -e high` |
+| opus  | `~/.config/cross-review/claude.sh <mode> -m opus -e high`  |
+| astra | `~/.config/cross-review/codex.sh <mode> -m astra -e high`  |
+| sol   | `~/.config/cross-review/codex.sh <mode> -m sol -e high`    |
 
 The user can name other seats or another effort. A seat whose CLI is missing is skipped and named in the report. Read `call-claude` and `call-codex` for model names and flags.
 
@@ -26,23 +26,24 @@ Every seat is a separate process with no memory of this session. The chair gives
 
 ## Review kind
 
-- Code change: each seat runs the tool's built-in code review. Claude seats: `claude.sh code-review [--target ...]`. Codex seats: `codex.sh code-review --base <branch>` (or `--commit`, `--uncommitted`).
+- Code change: each seat runs the tool's built-in code review, and every seat gets the same base. Claude's built-in review defaults to the branch's upstream, which can be empty on a pushed branch, so pass the base as a range. Claude seats: `claude.sh code-review --target <base>...HEAD`. Codex seats: `codex.sh code-review --base <base>`. For one commit use `--target <sha>` and `--commit <sha>`. For the working tree use `--target HEAD` and `--uncommitted`.
 - Design or document: each seat runs `prompt` mode with the design review prompt from `review-with-claude` or `review-with-codex`. Use the same prompt text for every seat.
 
 ## Run
 
-1. Launch every seat at once in the background. Send each seat's output to its own file.
+1. Launch every seat at once in the background. Send each seat's output to its own file. Record each seat's exit status. A bare `wait` returns 0 even when a seat failed.
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"; out=$(mktemp -d)
-~/.config/cross-review/claude.sh code-review -m fable -e high > "$out/fable.txt" 2>&1 &
-~/.config/cross-review/claude.sh code-review -m opus  -e high > "$out/opus.txt"  2>&1 &
-~/.config/cross-review/codex.sh  code-review -m astra -e high --base main > "$out/astra.txt" 2>&1 &
-~/.config/cross-review/codex.sh  code-review -m sol   -e high --base main > "$out/sol.txt"   2>&1 &
-wait; echo "$out"
+cd "$(git rev-parse --show-toplevel)"; out=$(mktemp -d); pids=(); seats=()
+~/.config/cross-review/claude.sh code-review -m fable -e high --target main...HEAD > "$out/fable.txt" 2>&1 & pids+=($!); seats+=(fable)
+~/.config/cross-review/claude.sh code-review -m opus  -e high --target main...HEAD > "$out/opus.txt"  2>&1 & pids+=($!); seats+=(opus)
+~/.config/cross-review/codex.sh  code-review -m astra -e high --base main > "$out/astra.txt" 2>&1 & pids+=($!); seats+=(astra)
+~/.config/cross-review/codex.sh  code-review -m sol   -e high --base main > "$out/sol.txt"   2>&1 & pids+=($!); seats+=(sol)
+for i in "${!pids[@]}"; do wait "${pids[$i]}" || echo "${seats[$i]} rc=$?" >> "$out/failed.txt"; done
+echo "$out"; cat "$out/failed.txt" 2>/dev/null
 ```
 
-2. Read every seat's output. Extract each finding as: file, line, severity, one-sentence claim, failure scenario, seat.
+2. Read every seat's output. Extract each finding as: file, line, severity, one-sentence claim, failure scenario, seat. A Codex transcript prints its final message twice. Read it once.
 
 3. Merge. Two findings are the same when they name the same file, lines within three of each other, and the same defect in substance. Keep the clearest wording. Record every seat that raised it.
 

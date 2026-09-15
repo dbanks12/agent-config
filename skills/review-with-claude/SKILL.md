@@ -24,10 +24,10 @@ Do not edit files or implement fixes during this skill. Run the reviewer once. D
 
 ## Code review
 
-With no `--target`, the built-in review covers the current branch's diff. Pass `--target` for a PR number, another branch, or a path. Use `-e high`. Pass `-m` only when the user names a model.
+Pass the base as a range: `--target <base>...HEAD` for a branch, `--target <sha>` for one commit, `--target HEAD` for the working tree. A PR number or path also works. With no `--target` the built-in review diffs against the branch's upstream, which is empty once the branch is pushed. Use `-e high`. Pass `-m` only when the user names a model.
 
 ```bash
-~/.config/cross-review/claude.sh code-review -e high
+~/.config/cross-review/claude.sh code-review -e high --target main...HEAD
 ```
 
 The built-in review takes no extra instructions. If the user asked specific review questions, run them after the code review in `prompt` mode with the same target named in the text.

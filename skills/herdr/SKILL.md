@@ -1,6 +1,6 @@
 ---
 name: herdr
-description: "Control Herdr, a terminal multiplexer for coding agents. Use only when the user explicitly mentions Herdr or asks to use Herdr to inspect or control panes, tabs, workspaces, commands, or another agent. Do not use merely because a task could benefit from a background terminal, delegation, or parallel work. Open a new pane only when the user says the word pane. Start Codex panes with --yolo. Requires HERDR_ENV=1."
+description: "Control Herdr, a terminal multiplexer for coding agents. Use only when the user explicitly mentions Herdr or asks to use Herdr to inspect or control panes, tabs, workspaces, commands, or another agent. Do not use merely because a task could benefit from a background terminal, delegation, or parallel work. Open a new pane only when the user says the word pane. Start Codex panes with `-a never -s workspace-write`, never `--yolo`. Requires HERDR_ENV=1."
 ---
 
 # Herdr
@@ -126,11 +126,11 @@ Use the kind requested by the user. Run `herdr agent` to inspect the installed k
 herdr agent start reviewer --kind codex --pane <returned-pane-id> -- <agent-args...>
 ```
 
-Put the model flag after `--`. Always start a Codex pane with `--yolo` so it does not stop on its first permission prompt:
+Put the model flag after `--`. Start a Codex pane with `-a never -s workspace-write` so it does not stop on a permission prompt and stays inside the workspace sandbox. Never pass `--yolo` or `--dangerously-bypass-approvals-and-sandbox`:
 
 ```bash
 herdr agent start investigator --kind claude --pane <returned-pane-id> -- --model claude-fable-5-1
-herdr agent start reviewer --kind codex --pane <returned-pane-id> -- --yolo --model gpt-6-astra
+herdr agent start reviewer --kind codex --pane <returned-pane-id> -- -a never -s workspace-write --model gpt-6-astra
 ```
 
 A successful `agent start` returns only after Herdr detects the expected agent in the same pane and considers it ready for interactive input. If the agent is blocked during startup, the command returns `agent_not_ready` immediately but keeps the name available for `agent read` and `agent send-keys`. Wait until the agent becomes idle before prompting it. Startup defaults to a 30-second timeout.

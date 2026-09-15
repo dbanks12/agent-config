@@ -17,8 +17,10 @@ Run Claude Code once as a separate, independent process. The current session sta
 ...
 PROMPT
 
-~/.config/cross-review/claude.sh code-review [-m MODEL] [-e EFFORT]                     # current branch diff
+~/.config/cross-review/claude.sh code-review [-m MODEL] [-e EFFORT] --target main...HEAD   # branch against main
+~/.config/cross-review/claude.sh code-review [-m MODEL] [-e EFFORT] --target <sha>          # one commit
 ~/.config/cross-review/claude.sh code-review [-m MODEL] [-e EFFORT] --target <pr#|branch|path>
+~/.config/cross-review/claude.sh code-review [-m MODEL] [-e EFFORT]                         # diff against the branch upstream; empty once pushed
 ```
 
 Use a quoted heredoc to prevent shell expansion. Every mode is read-only. The script runs from the Git worktree root.
