@@ -17,3 +17,5 @@ skills/review-by-council  ~/.claude/skills/review-by-council
 skills/review-by-council  ~/.codex/skills/review-by-council
 cross-review              ~/.config/cross-review
 statusline/claude.py       ~/.claude/statusline.py
+settings/codex.toml       ~/.codex/config.toml
+settings/claude.json      ~/.claude/settings.json

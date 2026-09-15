@@ -19,11 +19,23 @@ For Ubuntu Bubblewrap errors in Codex, see [Linux sandbox setup](linux/README.md
 
 Edit files in this repo and commit. The installed paths are symlinks, so changes apply at once.
 
+## Settings
+
+`~/.codex/config.toml` links to `settings/codex.toml`.
+`~/.claude/settings.json` links to `settings/claude.json`.
+Edits through these links change the tracked files. Review the diff and commit it.
+Credentials, sessions, and caches stay outside this repo.
+
+If a tool replaces a symlink during a save, `./install.sh --check` reports drift.
+Copy the changed settings into the matching repository file before you run `./install.sh` to restore the link.
+The installer backs up the replaced local file.
+
 ## Layout
 
 - `instructions/AGENTS.md` is the global instruction file for both tools.
 - `skills/` holds shared skills. Link each into both tools unless it is tool-specific.
 - `cross-review/` holds the model list and the runner scripts (`claude.sh`, `codex.sh`) behind the cross-tool skills.
+- `settings/` holds the complete Codex and Claude settings files, including machine-specific paths and trust entries.
 - `links` lists every managed symlink as `source target`.
 - `check.sh` verifies each skill has a valid SKILL.md, is in `links`, and links into every tool unless listed as tool-specific.
 - Name a tool-specific skill `<purpose>-with-<tool>`, for example `review-with-codex`, so agents can find it by name.
