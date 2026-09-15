@@ -1,0 +1,405 @@
+<title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #F5F7F9;
+    --surface: #FFFFFF;
+    --ink: #1A212B;
+    --muted: #5C6675;
+    --line: #D6DCE4;
+    --accent: #0B7A75;
+    --accent-ink: #FFFFFF;
+    --tint: #E1F1EF;
+    --tint-2: #EEF2F5;
+    --shadow: 0 18px 50px rgba(20, 30, 40, .16);
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12171B;
+      --surface: #1A2127;
+      --ink: #E3E8ED;
+      --muted: #98A3B0;
+      --line: #2C3641;
+      --accent: #4FC3BA;
+      --accent-ink: #0F1A19;
+      --tint: #17312F;
+      --tint-2: #202932;
+      --shadow: 0 18px 50px rgba(0, 0, 0, .55);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12171B;
+    --surface: #1A2127;
+    --ink: #E3E8ED;
+    --muted: #98A3B0;
+    --line: #2C3641;
+    --accent: #4FC3BA;
+    --accent-ink: #0F1A19;
+    --tint: #17312F;
+    --tint-2: #202932;
+    --shadow: 0 18px 50px rgba(0, 0, 0, .55);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding-block: 56px 120px;
+    padding-inline: 24px;
+  }
+  header.masthead {
+    display: grid;
+    gap: 18px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 40px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(38px, 6vw, 56px);
+    line-height: 1.05;
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: -.01em;
+  }
+  .lede {
+    font-size: 19px;
+    color: var(--muted);
+    max-width: 60ch;
+    margin: 0;
+  }
+  .hint {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    font-size: 14px; color: var(--muted);
+  }
+  nav.toc {
+    display: flex; flex-wrap: wrap; gap: 6px 18px;
+    font-family: var(--mono); font-size: 13px;
+    margin-bottom: 48px;
+  }
+  nav.toc a { color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent; }
+  nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent); border-bottom-color: var(--accent); outline: none; }
+
+  section { margin-bottom: 64px; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 1.15;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 18px;
+    margin: 32px 0 8px;
+  }
+  .kicker {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+  }
+  p { margin: 0 0 16px; max-width: 66ch; }
+  ul, ol { padding-left: 22px; margin: 0 0 16px; max-width: 66ch; }
+  li { margin-bottom: 8px; }
+  li::marker { color: var(--muted); }
+  strong { font-weight: 600; }
+  code {
+    font-family: var(--mono); font-size: .88em;
+    background: var(--tint-2); padding: 1px 6px; border-radius: 4px;
+  }
+
+  .summary {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    padding: 22px 26px;
+    margin-bottom: 24px;
+  }
+  .summary p:last-child { margin-bottom: 0; }
+
+  /* glossary terms */
+  button.t {
+    all: unset;
+    cursor: pointer;
+    color: inherit;
+    border-bottom: 1.5px dotted var(--accent);
+    padding-bottom: 1px;
+    transition: background-color .12s, color .12s;
+  }
+  button.t:hover, button.t:focus-visible {
+    background: var(--tint);
+    color: var(--accent);
+    border-bottom-style: solid;
+    outline: none;
+  }
+
+  /* diagrams */
+  figure {
+    margin: 24px 0 28px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 20px 20px 14px;
+    overflow-x: auto;
+  }
+  figure svg {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink);
+  }
+  figcaption {
+    font-size: 14px; color: var(--muted); margin-top: 12px; line-height: 1.5;
+  }
+  .box { fill: var(--surface); stroke: currentColor; stroke-width: 1.2; }
+  .box-soft { fill: var(--tint-2); stroke: currentColor; stroke-width: 1.2; }
+  .box-accent { fill: var(--tint); stroke: var(--accent); stroke-width: 1.5; }
+  .box-solid { fill: var(--accent); stroke: var(--accent); }
+  .cell { fill: var(--surface); stroke: currentColor; stroke-width: 1; }
+  .cell-old { fill: var(--tint-2); stroke: currentColor; stroke-width: 1; }
+  .ln { stroke: currentColor; stroke-width: 1.2; fill: none; }
+  .ln-acc { stroke: var(--accent); stroke-width: 1.6; fill: none; }
+  .ln-dash { stroke: currentColor; stroke-width: 1.2; fill: none; stroke-dasharray: 4 4; }
+  .lbl { fill: currentColor; }
+  .lbl-m { fill: var(--muted); font-size: 11px; }
+  .lbl-acc { fill: var(--accent); font-weight: 500; }
+  .lbl-on { fill: var(--accent-ink); font-weight: 500; }
+  .lbl-b { fill: currentColor; font-weight: 500; }
+  .group-outline { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 5 4; }
+
+  /* two-column compare */
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 24px;
+    max-width: 66ch;
+  }
+  .compare > div { background: var(--surface); border: 1px solid var(--line); padding: 16px 18px; }
+  .compare h4 { margin: 0 0 8px; font-size: 14px; font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+  .compare ul { padding-left: 18px; margin: 0; font-size: 15px; }
+  @media (max-width: 560px) { .compare { grid-template-columns: 1fr; } }
+
+  table {
+    border-collapse: collapse; width: 100%; max-width: 66ch; font-size: 15px; margin: 8px 0 24px;
+    font-variant-numeric: tabular-nums;
+  }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+  /* glossary index */
+  .gloss-index {
+    display: flex; flex-wrap: wrap; gap: 8px 10px; max-width: 66ch;
+  }
+  .gloss-index button.t {
+    border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px;
+    font-family: var(--mono); font-size: 13px; background: var(--surface);
+  }
+  .gloss-index button.t:hover, .gloss-index button.t:focus-visible {
+    border-color: var(--accent); background: var(--tint);
+  }
+
+  /* definition panel */
+  #backdrop {
+    position: fixed; inset: 0; background: rgba(10, 15, 20, .35);
+    opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40;
+  }
+  #backdrop.show { opacity: 1; pointer-events: auto; }
+  #panel {
+    position: fixed;
+    top: env(safe-area-inset-top, 0px); right: 0; bottom: 0;
+    width: min(400px, 92vw);
+    background: var(--surface);
+    border-left: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    transform: translateX(105%);
+    transition: transform .22s ease;
+    z-index: 50;
+    display: flex; flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  #panel.open { transform: translateX(0); }
+  .panel-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid var(--line);
+  }
+  .panel-bar .eyebrow { margin: 0; }
+  .panel-actions { display: flex; gap: 6px; }
+  .panel-actions button {
+    all: unset; cursor: pointer; font-family: var(--mono); font-size: 13px;
+    padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink);
+  }
+  .panel-actions button:hover, .panel-actions button:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+  .panel-actions button[hidden] { display: none; }
+  .panel-body { padding: 22px 22px 32px; overflow-y: auto; }
+  .panel-body h3 { margin: 0 0 10px; font-family: var(--serif); font-size: 26px; font-weight: 600; }
+  .panel-body p { font-size: 16px; }
+  .panel-body .also { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .panel-body .also .eyebrow { margin-bottom: 8px; }
+  .panel-body .also button.t {
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px;
+    font-family: var(--mono); font-size: 12px; margin: 0 6px 6px 0;
+  }
+  @media (max-width: 640px) {
+    #panel {
+      top: auto; left: 0; right: 0; bottom: 0; width: 100%;
+      max-height: 70vh; border-left: 0; border-top: 1px solid var(--line);
+      border-radius: 14px 14px 0 0;
+      transform: translateY(105%);
+    }
+    #panel.open { transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #panel, #backdrop, button.t { transition: none; }
+  }
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 20px; }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">{{EYEBROW}}</div>
+    <h1>{{TITLE}}</h1>
+    <p class="lede">{{LEDE}}</p>
+    <div class="hint">
+      <span>Terms with a dotted underline like <button class="t" data-t="{{EXAMPLE_SLUG}}">{{EXAMPLE_TERM}}</button> open a definition. Definitions link to each other, so you can follow a thread and come back.</span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sections">
+    <a href="#summary">Summary</a>
+    <a href="#foundation">Foundation</a>
+    <a href="#blocks">Building blocks</a>
+    <a href="#flow">How it works</a>
+    <a href="#plug">Plugging it in</a>
+    <a href="#guarantees">Guarantees</a>
+    <a href="#compare">vs. other tools</a>
+    <a href="#fit">When to use it</a>
+    <a href="#glossary">Glossary</a>
+  </nav>
+
+  <!-- SECTIONS: each is
+  <section id="...">
+    <div class="kicker">Short label</div>
+    <h2>Heading</h2>
+    ...prose, <div class="summary"> callouts, <figure><svg/> diagrams, tables, .compare grids...
+  </section>
+  -->
+
+  <section id="glossary">
+    <div class="kicker">Reference</div>
+    <h2>Glossary</h2>
+    <p>Every term used on this page. Click any of them.</p>
+    <div class="gloss-index" id="glossIndex"></div>
+  </section>
+
+  <footer>{{FOOTER}}</footer>
+</div>
+
+<!-- definition panel -->
+<div id="backdrop"></div>
+<aside id="panel" aria-label="Definition" aria-hidden="true">
+  <div class="panel-bar">
+    <span class="eyebrow">Definition</span>
+    <div class="panel-actions">
+      <button id="backBtn" type="button" hidden>← Back</button>
+      <button id="closeBtn" type="button" aria-label="Close definition">Close</button>
+    </div>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</aside>
+
+<script>
+(function () {
+  const G = {
+    /* GLOSSARY: "slug": { name: "Display name", def: "One to three plain sentences.", also: ["other-slug"] }, */
+  };
+
+  const panel = document.getElementById('panel');
+  const body = document.getElementById('panelBody');
+  const backdrop = document.getElementById('backdrop');
+  const backBtn = document.getElementById('backBtn');
+  const closeBtn = document.getElementById('closeBtn');
+  const history = [];
+  let lastTrigger = null;
+
+  function render(id) {
+    const g = G[id];
+    if (!g) return;
+    const also = (g.also || []).filter(k => G[k]).map(k =>
+      `<button class="t" type="button" data-t="${k}">${G[k].name}</button>`).join('');
+    body.innerHTML = `<h3>${g.name}</h3><p>${g.def}</p>` +
+      (also ? `<div class="also"><div class="eyebrow">See also</div>${also}</div>` : '');
+    backBtn.hidden = history.length < 2;
+    body.scrollTop = 0;
+  }
+  function open(id, trigger) {
+    if (!G[id]) return;
+    if (trigger && !panel.contains(trigger)) lastTrigger = trigger;
+    history.push(id);
+    render(id);
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    backdrop.classList.add('show');
+    closeBtn.focus({ preventScroll: true });
+  }
+  function close() {
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    backdrop.classList.remove('show');
+    history.length = 0;
+    if (lastTrigger) { lastTrigger.focus({ preventScroll: true }); lastTrigger = null; }
+  }
+  function back() {
+    if (history.length < 2) return;
+    history.pop();
+    render(history[history.length - 1]);
+  }
+
+  document.addEventListener('click', e => {
+    const t = e.target.closest('button.t');
+    if (t) { open(t.dataset.t, t); }
+  });
+  closeBtn.addEventListener('click', close);
+  backBtn.addEventListener('click', back);
+  backdrop.addEventListener('click', close);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && panel.classList.contains('open')) close();
+  });
+
+  // glossary index
+  const idx = document.getElementById('glossIndex');
+  Object.keys(G).sort((a, b) => G[a].name.localeCompare(G[b].name)).forEach(k => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 't'; b.dataset.t = k; b.textContent = G[k].name;
+    idx.appendChild(b);
+  });
+
+  // make every term button a real button element for keyboard users
+  document.querySelectorAll('button.t').forEach(b => { if (!b.type) b.type = 'button'; });
+})();
+</script>

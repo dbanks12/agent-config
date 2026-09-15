@@ -15,6 +15,8 @@ skills/review-with-codex  ~/.claude/skills/review-with-codex
 skills/review-with-claude ~/.codex/skills/review-with-claude
 skills/review-by-council  ~/.claude/skills/review-by-council
 skills/review-by-council  ~/.codex/skills/review-by-council
+skills/teach-me           ~/.claude/skills/teach-me
+skills/teach-me           ~/.codex/skills/teach-me
 cross-review              ~/.config/cross-review
 statusline/claude.py       ~/.claude/statusline.py
 settings/codex.toml       ~/.codex/config.toml
