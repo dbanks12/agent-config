@@ -7,6 +7,12 @@ skills/create-pr          ~/.claude/skills/create-pr
 skills/create-pr          ~/.codex/skills/create-pr
 skills/herdr              ~/.claude/skills/herdr
 skills/herdr              ~/.codex/skills/herdr
+skills/call-codex         ~/.claude/skills/call-codex
+skills/call-codex         ~/.codex/skills/call-codex
+skills/call-claude        ~/.claude/skills/call-claude
+skills/call-claude        ~/.codex/skills/call-claude
 skills/review-with-codex  ~/.claude/skills/review-with-codex
 skills/review-with-claude ~/.codex/skills/review-with-claude
+skills/review-by-council  ~/.claude/skills/review-by-council
+skills/review-by-council  ~/.codex/skills/review-by-council
 cross-review              ~/.config/cross-review

@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
-# Maintain the model-name list that both cross-tool review skills trigger on,
-# and regenerate the `description:` frontmatter line in each SKILL.md.
+# Maintain the model-name list that the cross-tool skills trigger on, and
+# regenerate the `description:` frontmatter line in each of their SKILL.md files.
+# models format: <family> <name> [<cli-model>]. The runner scripts resolve
+# <name> to <cli-model>; the description lists <name>.
 set -euo pipefail
 
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 models="$dir/models"
-claude_skill="$HOME/.claude/skills/review-with-codex/SKILL.md"
-codex_skill="$HOME/.codex/skills/review-with-claude/SKILL.md"
+skills="$dir/../skills"
+review_codex="$skills/review-with-codex/SKILL.md"
+review_claude="$skills/review-with-claude/SKILL.md"
+call_codex="$skills/call-codex/SKILL.md"
+call_claude="$skills/call-claude/SKILL.md"
 stale_days=30
 
 usage() {
   cat <<USAGE
 usage: update-models.sh <command>
   list                      show the current list
-  add <family> <name>...    add names (family: claude | openai) and re-render
-  remove <family> <name>... remove names and re-render
-  render                    rewrite the description line in both SKILL.md files
+  add <family> <name> [<cli-model>]  add a name (family: claude | openai) and re-render
+  remove <family> <name>...          remove names and re-render
+  render                             rewrite the description line in the four cross-tool SKILL.md files
   check <family>            print a reminder if the list is older than $stale_days days
   ack                       mark the list as reviewed (resets the reminder timer)
 USAGE
@@ -39,27 +44,32 @@ render() {
   local openai claude
   openai="$(names_for openai)"
   claude="$(names_for claude)"
-  set_description "$claude_skill" \
-    "Run an independent, read-only Codex review of a code change. Use whenever the user asks for a review, second opinion, or cross-model review from any non-Claude model or tool, named with or without a version number, including $openai. A bare family name means its latest version. Do not use for ordinary self-review or to implement fixes."
-  set_description "$codex_skill" \
-    "Run an independent, read-only Claude review of a code change. Use whenever the user asks for a review, second opinion, or cross-model review from any non-OpenAI model or tool, named with or without a version number, including $claude. A bare family name means its latest version. Do not use for ordinary self-review or to implement fixes."
-  echo "rendered: $claude_skill"
-  echo "rendered: $codex_skill"
+  set_description "$review_codex" \
+    "Run an independent, read-only Codex review of a code change, design, or document. Use whenever the user asks for a review, second opinion, or cross-model review from any non-Claude model or tool, named with or without a version number, including $openai. A bare family name means its latest version. Do not use for ordinary self-review or to implement fixes."
+  set_description "$review_claude" \
+    "Run an independent, read-only Claude review of a code change, design, or document. Use whenever the user asks for a review, second opinion, or cross-model review from any non-OpenAI model or tool, named with or without a version number, including $claude. A bare family name means its latest version. Do not use for ordinary self-review or to implement fixes."
+  set_description "$call_codex" \
+    "Call Codex (OpenAI) as a separate process for any task, not only reviews. Use when the user wants to ask, consult, or cross-call an OpenAI model or tool, named with or without a version number, including $openai. A bare family name means its latest version. Higher skills (review-with-codex, review-by-council) build on this one."
+  set_description "$call_claude" \
+    "Call Claude Code (Anthropic) as a separate process for any task, not only reviews. Use when the user wants to ask, consult, or cross-call a Claude model, or a fresh Claude process with no memory of this session, named with or without a version number, including $claude. A bare family name means its latest version. Higher skills (review-with-claude, review-by-council) build on this one."
+  for f in "$review_codex" "$review_claude" "$call_codex" "$call_claude"; do echo "rendered: $f"; done
 }
 
 cmd="${1:-}"; shift || true
 case "$cmd" in
   list) grep -v '^#' "$models" ;;
-  add|remove)
+  add)
+    family="${1:?family}"; name="${2:?name}"; cli="${3:-}"
+    [[ "$family" == claude || "$family" == openai ]] || { echo "family must be claude or openai" >&2; exit 2; }
+    grep -qiE "^$family $name( |$)" "$models" || echo "$family $name${cli:+ $cli}" >> "$models"
+    touch "$models"
+    render ;;
+  remove)
     family="${1:?family}"; shift
     [[ "$family" == claude || "$family" == openai ]] || { echo "family must be claude or openai" >&2; exit 2; }
     [[ $# -gt 0 ]] || { echo "no names given" >&2; exit 2; }
     for name in "$@"; do
-      if [[ "$cmd" == add ]]; then
-        grep -qix "$family $name" "$models" || echo "$family $name" >> "$models"
-      else
-        grep -vix "$family $name" "$models" > "$models.tmp" && mv "$models.tmp" "$models"
-      fi
+      grep -viE "^$family $name( |$)" "$models" > "$models.tmp" && mv "$models.tmp" "$models"
     done
     touch "$models"
     render ;;

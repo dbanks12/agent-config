@@ -1,13 +1,18 @@
-# Model names that trigger the cross-tool review skills.
-# Format: <family> <name>   families: claude | openai
+# Model names that trigger the cross-tool skills.
+# Format: <family> <name> [<cli-model>]   families: claude | openai
+# <cli-model> is the exact name the tool's CLI accepts. Omit it for a family
+# name (Claude, GPT) that means "the tool's default model".
 # Edit by hand or via update-models.sh, then run `update-models.sh render`.
 claude Claude
 claude Anthropic
-claude Fable
-claude Opus
-claude Sonnet
-claude Haiku
+claude Fable fable
+claude Opus opus
+claude Sonnet sonnet
+claude Haiku haiku
 openai Codex
 openai OpenAI
 openai GPT
-openai astra
+openai astra gpt-6-astra
+openai sol gpt-5.6-sol
+openai terra gpt-5.6-terra
+openai luna gpt-5.6-luna
