@@ -17,13 +17,13 @@ Build one HTML artifact that teaches a subject to a smart engineer who has never
 
 The page is short. Cut, do not pad.
 
-- Prose: 1,000 to 1,200 words, not counting diagrams and glossary definitions.
+- Prose: about 900 words, never more than 1,000, not counting diagrams and glossary definitions.
 - Diagrams: 4 to 6.
 - Glossary: 25 to 40 terms. One to three sentences each.
 - Quiz: 6 to 8 questions.
 - Every sentence 25 words or fewer. Every paragraph one topic.
 
-Measure before publishing. Strip tags and SVG, count words. If prose is over 1,200, cut until it is under.
+Measure before publishing. Strip tags and SVG, count words. If prose is over 1,000, cut until it is under.
 
 ## Say each thing once
 
