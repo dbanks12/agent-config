@@ -55,6 +55,10 @@ If the runner fails, report its exit status and error. Do not replace the failed
 
 ## Return the review
 
+This is a local review. Its output stays in the current session. Do not post it, in full or in part, to a pull request, an issue, a commit message, Slack, or any other external system, even when an earlier instruction asked for a PR review or a PR comment. If the user wants something on the PR, they will write it or ask for it separately after reading the findings here.
+
+Read the findings as soon as the runner returns. Then decide, item by item, whether to act on each one. Report every item to the user with its disposition: acted on, rejected with the repository evidence, or deferred to the user.
+
 Identify Claude as the external reviewer. Return Claude's findings without weakening their severity or changing their meaning.
 
 Separate any Codex triage from Claude's review. Validate a disputed finding against repository evidence before rejecting it.
