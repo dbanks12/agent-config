@@ -20,6 +20,7 @@ The page is short. Cut, do not pad.
 - Prose: 1,000 to 1,200 words, not counting diagrams and glossary definitions.
 - Diagrams: 4 to 6.
 - Glossary: 25 to 40 terms. One to three sentences each.
+- Quiz: 6 to 8 questions.
 - Every sentence 25 words or fewer. Every paragraph one topic.
 
 Measure before publishing. Strip tags and SVG, count words. If prose is over 1,200, cut until it is under.
@@ -43,6 +44,7 @@ Use the template in `template.html` next to this file. Copy it, replace the `{{.
 7. `compare`: a table placing the subject next to tools the reader may confuse it with and next to its real alternatives. Name the category of each. Say "different job" plainly when it is.
 8. `fit`: a two-column `.compare` grid, "Reach for it when" and "Think twice when". Then one sentence saying what the subject is not.
 9. `glossary`: leave the template's index in place. The script fills it.
+10. `quizpage`: the Quiz tab. See "Quiz" below.
 
 Skip a section only when the subject truly has nothing for it. Do not add sections unless the user asks. When the user asks for an added topic, add one section of 300 words or fewer with one diagram, and put it in the nav.
 
@@ -74,6 +76,19 @@ Inline SVG, hand-authored, using the template's classes. One claim per figure, s
 - Keep text 10 to 13px in the drawn scale. Sentences go in the caption.
 - The before-and-after diagram in `plug` shows the same system twice, split by a dashed line, with the one edge that changed in the accent color.
 - Reuse the `arr` and `arrA` markers defined in the first SVG on the page. Define them only once.
+
+## Quiz
+
+The template has two tabs, Learn and Quiz. The Quiz tab is a separate page in the same artifact. Fill the `Q` array in the script and the `{{QUIZ_HEADING}}` marker.
+
+- 6 to 8 questions. Each tests one core idea from the page, not a detail. If a reader gets them all right, they have the mental model.
+- Mix types: mostly multiple choice (`t: "mc"`, four options, `a` is the zero-based index of the right one), plus one or two typed answers (`t: "text"`, `accept` lists lowercase answers and synonyms; a match is exact or substring after stripping punctuation).
+- Every question has a `why`: one or two sentences that teach the point again, shown on both correct and incorrect.
+- Wrong options must be plausible to a newcomer. No joke options.
+- Include one question that places the subject against a neighbor it is often confused with.
+- The heading names the count, for example "Seven questions on the core ideas".
+
+The quiz mechanics are already in the template: per-question Check buttons, a running score, and Reset. Do not rewrite them.
 
 ## After publishing
 

@@ -277,6 +277,43 @@
   @media (prefers-reduced-motion: reduce) {
     #panel, #backdrop, button.t { transition: none; }
   }
+  .tabs {
+    display: flex; gap: 0; margin: 0 0 32px; border-bottom: 1px solid var(--line);
+  }
+  .tabs button {
+    all: unset; cursor: pointer; padding: 10px 18px; font-family: var(--mono); font-size: 13px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  .tabs button:hover, .tabs button:focus-visible { color: var(--accent); outline: none; }
+  .score { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .qcard { background: var(--surface); border: 1px solid var(--line); padding: 20px 22px; margin-bottom: 16px; max-width: 66ch; }
+  .qcard.checked { border-color: var(--accent); }
+  .qnum { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .qtext { font-weight: 500; font-size: 17px; margin-bottom: 14px; }
+  .opts { display: grid; gap: 8px; margin-bottom: 14px; }
+  .opts label { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border: 1px solid var(--line); cursor: pointer; font-size: 15px; }
+  .opts label:hover { border-color: var(--accent); }
+  .opts label.right { border-color: var(--accent); background: var(--tint); }
+  .opts label.wrong { border-color: #B5521A; text-decoration: line-through; color: var(--muted); }
+  .opts input { margin-top: 4px; accent-color: var(--accent); }
+  .qinput {
+    width: 100%; max-width: 380px; padding: 9px 12px; font: inherit; font-size: 15px;
+    background: var(--bg); color: var(--ink); border: 1px solid var(--line); margin-bottom: 14px;
+  }
+  .qinput:focus { outline: none; border-color: var(--accent); }
+  .qrow { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+  button.check, .quiz-actions button {
+    all: unset; cursor: pointer; font-family: var(--mono); font-size: 13px; padding: 7px 16px;
+    background: var(--accent); color: var(--accent-ink); border-radius: 4px;
+  }
+  button.check:hover, button.check:focus-visible, .quiz-actions button:focus-visible { filter: brightness(1.08); outline: none; }
+  .quiz-actions button { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .verdict { font-size: 15px; flex: 1 1 260px; line-height: 1.5; }
+  .verdict.ok strong { color: var(--accent); }
+  .verdict.bad strong { color: #B5521A; }
+  .verdict.pending { color: var(--muted); }
   footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 20px; }
 </style>
 
@@ -290,6 +327,11 @@
     </div>
   </header>
 
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="learn" aria-selected="true">Learn</button>
+    <button type="button" role="tab" data-tab="quiz" aria-selected="false">Quiz</button>
+  </div>
+
   <nav class="toc" aria-label="Sections">
     <a href="#summary">Summary</a>
     <a href="#foundation">Foundation</a>
@@ -302,6 +344,7 @@
     <a href="#glossary">Glossary</a>
   </nav>
 
+  <div id="learnpage">
   <!-- SECTIONS: each is
   <section id="...">
     <div class="kicker">Short label</div>
@@ -315,6 +358,17 @@
     <h2>Glossary</h2>
     <p>Every term used on this page. Click any of them.</p>
     <div class="gloss-index" id="glossIndex"></div>
+  </section>
+
+  </div><!-- /learnpage -->
+
+  <section id="quizpage" hidden>
+    <div class="kicker">Check yourself</div>
+    <h2>{{QUIZ_HEADING}}</h2>
+    <p>Answer each one, then check it. Nothing is recorded. Typed answers accept close spellings.</p>
+    <div class="score" id="score">0 checked</div>
+    <div id="quiz"></div>
+    <div class="quiz-actions"><button type="button" id="quizReset">Reset quiz</button></div>
   </section>
 
   <footer>{{FOOTER}}</footer>
@@ -401,5 +455,90 @@
 
   // make every term button a real button element for keyboard users
   document.querySelectorAll('button.t').forEach(b => { if (!b.type) b.type = 'button'; });
+
+  const Q = [
+    /* QUIZ: 6 to 8 items.
+       { t: "mc", q: "Question?", o: ["A", "B", "C", "D"], a: 1, why: "One or two sentences explaining the right answer." }
+       { t: "text", q: "Question?", accept: ["answer", "synonym"], why: "..." }  */
+  ];
+  const quizEl = document.getElementById('quiz');
+  const scoreEl = document.getElementById('score');
+  const results = new Array(Q.length).fill(null);
+
+  function norm(s) { return s.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim(); }
+  function renderQuiz() {
+    quizEl.innerHTML = '';
+    Q.forEach((it, i) => {
+      const card = document.createElement('div');
+      card.className = 'qcard';
+      card.id = 'q' + i;
+      let inner = `<div class="qnum">Question ${i + 1} of ${Q.length}</div><p class="qtext">${it.q}</p>`;
+      if (it.t === 'mc') {
+        inner += '<div class="opts">' + it.o.map((o, j) =>
+          `<label><input type="radio" name="q${i}" id="q${i}o${j}" value="${j}"><span>${o}</span></label>`).join('') + '</div>';
+      } else {
+        inner += `<input type="text" class="qinput" id="q${i}input" placeholder="Type your answer" autocomplete="off">`;
+      }
+      inner += `<div class="qrow"><button type="button" class="check" data-i="${i}">Check</button><div class="verdict" id="v${i}"></div></div>`;
+      card.innerHTML = inner;
+      quizEl.appendChild(card);
+    });
+    updateScore();
+  }
+  function check(i) {
+    const it = Q[i];
+    const v = document.getElementById('v' + i);
+    let ok = null;
+    if (it.t === 'mc') {
+      const sel = document.querySelector(`input[name="q${i}"]:checked`);
+      if (!sel) { v.className = 'verdict pending'; v.textContent = 'Pick an option first.'; return; }
+      ok = Number(sel.value) === it.a;
+      document.querySelectorAll(`#q${i} label`).forEach((l, j) => {
+        l.classList.toggle('right', j === it.a);
+        l.classList.toggle('wrong', j !== it.a && j === Number(sel.value));
+      });
+    } else {
+      const val = norm(document.getElementById('q' + i + 'input').value);
+      if (!val) { v.className = 'verdict pending'; v.textContent = 'Type an answer first.'; return; }
+      ok = it.accept.some(a => val === norm(a) || val.includes(norm(a)));
+    }
+    results[i] = ok;
+    v.className = 'verdict ' + (ok ? 'ok' : 'bad');
+    v.innerHTML = `<strong>${ok ? 'Correct.' : 'Not quite.'}</strong> ${it.why}`;
+    document.getElementById('q' + i).classList.add('checked');
+    updateScore();
+  }
+  function updateScore() {
+    const done = results.filter(r => r !== null).length;
+    const right = results.filter(r => r === true).length;
+    scoreEl.textContent = done === 0 ? `0 of ${Q.length} checked` : `${right} correct of ${done} checked`;
+    if (done === Q.length) scoreEl.textContent += right === Q.length ? '. All of them.' : '. Reread the ones marked.';
+  }
+  quizEl.addEventListener('click', e => {
+    const b = e.target.closest('button.check');
+    if (b) check(Number(b.dataset.i));
+  });
+  quizEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.classList.contains('qinput')) {
+      check(Number(e.target.id.replace(/\D/g, '')));
+    }
+  });
+  document.getElementById('quizReset').addEventListener('click', () => { results.fill(null); renderQuiz(); });
+  renderQuiz();
+
+  // tabs
+  const learn = document.getElementById('learnpage');
+  const quiz = document.getElementById('quizpage');
+  const tabs = document.querySelectorAll('.tabs button');
+  function showTab(name) {
+    const isQuiz = name === 'quiz';
+    learn.hidden = isQuiz; quiz.hidden = !isQuiz;
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+    document.querySelector('nav.toc').hidden = isQuiz;
+    window.scrollTo({ top: 0 });
+  }
+  tabs.forEach(t => t.addEventListener('click', () => { showTab(t.dataset.tab); history.replaceState(null, '', t.dataset.tab === 'quiz' ? '#quiz' : ' '); }));
+  if (location.hash === '#quiz') showTab('quiz');
+
 })();
 </script>
