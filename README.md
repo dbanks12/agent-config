@@ -11,6 +11,8 @@ Shared instructions and skills for Claude Code and Codex. One source, both tools
 
 Replaced files go to `~/.local/state/agent-config/backups/`.
 
+For Ubuntu Bubblewrap errors in Codex, see [Linux sandbox setup](linux/README.md).
+
 `check.sh` enforces the skill pattern. `install.sh` runs it and installs it as the git pre-commit hook.
 
 ## Edit

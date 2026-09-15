@@ -1,0 +1,8 @@
+# Allow the system Bubblewrap executable to create sandbox namespaces.
+# Bubblewrap and Codex enforce the requested filesystem and network limits.
+abi <abi/4.0>,
+include <tunables/global>
+
+profile agent-config-bwrap /usr/bin/bwrap flags=(unconfined) {
+  userns,
+}
