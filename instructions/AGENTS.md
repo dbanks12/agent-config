@@ -82,7 +82,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
-# General writing
+# All writing
 
 Four selected instructions from Ylan Segal's Zinsser-inspired Claude configuration, quoted verbatim:
 
@@ -91,7 +91,7 @@ Four selected instructions from Ylan Segal's Zinsser-inspired Claude configurati
 - Strengthen unity and flow
 - Focus on word choice and sentence structure
 
-# Technical writing
+# Additional rules for technical writing
 
 Use ASD-STE100-style Simplified Technical English for technical output. This rule applies to documentation, procedures, error messages, commit messages, runbooks, pull-request descriptions, and explanations of code.
 
