@@ -2,6 +2,10 @@
 
 This file and the shared skills live in `dbanks12/agent-config`. Paths under `~/.claude` and `~/.codex` are symlinks into that repo. Edit there and commit. Link each skill into both tools unless it is tool-specific.
 
+# Pull requests
+
+Always create pull requests as drafts.
+
 # Sandbox rule
 
 When you launch Codex or Claude Code yourself, from a skill, a script, a pane, or a subprocess, keep its sandbox and approvals on.

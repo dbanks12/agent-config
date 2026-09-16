@@ -71,12 +71,12 @@ If multiple issues are relevant, add one `Fixes` line per issue.
 Run in parallel as needed:
 
 - Push to remote with `-u` if needed
-- Create PR with `gh pr create`
+- Create PR with `gh pr create --draft`
 
 Use a HEREDOC for the body:
 
 ```bash
-gh pr create --title "the pr title" --body "$(cat <<'EOF'
+gh pr create --draft --title "the pr title" --body "$(cat <<'EOF'
 ## Motivation
 ...
 
