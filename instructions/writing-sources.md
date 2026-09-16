@@ -10,12 +10,20 @@ AGENTS.md quotes the first four bullets from the published Claude configuration 
 
 ## Technical writing examples
 
-Google's technical writing courses provide the three before-and-after pairs:
+Google's technical writing courses provide the six examples:
 
 - [Active voice](https://developers.google.com/tech-writing/one/active-voice)
-- [Clear sentences](https://developers.google.com/tech-writing/one/clear-sentences)
+- [Clear sentences](https://developers.google.com/tech-writing/one/clear-sentences): stronger verbs and factual specificity.
 - [Short sentences](https://developers.google.com/tech-writing/one/short-sentences)
+- [Words](https://developers.google.com/tech-writing/one/words): ambiguous pronouns.
+- [Paragraphs](https://developers.google.com/tech-writing/one/paragraphs): the opening-sentence guidance and loop example.
 
 The example sentences are quoted without changes. Their presentation uses bullets and arrows.
+
+The pronoun example quotes one of Google's alternatives for the second sentence. The intended meaning determines the correct alternative.
+
+The performance numbers belong to Google's illustrative example. They are not measurements of this repository.
+
+The paragraph example quotes Google's guidance and the first sentence of its sample paragraph.
 
 Google licenses this content under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).

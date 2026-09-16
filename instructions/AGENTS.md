@@ -113,5 +113,8 @@ Use ASD-STE100-style Simplified Technical English for technical output. This rul
 - Active voice: "Read-only access is provided by MutableInput." → "MutableInput provides read-only access."
 - Clear sentences: "The exception occurs when dividing by zero." → "Dividing by zero raises the exception."
 - Short sentences: "This design document provides a detailed description of Project Frambus." → "This design document describes Project Frambus."
+- Ambiguous pronouns: "Running the process configures permissions and generates a user ID. This lets users authenticate to the app." → Replacement for the second sentence: "This user ID lets users authenticate."
+- Factual specificity: "Setting this flag makes the application run screamingly fast." → "Setting this flag makes the application run 225-250% faster."
+- Paragraph openings: "Good opening sentences establish the paragraph's central point." Example: "A loop runs the same block of code multiple times."
 
 Apply these rules strictly to procedures, error messages, and step-by-step documentation. Use the same sentence discipline, without strict vocabulary limits, for READMEs, pull-request descriptions, and chat explanations. Do not change quotations or text that must match an existing file style.
