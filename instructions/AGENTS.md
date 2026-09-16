@@ -116,5 +116,14 @@ Use ASD-STE100-style Simplified Technical English for technical output. This rul
 - Ambiguous pronouns: "Running the process configures permissions and generates a user ID. This lets users authenticate to the app." → Replacement for the second sentence: "This user ID lets users authenticate."
 - Factual specificity: "Setting this flag makes the application run screamingly fast." → "Setting this flag makes the application run 225-250% faster."
 - Paragraph openings: "Good opening sentences establish the paragraph's central point." Example: "A loop runs the same block of code multiple times."
+- Audience awareness: "Match your vocabulary to your audience." Example: "The average Python programmer is unaware of manipulating memory or pointers."
+
+**Realistic explanatory examples** — Julia Evans, verbatim title and code:
+
+"Write good examples by starting with real code"
+
+```python
+tasks.sort(key=lambda task: task['completed_time'])
+```
 
 Apply these rules strictly to procedures, error messages, and step-by-step documentation. Use the same sentence discipline, without strict vocabulary limits, for READMEs, pull-request descriptions, and chat explanations. Do not change quotations or text that must match an existing file style.

@@ -10,13 +10,14 @@ AGENTS.md quotes the first four bullets from the published Claude configuration 
 
 ## Technical writing examples
 
-Google's technical writing courses provide the six examples:
+Google's technical writing courses provide the seven examples:
 
 - [Active voice](https://developers.google.com/tech-writing/one/active-voice)
 - [Clear sentences](https://developers.google.com/tech-writing/one/clear-sentences): stronger verbs and factual specificity.
 - [Short sentences](https://developers.google.com/tech-writing/one/short-sentences)
 - [Words](https://developers.google.com/tech-writing/one/words): ambiguous pronouns.
 - [Paragraphs](https://developers.google.com/tech-writing/one/paragraphs): the opening-sentence guidance and loop example.
+- [Audience](https://developers.google.com/tech-writing/one/audience): vocabulary guidance and the example of Python programmers unfamiliar with memory management.
 
 The example sentences are quoted without changes. Their presentation uses bullets and arrows.
 
@@ -27,3 +28,9 @@ The performance numbers belong to Google's illustrative example. They are not me
 The paragraph example quotes Google's guidance and the first sentence of its sample paragraph.
 
 Google licenses this content under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+## Realistic explanatory examples
+
+Julia Evans, [Write good examples by starting with real code](https://jvns.ca/blog/2021/07/08/writing-great-examples/), July 8, 2021.
+
+AGENTS.md quotes the article title and one line of Python without changes. Evans identifies this line as an example from her own code.
