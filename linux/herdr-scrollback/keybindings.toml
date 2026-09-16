@@ -1,0 +1,11 @@
+[[keys.command]]
+key = "prefix+ctrl+t"
+type = "shell"
+command = '"$HOME/.local/bin/herdr-scrollback" tmux'
+description = "copy scrollback in external tmux"
+
+[[keys.command]]
+key = "prefix+ctrl+v"
+type = "shell"
+command = '"$HOME/.local/bin/herdr-scrollback" nvim'
+description = "copy scrollback in external Neovim"
