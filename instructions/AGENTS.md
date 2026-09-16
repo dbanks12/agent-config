@@ -84,7 +84,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 # General writing
 
-Four selected instructions from [Ylan Segal's Zinsser-inspired Claude configuration](https://ylan.segal-family.com/blog/2025/09/21/improving-writing-with-ai-a-zinsser-inspired-approach/), quoted verbatim:
+Four selected instructions from Ylan Segal's Zinsser-inspired Claude configuration, quoted verbatim:
 
 - Eliminate clutter and unnecessary words
 - Ensure clarity and simplicity
@@ -108,10 +108,10 @@ Use ASD-STE100-style Simplified Technical English for technical output. This rul
 - Do not use hedge stacks or marketing adjectives such as `robust`, `seamless`, or `simply`.
 - Avoid semicolons. Use separate sentences.
 
-**Examples** from Google's technical writing courses, quoted verbatim ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)):
+**Examples** from Google's technical writing courses, quoted verbatim (CC BY 4.0):
 
-- [Active voice](https://developers.google.com/tech-writing/one/active-voice): "Read-only access is provided by MutableInput." → "MutableInput provides read-only access."
-- [Clear sentences](https://developers.google.com/tech-writing/one/clear-sentences): "The exception occurs when dividing by zero." → "Dividing by zero raises the exception."
-- [Short sentences](https://developers.google.com/tech-writing/one/short-sentences): "This design document provides a detailed description of Project Frambus." → "This design document describes Project Frambus."
+- Active voice: "Read-only access is provided by MutableInput." → "MutableInput provides read-only access."
+- Clear sentences: "The exception occurs when dividing by zero." → "Dividing by zero raises the exception."
+- Short sentences: "This design document provides a detailed description of Project Frambus." → "This design document describes Project Frambus."
 
 Apply these rules strictly to procedures, error messages, and step-by-step documentation. Use the same sentence discipline, without strict vocabulary limits, for READMEs, pull-request descriptions, and chat explanations. Do not change quotations or text that must match an existing file style.
