@@ -19,3 +19,6 @@ cross-review              ~/.config/cross-review
 statusline/claude.py       ~/.claude/statusline.py
 settings/codex.toml       ~/.codex/config.toml
 settings/claude.json      ~/.claude/settings.json
+
+linux/herdr-scrollback/herdr-scrollback.py ~/.local/bin/herdr-scrollback
+linux/herdr-scrollback/i3.conf ~/.config/regolith3/i3/config.d/89_herdr_scrollback
