@@ -24,3 +24,19 @@ settings/claude.json      ~/.claude/settings.json
 
 linux/herdr-scrollback/herdr-scrollback.py ~/.local/bin/herdr-scrollback
 linux/herdr-scrollback/i3.conf ~/.config/regolith3/i3/config.d/89_herdr_scrollback
+skills/grill-me ~/.claude/skills/grill-me
+skills/grill-me ~/.codex/skills/grill-me
+skills/grilling ~/.claude/skills/grilling
+skills/grilling ~/.codex/skills/grilling
+skills/handoff ~/.claude/skills/handoff
+skills/handoff ~/.codex/skills/handoff
+skills/to-questionnaire ~/.claude/skills/to-questionnaire
+skills/to-questionnaire ~/.codex/skills/to-questionnaire
+skills/wait-what ~/.claude/skills/wait-what
+skills/wait-what ~/.codex/skills/wait-what
+skills/writing-for-agents ~/.claude/skills/writing-for-agents
+skills/writing-for-agents ~/.codex/skills/writing-for-agents
+skills/tdd ~/.claude/skills/tdd
+skills/tdd ~/.codex/skills/tdd
+skills/code-review ~/.claude/skills/code-review
+skills/code-review ~/.codex/skills/code-review

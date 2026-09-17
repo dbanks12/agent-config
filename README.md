@@ -49,3 +49,17 @@ Three layers. Each layer calls the one below it.
 - `review-by-council`: several seats in parallel (default fable, opus, astra, sol at high), then dedupe, verify each finding, report. Linked into both tools.
 
 `cross-review/update-models.sh add <family> <name> [<cli-model>]` adds a trigger name and re-renders the skill descriptions.
+
+## Imported Pocock skills
+
+Eight skills come from [mattpocock/skills](https://github.com/mattpocock/skills) at commit `74ca5fe077456a0b3b2f5310cf9430999fd0b5fd`.
+Each copied skill includes the upstream MIT license.
+
+- `grill-me`, `handoff`, `to-questionnaire`, and `wait-what` retain upstream explicit invocation.
+- `grilling` and `writing-for-agents` retain automatic discovery.
+- `tdd` and `code-review` require explicit invocation in both tools.
+
+Use `$skill-name` in Codex or `/skill-name` in Claude Code.
+The `grill-me` and `handoff` instructions support agents without a Skill tool.
+TDD includes the upstream codebase-design documents as local references.
+Code review uses existing tracker guidance or a supplied spec without requiring the upstream setup skill.
