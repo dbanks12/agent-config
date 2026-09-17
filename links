@@ -3,6 +3,8 @@ instructions/AGENTS.md    ~/.claude/CLAUDE.md
 instructions/AGENTS.md    ~/.codex/AGENTS.md
 skills/brief              ~/.claude/skills/brief
 skills/brief              ~/.codex/skills/brief
+skills/expert-research    ~/.claude/skills/expert-research
+skills/expert-research    ~/.codex/skills/expert-research
 skills/create-pr          ~/.claude/skills/create-pr
 skills/create-pr          ~/.codex/skills/create-pr
 skills/herdr              ~/.claude/skills/herdr
