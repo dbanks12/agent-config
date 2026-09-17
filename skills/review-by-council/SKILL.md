@@ -38,14 +38,34 @@ Every seat is a separate process with no memory of this session. The chair gives
 
 1. Check the Fable limit as described under Seats. Then launch every seat at once in the background. Send each seat's output to its own file. Record each seat's exit status. A bare `wait` returns 0 even when a seat failed.
 
-For a design or document, prepare one prompt file with the shared policy and scope context. For example:
+Prepare `/tmp/council-request.txt` with the exact target, shared policy text, and scope context. Omit skipped seats from this example. If the user explicitly named Fable, add `--pin` to its command. For a design or document, set `codex_mode=prompt`.
 
 ```bash
+cd "$(git rev-parse --show-toplevel)" || exit 1
+prompt=/tmp/council-request.txt
+[[ -s "$prompt" ]] || { echo "Prepare $prompt before launch." >&2; exit 1; }
+out=$(mktemp -d)
+pids=()
+seats=()
+codex_mode=code-review
+
+~/.config/cross-review/claude.sh prompt -m fable -e high < "$prompt" > "$out/fable.txt" 2>&1 &
+pids+=($!); seats+=(fable)
 ~/.config/cross-review/claude.sh prompt -m opus -e high < "$prompt" > "$out/opus.txt" 2>&1 &
 pids+=($!); seats+=(opus)
-```
+~/.config/cross-review/codex.sh "$codex_mode" -m astra -e high < "$prompt" > "$out/astra.txt" 2>&1 &
+pids+=($!); seats+=(astra)
+~/.config/cross-review/codex.sh "$codex_mode" -m sol -e high < "$prompt" > "$out/sol.txt" 2>&1 &
+pids+=($!); seats+=(sol)
 
-Initialize `out`, `pids`, and `seats` before launch. Repeat for each enabled seat with its runner and model. Wait for each PID separately and record its exit status. Use the modes under Review kind for code changes.
+for i in "${!pids[@]}"; do
+  rc=0
+  wait "${pids[$i]}" || rc=$?
+  printf '%s rc=%s\n' "${seats[$i]}" "$rc" >> "$out/status.txt"
+done
+printf 'Review output: %s\n' "$out"
+cat "$out/status.txt"
+```
 
 2. Read every seat's output. Extract each finding as: file, line, severity, claim, failure scenario, seat, requirement source, applicability, attribution, and scope disposition. A Codex transcript prints its final message twice. Read it once.
 
