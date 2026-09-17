@@ -9,7 +9,7 @@ Several models review the same target independently. The current session is the 
 
 Findings are not put to a vote. A finding that one seat raised and the verifier confirmed outranks a finding that three seats raised and the verifier refuted. Agreement sets priority within a disposition. Verification checks technical validity and requirement applicability separately.
 
-Read and apply [requirements and review scope](references/scope.md) before preparing prompts or assessing findings. Paste the policy text into seat and verifier prompts to avoid external file reads.
+Read and apply [review criteria](references/review-criteria.md) before preparing prompts or assessing findings. Paste the review criteria into seat and verifier prompts to avoid external file reads.
 
 ## Seats
 
@@ -26,19 +26,19 @@ The user can name other seats or another effort. A seat whose CLI is missing is 
 
 Fable seat and the weekly limit: before launch, run `~/.config/cross-review/fable-usage.sh --near`. If it exits 0 and the user did not name Fable, drop the fable seat and print `Fable usage is near limit. Dropping Fable agent from council.` The other seats run as normal. If the user named Fable, keep the seat and pass `--pin` to its runner.
 
-Every seat is a separate process with no memory of this session. The chair gives every seat the same target and sourced scope context from the shared policy. It never gives a seat suspected findings, the author's conclusions, or another seat's output.
+Every seat is a separate process with no memory of this session. The chair gives every seat the same target and sourced scope context from the shared review criteria. It never gives a seat suspected findings, the author's conclusions, or another seat's output.
 
 ## Review kind
 
-- Code change: include the shared policy and scope context in every seat request. Use Codex's stdin code-review form and Claude's prompt mode. Name the exact base, commit, or working-tree target in the prompt. When the user explicitly requests native review, each seat runs the tool's built-in code review, and every seat gets the same base. Claude's built-in review defaults to the branch's upstream, which can be empty on a pushed branch, so pass the base as a range. Claude seats: `claude.sh code-review --target <base>...HEAD`. Codex seats: `codex.sh code-review --base <base>`. For one commit use `--target <sha>` and `--commit <sha>`. For the working tree use `--target HEAD` and `--uncommitted`.
-- Design or document: each seat runs `prompt` mode with the design review prompt from `review-with-claude` or `review-with-codex`. Use the same prompt text for every seat. Include the shared policy and scope context.
+- Code change: include the shared review criteria and scope context in every seat request. Use Codex's stdin code-review form and Claude's prompt mode. Name the exact base, commit, or working-tree target in the prompt. When the user explicitly requests native review, each seat runs the tool's built-in code review, and every seat gets the same base. Claude's built-in review defaults to the branch's upstream, which can be empty on a pushed branch, so pass the base as a range. Claude seats: `claude.sh code-review --target <base>...HEAD`. Codex seats: `codex.sh code-review --base <base>`. For one commit use `--target <sha>` and `--commit <sha>`. For the working tree use `--target HEAD` and `--uncommitted`.
+- Design or document: each seat runs `prompt` mode with the design review prompt from `review-with-claude` or `review-with-codex`. Use the same prompt text for every seat. Include the shared review criteria and scope context.
 - For an explicitly requested native review, supply scope context during verification and mark the limitation in the report.
 
 ## Run
 
 1. Check the Fable limit as described under Seats. Then launch every seat at once in the background. Send each seat's output to its own file. Record each seat's exit status. A bare `wait` returns 0 even when a seat failed.
 
-Prepare `/tmp/council-request.txt` with the exact target, shared policy text, and scope context. Omit skipped seats from this example. If the user explicitly named Fable, add `--pin` to its command. For a design or document, set `codex_mode=prompt`.
+Prepare `/tmp/council-request.txt` with the exact target, shared review criteria, and scope context. Omit skipped seats from this example. If the user explicitly named Fable, add `--pin` to its command. For a design or document, set `codex_mode=prompt`.
 
 ```bash
 cd "$(git rev-parse --show-toplevel)" || exit 1
@@ -71,7 +71,7 @@ cat "$out/status.txt"
 
 3. Merge. Two findings are the same when they name the same file, lines within three of each other, and the same defect in substance. Keep the clearest wording. Record every seat that raised it.
 
-4. Verify each merged finding with one fresh verifier per finding, all in parallel. A verifier gets one finding, the repository, and the shared policy with sourced scope context. It does not get the other findings, the seat names, or the count of seats. It returns technical validity (confirmed, plausible, or refuted), requirement applicability, attribution, and scope disposition. Require evidence for both the defect and its claimed requirement.
+4. Verify each merged finding with one fresh verifier per finding, all in parallel. A verifier gets one finding, the repository, and the shared review criteria with sourced scope context. It does not get the other findings, the seat names, or the count of seats. It returns technical validity (confirmed, plausible, or refuted), requirement applicability, attribution, and scope disposition. Require evidence for both the defect and its claimed requirement.
    - In Claude Code, use one Agent subagent per finding.
    - In Codex, use `~/.config/cross-review/codex.sh prompt -m astra -e high` per finding.
    - Verification uses the host tool's strongest model at effort high. The task is narrow, so the cost per finding is small, and this step decides what the user sees.

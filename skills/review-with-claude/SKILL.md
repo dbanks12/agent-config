@@ -7,7 +7,7 @@ description: Run an independent, read-only Claude review of a code change, desig
 
 Use Claude as an external reviewer. Keep the current Codex session as the review coordinator. This skill sets the review policy. The `call-claude` skill owns the command line, model names, and effort levels. Read it for those.
 
-Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Paste the policy text and sourced scope context into the review request.
+Read and apply [review criteria](../review-by-council/references/review-criteria.md) before every review. Paste the review criteria and sourced scope context into the review request.
 
 ## Choose the review kind
 
@@ -18,7 +18,7 @@ Do not send a design through the code review.
 
 ## Preserve independence
 
-Do not give Claude suspected findings, the author's conclusions, or hidden reasoning. Give Claude the target, comparison base, validation results, and sourced scope context from the shared policy.
+Do not give Claude suspected findings, the author's conclusions, or hidden reasoning. Give Claude the target, comparison base, validation results, and sourced scope context from the shared review criteria.
 
 Do not include secrets, credentials, environment files, private keys, or unrelated untracked files. Stop if the review needs data that Claude may not receive.
 
@@ -46,8 +46,8 @@ Review the design for correctness, missing cases, failure modes, security, opera
 
 State missing evidence and review limits. End with coverage, findings, unverified claims, and a verdict: Pass, Request changes, or Blocked.
 
-Review policy:
-<paste the full shared scope policy here>
+Review criteria:
+<paste the full shared review criteria here>
 Scope context: <outcome, acceptance criteria, exclusions, accepted limitations, operating conditions, sources, and unknowns>
 Original request: <request>
 Target: <paths or revision>
@@ -65,7 +65,7 @@ This is a local review. Its output stays in the current session. Do not post it,
 
 If the runner fails, report its exit status and error. Do not replace the failed independent review with a self-review.
 
-Read the findings as soon as the runner returns. Assess each item against the shared scope policy before recommending action. Report every item to the user with its disposition: acted on, rejected with the repository evidence, or deferred to the user.
+Read the findings as soon as the runner returns. Assess each item against the shared review criteria before recommending action. Report every item to the user with its disposition: acted on, rejected with the repository evidence, or deferred to the user.
 
 Identify Claude as the external reviewer. Return Claude's findings without weakening their severity or changing their meaning. Separate any Codex triage from Claude's review. Validate a disputed finding against repository evidence before rejecting it.
 

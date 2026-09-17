@@ -1,6 +1,4 @@
-# Requirements and review scope
-
-Read this policy before preparing a review or assessing its findings.
+# Review criteria
 
 ## Context for reviewers
 
@@ -11,7 +9,7 @@ Give every reviewer the same scope context alongside the target, comparison base
 - Relevant deployment conditions and existing system invariants.
 - Unresolved requirements and assumptions, marked as unresolved.
 
-Cite user decisions or repository sources when available. Mark missing information as unknown. Do not invent requirements or ask users to repeat accessible decisions.
+Cite user decisions or repository sources when available. Mark missing information as unknown.
 
 Scope context conveys requirements, not the author's conclusions about correctness. Exclude suspected findings, private reasoning, and other reviewers' output.
 
@@ -36,10 +34,6 @@ For a design, assess whether each major component serves the agreed outcome. Fla
 
 Preserve the reviewer's original severity and wording in the review record. Show scope assessment separately.
 
-Only technically supported findings tied to an applicable requirement justify required changes. Severity and reviewer agreement alone do not authorize work.
+Only technically supported findings tied to an applicable requirement justify required changes.
 
-Report an unresolved material requirement as a decision with options, costs, and consequences. Do not invent a guarantee. Keep optional improvements separate from required corrections.
-
-Treat accepted limitations as context. Reopen them when evidence contradicts their assumptions, and explain the contradiction.
-
-A separate PR does not establish necessity. Check whether omitting the proposed fix still satisfies the agreed outcome.
+Report an unresolved material requirement as a decision with options, costs, and consequences. Keep optional improvements separate from required corrections.
