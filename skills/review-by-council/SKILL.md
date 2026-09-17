@@ -7,7 +7,9 @@ description: Review a code change or design with several independent models in p
 
 Several models review the same target independently. The current session is the chair. The chair does not review. It launches the seats, merges their findings, verifies each one, and reports.
 
-Findings are not put to a vote. A finding that one seat raised and the verifier confirmed outranks a finding that three seats raised and the verifier refuted. Agreement sets priority. Verification decides what is reported.
+Findings are not put to a vote. A finding that one seat raised and the verifier confirmed outranks a finding that three seats raised and the verifier refuted. Agreement sets priority within a disposition. Verification checks technical validity and requirement applicability separately.
+
+Read and apply [requirements and review scope](references/scope.md) before preparing prompts or assessing findings.
 
 ## Seats
 
@@ -24,37 +26,37 @@ The user can name other seats or another effort. A seat whose CLI is missing is 
 
 Fable seat and the weekly limit: before launch, run `~/.config/cross-review/fable-usage.sh --near`. If it exits 0 and the user did not name Fable, drop the fable seat and print `Fable usage is near limit. Dropping Fable agent from council.` The other seats run as normal. If the user named Fable, keep the seat and pass `--pin` to its runner.
 
-Every seat is a separate process with no memory of this session. The chair gives a seat the target only. It never gives a seat suspected findings, the author's conclusions, or another seat's output.
+Every seat is a separate process with no memory of this session. The chair gives every seat the same target and sourced scope context from the shared policy. It never gives a seat suspected findings, the author's conclusions, or another seat's output.
 
 ## Review kind
 
-- Code change: each seat runs the tool's built-in code review, and every seat gets the same base. Claude's built-in review defaults to the branch's upstream, which can be empty on a pushed branch, so pass the base as a range. Claude seats: `claude.sh code-review --target <base>...HEAD`. Codex seats: `codex.sh code-review --base <base>`. For one commit use `--target <sha>` and `--commit <sha>`. For the working tree use `--target HEAD` and `--uncommitted`.
-- Design or document: each seat runs `prompt` mode with the design review prompt from `review-with-claude` or `review-with-codex`. Use the same prompt text for every seat.
+- Code change: include the shared policy and scope context in every seat request. Use Codex's stdin code-review form and Claude's prompt mode when native target flags cannot carry that context. Name the exact base, commit, or working-tree target in the prompt. When the user explicitly requests native review, each seat runs the tool's built-in code review, and every seat gets the same base. Claude's built-in review defaults to the branch's upstream, which can be empty on a pushed branch, so pass the base as a range. Claude seats: `claude.sh code-review --target <base>...HEAD`. Codex seats: `codex.sh code-review --base <base>`. For one commit use `--target <sha>` and `--commit <sha>`. For the working tree use `--target HEAD` and `--uncommitted`.
+- Design or document: each seat runs `prompt` mode with the design review prompt from `review-with-claude` or `review-with-codex`. Use the same prompt text for every seat. Include the shared policy and scope context.
+- If an explicitly requested native review cannot receive scope context, supply it during verification. Mark the initial review context limitation in the report.
 
 ## Run
 
 1. Check the Fable limit as described under Seats. Then launch every seat at once in the background. Send each seat's output to its own file. Record each seat's exit status. A bare `wait` returns 0 even when a seat failed.
 
+For a design or document, prepare one prompt file with the shared policy and scope context. For example:
+
 ```bash
-cd "$(git rev-parse --show-toplevel)"; out=$(mktemp -d); pids=(); seats=()
-~/.config/cross-review/claude.sh code-review -m fable -e high --target main...HEAD > "$out/fable.txt" 2>&1 & pids+=($!); seats+=(fable)
-~/.config/cross-review/claude.sh code-review -m opus  -e high --target main...HEAD > "$out/opus.txt"  2>&1 & pids+=($!); seats+=(opus)
-~/.config/cross-review/codex.sh  code-review -m astra -e high --base main > "$out/astra.txt" 2>&1 & pids+=($!); seats+=(astra)
-~/.config/cross-review/codex.sh  code-review -m sol   -e high --base main > "$out/sol.txt"   2>&1 & pids+=($!); seats+=(sol)
-for i in "${!pids[@]}"; do wait "${pids[$i]}" || echo "${seats[$i]} rc=$?" >> "$out/failed.txt"; done
-echo "$out"; cat "$out/failed.txt" 2>/dev/null
+~/.config/cross-review/claude.sh prompt -m opus -e high < "$prompt" > "$out/opus.txt" 2>&1 &
+pids+=($!); seats+=(opus)
 ```
 
-2. Read every seat's output. Extract each finding as: file, line, severity, one-sentence claim, failure scenario, seat. A Codex transcript prints its final message twice. Read it once.
+Initialize `out`, `pids`, and `seats` before launch. Repeat for each enabled seat with its runner and model. Wait for each PID separately and record its exit status. Use the modes under Review kind for code changes.
+
+2. Read every seat's output. Extract each finding as: file, line, severity, claim, failure scenario, seat, requirement source, applicability, attribution, and scope disposition. A Codex transcript prints its final message twice. Read it once.
 
 3. Merge. Two findings are the same when they name the same file, lines within three of each other, and the same defect in substance. Keep the clearest wording. Record every seat that raised it.
 
-4. Verify each merged finding with one fresh verifier per finding, all in parallel. A verifier gets one finding and the repository. It does not get the other findings, the seat names, or the count of seats. It returns one of: confirmed, plausible, or refuted, with evidence from the code or from running it.
+4. Verify each merged finding with one fresh verifier per finding, all in parallel. A verifier gets one finding, the repository, and the shared policy with sourced scope context. It does not get the other findings, the seat names, or the count of seats. It returns technical validity (confirmed, plausible, or refuted), requirement applicability, attribution, and scope disposition. Require evidence for both the defect and its claimed requirement.
    - In Claude Code, use one Agent subagent per finding.
    - In Codex, use `~/.config/cross-review/codex.sh prompt -m astra -e high` per finding.
    - Verification uses the host tool's strongest model at effort high. The task is narrow, so the cost per finding is small, and this step decides what the user sees.
 
-5. Report. Sort confirmed findings by severity, then by seat count. Show for each: severity, file:line, claim, failure scenario, seats, verifier evidence. List plausible findings after them. List refuted findings last in a short appendix with the refuting evidence, so the user can overrule. Name skipped or failed seats.
+5. Report required corrections, unresolved scope decisions, and optional improvements separately. Sort within each group by validity, severity, then seat count. Show the finding fields and verifier evidence from both checks. List refuted findings in a short appendix with evidence. Preserve original severity separately from scope disposition. Name skipped or failed seats and any missing context.
 
 ## Rules
 

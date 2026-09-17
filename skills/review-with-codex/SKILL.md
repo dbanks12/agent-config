@@ -7,20 +7,22 @@ description: Run an independent, read-only Codex review of a code change, design
 
 Use Codex as an external reviewer. Keep the current Claude session as the review coordinator. This skill sets the review policy. The `call-codex` skill owns the command line, model names, and effort levels. Read it for those.
 
+Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Include its context and finding fields in the review request.
+
 ## Choose the review kind
 
 - Code change (diff, commit, branch, working tree): use `call-codex` in `code-review` mode. That is Codex's built-in code review.
 - Design, plan, document, or anything that is not a code diff: use `call-codex` in `prompt` mode with the design review prompt below.
 
-Do not send a design through the code review. Do not send a code diff through a free prompt when the code review fits.
+Do not send a design through the code review. Use prompt mode for code when the native review cannot receive the required scope context. Name the exact diff target in the prompt.
 
 ## Preserve independence
 
-Do not give Codex suspected findings, the author's conclusions, or hidden reasoning. Give Codex the target, the comparison base, and completed validation results.
+Do not give Codex suspected findings, the author's conclusions, or hidden reasoning. Give Codex the target, comparison base, validation results, and sourced scope context from the shared policy.
 
 Do not include secrets, credentials, environment files, private keys, or unrelated untracked files. Stop if the review needs data that Codex may not receive.
 
-Do not edit files or implement fixes during this skill. Run the reviewer once. Do not start an exchange between models.
+Do not edit files or implement fixes during this skill. Run one independent review. If the user explicitly requests target flags, assess the native findings in prompt mode with scope context before reporting required changes.
 
 ## Code review
 
@@ -30,11 +32,13 @@ Pick the target flag from the change: `--base <branch>` for a branch, `--commit 
 ~/.config/cross-review/codex.sh code-review -e high --base main
 ```
 
-The target form takes no extra text. If the user asked specific review questions, use the stdin form instead and name the base in the text:
+The target form takes no extra text. Use the stdin form to include scope context and the shared policy. Name the exact base or commit in the text:
 
 ```bash
 ~/.config/cross-review/codex.sh code-review -e high <<'REVIEW_REQUEST'
 Review the changes against main.
+Read and apply <absolute path to review-by-council/references/scope.md>.
+Scope context: <outcome, acceptance criteria, exclusions, accepted limitations, operating conditions, sources, and unknowns>
 Validation evidence: <commands and results or not provided>
 Review questions: <questions>
 REVIEW_REQUEST
@@ -52,6 +56,8 @@ Review the design for correctness, missing cases, failure modes, security, opera
 
 State missing evidence and review limits. End with coverage, findings, unverified claims, and a verdict: Pass, Request changes, or Blocked.
 
+Review policy: Read and apply <absolute path to review-by-council/references/scope.md>.
+Scope context: <outcome, acceptance criteria, exclusions, accepted limitations, operating conditions, sources, and unknowns>
 Original request: <request>
 Target: <paths or revision>
 Comparison base: <base or not provided>
@@ -68,7 +74,7 @@ This is a local review. Its output stays in the current session. Do not post it,
 
 If the runner fails, report its exit status and error. Do not replace the failed independent review with a self-review.
 
-Read the findings as soon as the runner returns. Then decide, item by item, whether to act on each one. Report every item to the user with its disposition: acted on, rejected with the repository evidence, or deferred to the user.
+Read the findings as soon as the runner returns. Assess each item against the shared scope policy before recommending action. Report every item to the user with its disposition: acted on, rejected with the repository evidence, or deferred to the user.
 
 Identify Codex as the external reviewer. Return Codex's findings without weakening their severity or changing their meaning. Separate any Claude triage from Codex's review. Validate a disputed finding against repository evidence before rejecting it.
 

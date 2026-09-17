@@ -27,10 +27,28 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
 Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
+- Check the request, repository guidance, and prior decisions before asking about missing requirements.
+- State assumptions that materially affect scope or behavior.
 - If multiple interpretations exist, present them - don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+- If a missing requirement changes the design materially, ask a focused question before implementing the dependent work.
+- Explain the options and their costs. Continue independent, authorized work while waiting.
+
+### Requirements and scope
+
+For ambiguous or substantial work, plan before implementation. Use plan mode when available and appropriate. Small, clear changes need no extra approval step.
+
+- Record the intended outcome, acceptance checks, exclusions, and accepted limitations in the existing plan or task notes.
+- Flag missing requirements that affect availability, latency, concurrency, recovery, compatibility, or operational cost when relevant to the task.
+- Do not infer a stronger guarantee from silence. Ask about the concrete tradeoff when the answer changes implementation scope.
+- Distinguish user decisions and established system constraints from agent assumptions. Cite their sources when available.
+- Before adding a distinct work item, check whether omitting it still satisfies the agreed outcome.
+- If it adds an independent improvement or new guarantee, propose it separately before implementation unless already authorized.
+- Splitting authorized work into PRs needs no new scope approval. Each PR must serve the agreed outcome.
+- Check whether a simpler design removes a proposed dependency before treating that dependency as necessary.
+- Carry accepted limitations, exclusions, and unresolved questions into handoffs, resumed work, and reviewer context.
+- Reopen a settled scope decision only when new evidence invalidates its assumptions. Explain that evidence to the user.
+- Review findings are evidence, not authorization. Apply the same scope check before implementing a suggested fix.
 
 ## 2. Simplicity First
 
