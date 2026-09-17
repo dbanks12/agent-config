@@ -30,9 +30,9 @@ Every seat is a separate process with no memory of this session. The chair gives
 
 ## Review kind
 
-- Code change: include the shared policy and scope context in every seat request. Use Codex's stdin code-review form and Claude's prompt mode when native target flags cannot carry that context. Name the exact base, commit, or working-tree target in the prompt. When the user explicitly requests native review, each seat runs the tool's built-in code review, and every seat gets the same base. Claude's built-in review defaults to the branch's upstream, which can be empty on a pushed branch, so pass the base as a range. Claude seats: `claude.sh code-review --target <base>...HEAD`. Codex seats: `codex.sh code-review --base <base>`. For one commit use `--target <sha>` and `--commit <sha>`. For the working tree use `--target HEAD` and `--uncommitted`.
+- Code change: include the shared policy and scope context in every seat request. Use Codex's stdin code-review form and Claude's prompt mode. Name the exact base, commit, or working-tree target in the prompt. When the user explicitly requests native review, each seat runs the tool's built-in code review, and every seat gets the same base. Claude's built-in review defaults to the branch's upstream, which can be empty on a pushed branch, so pass the base as a range. Claude seats: `claude.sh code-review --target <base>...HEAD`. Codex seats: `codex.sh code-review --base <base>`. For one commit use `--target <sha>` and `--commit <sha>`. For the working tree use `--target HEAD` and `--uncommitted`.
 - Design or document: each seat runs `prompt` mode with the design review prompt from `review-with-claude` or `review-with-codex`. Use the same prompt text for every seat. Include the shared policy and scope context.
-- If an explicitly requested native review cannot receive scope context, supply it during verification. Mark the initial review context limitation in the report.
+- For an explicitly requested native review, supply scope context during verification and mark the limitation in the report.
 
 ## Run
 
@@ -56,7 +56,7 @@ Initialize `out`, `pids`, and `seats` before launch. Repeat for each enabled sea
    - In Codex, use `~/.config/cross-review/codex.sh prompt -m astra -e high` per finding.
    - Verification uses the host tool's strongest model at effort high. The task is narrow, so the cost per finding is small, and this step decides what the user sees.
 
-5. Report required corrections, unresolved scope decisions, and optional improvements separately. Sort within each group by validity, severity, then seat count. Show the finding fields and verifier evidence from both checks. List refuted findings in a short appendix with evidence. Preserve original severity separately from scope disposition. Name skipped or failed seats and any missing context.
+5. Report required corrections, unresolved scope decisions, and optional improvements separately. Sort within each group by validity, severity, then seat count. Show the finding fields and verifier evidence from both checks. List refuted findings in a short appendix with evidence. Name skipped or failed seats and any missing context.
 
 ## Rules
 
@@ -69,4 +69,4 @@ Initialize `out`, `pids`, and `seats` before launch. Repeat for each enabled sea
 
 ## Time and cost
 
-Seats run in parallel, so the review phase takes as long as the slowest seat. Verification adds another parallel round. Native Claude review can fan out to subagents. Prompt-mode seats use one process each. Time and token costs depend on the mode, target, and number of findings.
+Seats run in parallel, so the review phase takes as long as the slowest seat. Verification adds another parallel round. Native Claude review can fan out to subagents. Prompt-mode seats use one process each.

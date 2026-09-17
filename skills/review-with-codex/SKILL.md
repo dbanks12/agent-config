@@ -7,14 +7,14 @@ description: Run an independent, read-only Codex review of a code change, design
 
 Use Codex as an external reviewer. Keep the current Claude session as the review coordinator. This skill sets the review policy. The `call-codex` skill owns the command line, model names, and effort levels. Read it for those.
 
-Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Paste the policy text and sourced scope context into the review request. Reviewers must not need an external policy-file read.
+Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Paste the policy text and sourced scope context into the review request.
 
 ## Choose the review kind
 
 - Code change (diff, commit, branch, working tree): use `call-codex` in `code-review` mode. That is Codex's built-in code review.
 - Design, plan, document, or anything that is not a code diff: use `call-codex` in `prompt` mode with the design review prompt below.
 
-Do not send a design through the code review. Use prompt mode for code when the native review cannot receive the required scope context. Name the exact diff target in the prompt.
+Do not send a design through the code review. Send scope context through the stdin form.
 
 ## Preserve independence
 

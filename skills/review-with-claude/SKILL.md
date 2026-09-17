@@ -7,14 +7,14 @@ description: Run an independent, read-only Claude review of a code change, desig
 
 Use Claude as an external reviewer. Keep the current Codex session as the review coordinator. This skill sets the review policy. The `call-claude` skill owns the command line, model names, and effort levels. Read it for those.
 
-Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Paste the policy text and sourced scope context into the review request. Reviewers must not need an external policy-file read.
+Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Paste the policy text and sourced scope context into the review request.
 
 ## Choose the review kind
 
 - Code change (diff, commit, branch, working tree): use `call-claude` in `prompt` mode with scope context and an exact target. Use native `code-review` mode when the user explicitly requests it.
 - Design, plan, document, or anything that is not a code diff: use `call-claude` in `prompt` mode with the design review prompt below.
 
-Do not send a design through the code review. Use prompt mode for code when the native review cannot receive the required scope context. Name the exact diff target in the prompt.
+Do not send a design through the code review.
 
 ## Preserve independence
 
@@ -32,7 +32,7 @@ Pass the base as a range: `--target <base>...HEAD` for a branch, `--target <sha>
 ~/.config/cross-review/claude.sh code-review -e high --target main...HEAD
 ```
 
-The built-in review takes no extra instructions. Prefer prompt mode when scope context or specific questions need to accompany the target. Use the prompt below and change the review kind to code. If the user explicitly requests native review, run it first. The coordinator then assesses scope locally and reports the missing reviewer context. Do not launch another model for this assessment.
+For the default code review, use the design prompt below with the review kind changed to code. Name the exact diff target. The built-in review takes no extra instructions. If the user explicitly requests native review, run it, then assess scope locally and report the missing reviewer context. Do not launch another model for this assessment.
 
 ## Design review
 

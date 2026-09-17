@@ -30,8 +30,6 @@ Keep technical validity separate: confirmed, plausible, or refuted. A reproducib
 
 Existing security, data integrity, and compatibility invariants can establish a requirement without an explicit task sentence. Support the claimed invariant with evidence.
 
-Do not suppress a material risk because its requirement is unknown. State the missing decision and its consequence without inventing a guarantee.
-
 For a design, assess whether each major component serves the agreed outcome. Flag unnecessary components as well as missing behavior.
 
 ## Disposition
@@ -40,7 +38,7 @@ Preserve the reviewer's original severity and wording in the review record. Show
 
 Only technically supported findings tied to an applicable requirement justify required changes. Severity and reviewer agreement alone do not authorize work.
 
-Report unresolved material requirements as decisions with concrete options and costs. Keep optional improvements separate from required corrections.
+Report an unresolved material requirement as a decision with options, costs, and consequences. Do not invent a guarantee. Keep optional improvements separate from required corrections.
 
 Treat accepted limitations as context. Reopen them when evidence contradicts their assumptions, and explain the contradiction.
 
