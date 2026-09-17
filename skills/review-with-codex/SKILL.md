@@ -7,7 +7,7 @@ description: Run an independent, read-only Codex review of a code change, design
 
 Use Codex as an external reviewer. Keep the current Claude session as the review coordinator. This skill sets the review policy. The `call-codex` skill owns the command line, model names, and effort levels. Read it for those.
 
-Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Include its context and finding fields in the review request.
+Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Paste the policy text and sourced scope context into the review request. Reviewers must not need an external policy-file read.
 
 ## Choose the review kind
 
@@ -22,7 +22,7 @@ Do not give Codex suspected findings, the author's conclusions, or hidden reason
 
 Do not include secrets, credentials, environment files, private keys, or unrelated untracked files. Stop if the review needs data that Codex may not receive.
 
-Do not edit files or implement fixes during this skill. Run one independent review. If the user explicitly requests target flags, assess the native findings in prompt mode with scope context before reporting required changes.
+Do not edit files or implement fixes during this skill. Run the external reviewer once. Do not start an exchange between models.
 
 ## Code review
 
@@ -32,12 +32,13 @@ Pick the target flag from the change: `--base <branch>` for a branch, `--commit 
 ~/.config/cross-review/codex.sh code-review -e high --base main
 ```
 
-The target form takes no extra text. Use the stdin form to include scope context and the shared policy. Name the exact base or commit in the text:
+The target form takes no extra text. If the user explicitly requests target flags, assess scope locally after the review. Report the missing reviewer context without another model call. Otherwise, use the stdin form to include scope context and the shared policy. Name the exact base or commit in the text:
 
 ```bash
 ~/.config/cross-review/codex.sh code-review -e high <<'REVIEW_REQUEST'
 Review the changes against main.
-Read and apply <absolute path to review-by-council/references/scope.md>.
+Apply this review policy:
+<paste the full shared scope policy here>
 Scope context: <outcome, acceptance criteria, exclusions, accepted limitations, operating conditions, sources, and unknowns>
 Validation evidence: <commands and results or not provided>
 Review questions: <questions>
@@ -56,7 +57,8 @@ Review the design for correctness, missing cases, failure modes, security, opera
 
 State missing evidence and review limits. End with coverage, findings, unverified claims, and a verdict: Pass, Request changes, or Blocked.
 
-Review policy: Read and apply <absolute path to review-by-council/references/scope.md>.
+Review policy:
+<paste the full shared scope policy here>
 Scope context: <outcome, acceptance criteria, exclusions, accepted limitations, operating conditions, sources, and unknowns>
 Original request: <request>
 Target: <paths or revision>

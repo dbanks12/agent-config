@@ -7,7 +7,7 @@ description: Run an independent, read-only Claude review of a code change, desig
 
 Use Claude as an external reviewer. Keep the current Codex session as the review coordinator. This skill sets the review policy. The `call-claude` skill owns the command line, model names, and effort levels. Read it for those.
 
-Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Include its context and finding fields in the review request.
+Read and apply [requirements and review scope](../review-by-council/references/scope.md) before every review. Paste the policy text and sourced scope context into the review request. Reviewers must not need an external policy-file read.
 
 ## Choose the review kind
 
@@ -22,7 +22,7 @@ Do not give Claude suspected findings, the author's conclusions, or hidden reaso
 
 Do not include secrets, credentials, environment files, private keys, or unrelated untracked files. Stop if the review needs data that Claude may not receive.
 
-Do not edit files or implement fixes during this skill. Run one independent review. A native review that lacks scope context needs the separate scope assessment described below.
+Do not edit files or implement fixes during this skill. Run the external reviewer once. Do not start an exchange between models.
 
 ## Code review
 
@@ -32,7 +32,7 @@ Pass the base as a range: `--target <base>...HEAD` for a branch, `--target <sha>
 ~/.config/cross-review/claude.sh code-review -e high --target main...HEAD
 ```
 
-The built-in review takes no extra instructions. Prefer prompt mode when scope context or specific questions need to accompany the target. Use the prompt below and change the review kind to code. If the user explicitly requests native review, run it first. Then assess its findings in prompt mode with the scope context before reporting required changes.
+The built-in review takes no extra instructions. Prefer prompt mode when scope context or specific questions need to accompany the target. Use the prompt below and change the review kind to code. If the user explicitly requests native review, run it first. The coordinator then assesses scope locally and reports the missing reviewer context. Do not launch another model for this assessment.
 
 ## Design review
 
@@ -46,7 +46,8 @@ Review the design for correctness, missing cases, failure modes, security, opera
 
 State missing evidence and review limits. End with coverage, findings, unverified claims, and a verdict: Pass, Request changes, or Blocked.
 
-Review policy: Read and apply <absolute path to review-by-council/references/scope.md>.
+Review policy:
+<paste the full shared scope policy here>
 Scope context: <outcome, acceptance criteria, exclusions, accepted limitations, operating conditions, sources, and unknowns>
 Original request: <request>
 Target: <paths or revision>

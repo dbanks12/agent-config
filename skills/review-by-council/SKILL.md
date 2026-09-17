@@ -9,7 +9,7 @@ Several models review the same target independently. The current session is the 
 
 Findings are not put to a vote. A finding that one seat raised and the verifier confirmed outranks a finding that three seats raised and the verifier refuted. Agreement sets priority within a disposition. Verification checks technical validity and requirement applicability separately.
 
-Read and apply [requirements and review scope](references/scope.md) before preparing prompts or assessing findings.
+Read and apply [requirements and review scope](references/scope.md) before preparing prompts or assessing findings. Paste the policy text into seat and verifier prompts to avoid external file reads.
 
 ## Seats
 
@@ -69,4 +69,4 @@ Initialize `out`, `pids`, and `seats` before launch. Repeat for each enabled sea
 
 ## Time and cost
 
-Seats run in parallel, so the review phase takes as long as the slowest seat. Claude's built-in review at high fans out to subagents and is the slowest seat, often several minutes on a small diff. Verification runs in parallel and adds one round. Expect about 1.5 to 2 times the wall-clock of one review, and 3 to 4 times the tokens.
+Seats run in parallel, so the review phase takes as long as the slowest seat. Verification adds another parallel round. Native Claude review can fan out to subagents. Prompt-mode seats use one process each. Time and token costs depend on the mode, target, and number of findings.

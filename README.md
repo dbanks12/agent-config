@@ -45,7 +45,7 @@ The installer backs up the replaced local file.
 Three layers. Each layer calls the one below it.
 
 - `call-codex`, `call-claude`: run the other tool once as a separate process. Own the command line, model names, and effort levels. Two modes: a free `prompt`, or the tool's built-in `code-review`. Linked into both tools.
-- `review-with-codex`, `review-with-claude`: review policy. Built-in code review for code. A design review prompt for everything else. Tool-specific.
+- `review-with-codex`, `review-with-claude`: review policy. Claude uses scoped prompts for code reviews. Codex uses built-in review with scope context. A design review prompt for everything else. Tool-specific.
 - `review-by-council`: several seats in parallel (default fable, opus, astra, sol at high), then dedupe, verify each finding, report. Linked into both tools.
 
 `cross-review/update-models.sh add <family> <name> [<cli-model>]` adds a trigger name and re-renders the skill descriptions.
