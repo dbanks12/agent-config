@@ -144,15 +144,31 @@ $('copy-resume').onclick = async () => {
     $('error').textContent = 'Clipboard access is unavailable. Select and copy the command above.';
   }
 };
+function advanceAnswer() {
+  if (!answered(current.questions[index])) return;
+  if (index < current.questions.length - 1) go(index + 1);
+  else {
+    const unanswered = current.questions.findIndex(q => !answered(q));
+    if (unanswered >= 0) go(unanswered);
+    else $('submit').focus();
+  }
+}
 $('accept').onclick = () => {
   const q = current.questions[index];
   answers[q.id] = {mode: 'accepted', text: q.recommendation};
   $('response').value = '';
   save(); renderAnswerStatus(); renderProgress();
+  advanceAnswer();
 };
 $('response').oninput = () => {
   answers[current.questions[index].id] = {mode: 'custom', text: $('response').value};
   save(); renderAnswerStatus(); renderProgress();
+};
+$('response').onkeydown = event => {
+  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    advanceAnswer();
+  }
 };
 $('previous').onclick = () => go(index - 1);
 $('next').onclick = () => go(index + 1);

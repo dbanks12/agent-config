@@ -8,6 +8,10 @@ description: Grill a plan or decision through a local browser page with recommen
 Read [grilling](../grilling/SKILL.md) for the design tree, frontier, research, and completion rules.
 Use the browser workflow below instead of chat questions and chat answers.
 
+Serve the bundled `assets/index.html` and `assets/app.js` unchanged through `scripts/interview.py` in both tools.
+Use the helper commands for interview state and JSON files for question content.
+These shared assets define the page layout and behavior. Each session supplies only interview data.
+
 Keep the launching Codex or Claude session active throughout the interview.
 The helper returns submitted sections through that session's shell tool output.
 If the agent stops, the server still stores submitted answers.

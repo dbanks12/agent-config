@@ -27,8 +27,17 @@ function publish(section) {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(connection.url);
+    await page.locator('#response').fill('Draft');
+    await page.locator('#response').press('End');
+    await page.locator('#response').press('Shift+Enter');
+    assert.equal(await page.locator('#response').inputValue(), 'Draft\n');
+    await page.locator('#response').press('Enter');
+    assert.equal(await page.locator('#question-title').innerText(), 'How should answers return?');
+    await page.getByRole('button', {name: 'Previous'}).click();
     await page.getByRole('button', {name: 'Accept recommendation', exact: true}).click();
-    await page.getByRole('button', {name: 'Next question'}).click();
+    assert.equal(await page.locator('#question-title').innerText(), 'How should answers return?');
+    await page.locator('#response').press('Enter');
+    assert.equal(await page.locator('#question-title').innerText(), 'How should answers return?');
     assert.equal(await page.locator('#submit').isDisabled(), true);
     await page.locator('#response').fill('Return answers to the original session. <script>alert(1)</script>');
     await page.reload();
@@ -36,6 +45,9 @@ function publish(section) {
     await page.getByRole('button', {name: 'Previous'}).click();
     assert.equal(await page.locator('#accept').getAttribute('aria-pressed'), 'true');
     await page.getByRole('button', {name: 'Next question'}).click();
+    await page.locator('#response').press('Enter');
+    assert.equal(await page.locator('#submit').evaluate(el => el === document.activeElement), true);
+    assert.equal(cli('read').sections[0].answers, undefined);
     const waiter = promisify(execFile)('python3', cliArgs('wait', ['--section', 'scope', '--timeout', '10']));
     await page.locator('#submit').click();
     await page.locator('#waiting').waitFor({state: 'visible'});
@@ -55,6 +67,7 @@ function publish(section) {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     // No agent wait process exists now. The independent server must retain this submission.
     await page.locator('#accept').click();
+    assert.equal(await page.locator('#submit').evaluate(el => el === document.activeElement), true);
     await page.locator('#submit').click();
     await page.locator('#waiting').waitFor({state: 'visible'});
     await page.locator('#recovery > summary').click();
