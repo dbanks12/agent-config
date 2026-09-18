@@ -29,9 +29,10 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.8rem;line-height:1.6;
 <div class="prose" id="question-body"></div>
 <div class="recommendation"><div class="label">Agent’s recommendation</div><p class="prose" id="recommendation"></p><button id="accept" type="button">Accept recommendation</button></div>
 <label class="label" for="response">Or write your own response</label>
-<p class="muted" id="response-help">Enter advances. Shift+Enter adds a new line. On the last answer, select Send section to agent.</p>
+<p class="muted" id="response-help">Enter advances. Shift+Enter adds a new line. To attach this text to the recommendation, select Accept with notes.</p>
 <textarea aria-describedby="response-help" id="response" placeholder="Your decision, changes, or uncertainty…"></textarea>
 <div id="answer-status" role="status" aria-live="polite"></div>
+<div class="row"><button id="accept-notes" type="button">Accept with notes →</button></div>
 <footer><div class="row"><button id="previous" type="button">← Previous</button><button id="next" type="button">Next question →</button><button id="submit" class="primary" type="button" hidden>Send section to agent →</button></div></footer>
 </div>
 </section>

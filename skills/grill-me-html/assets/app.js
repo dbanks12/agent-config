@@ -36,7 +36,7 @@ function renderHistory() {
     const summary = node('summary', `${section.title} · ${section.questions.length} decisions`);
     const shorthand = section.questions.map(q => {
       const a = section.answers[q.id];
-      return `${q.title}: ${a.mode === 'accepted' ? 'accepted' : a.text.replace(/\s+/g, ' ').slice(0, 65)}`;
+      return `${q.title}: ${a.mode === 'accepted' ? (a.notes ? `accepted · ${a.notes.replace(/\s+/g, ' ').slice(0, 65)}` : 'accepted') : a.text.replace(/\s+/g, ' ').slice(0, 65)}`;
     }).join(' · ');
     summary.append(node('span', ` — ${shorthand.slice(0, 220)}${shorthand.length > 220 ? '…' : ''}`));
     details.append(summary);
@@ -45,6 +45,7 @@ function renderHistory() {
       entry.append(node('strong', q.title), node('p', q.body, 'prose muted'),
         node('p', `Recommendation: ${q.recommendation}`, 'prose muted'),
         node('p', `${section.answers[q.id].mode === 'accepted' ? 'Accepted: ' : 'Your response: '}${section.answers[q.id].text}`, 'prose'));
+      if (section.answers[q.id].notes) entry.append(node('p', `Your notes: ${section.answers[q.id].notes}`, 'prose'));
       details.append(entry);
     }
     $('history').append(details);
@@ -73,7 +74,7 @@ function renderQuestion(focus = false) {
   $('question-title').textContent = q.title;
   $('question-body').textContent = q.body;
   $('recommendation').textContent = q.recommendation;
-  $('response').value = answers[q.id]?.mode === 'custom' ? answers[q.id].text : '';
+  $('response').value = answers[q.id]?.mode === 'custom' ? answers[q.id].text : answers[q.id]?.notes || '';
   renderAnswerStatus();
   $('previous').disabled = index === 0;
   $('next').hidden = index === current.questions.length - 1;
@@ -90,7 +91,7 @@ function renderAnswerStatus() {
   const accepted = a?.mode === 'accepted';
   $('accept').textContent = accepted ? '✓ Recommendation accepted' : 'Accept recommendation';
   $('accept').setAttribute('aria-pressed', String(accepted));
-  $('answer-status').textContent = accepted ? 'Recommendation selected. Send the section when you are ready.' : a?.text?.trim() ? (storageWarning ? 'Response kept in this tab. Send the section when you are ready.' : 'Draft saved in this browser. Send the section when you are ready.') : 'Choose the recommendation or enter a response.';
+  $('answer-status').textContent = accepted ? (a.notes?.trim() ? 'Recommendation accepted with your notes.' : 'Recommendation selected. Send the section when you are ready.') : a?.text?.trim() ? (storageWarning ? 'Response kept in this tab. Send the section when you are ready.' : 'Draft saved in this browser. Send the section when you are ready.') : 'Choose the recommendation or enter a response.';
 }
 function go(next) { index = next; save(); renderQuestion(true); }
 function render(nextState) {
@@ -155,13 +156,34 @@ function advanceAnswer() {
 }
 $('accept').onclick = () => {
   const q = current.questions[index];
+  if (answers[q.id]?.mode === 'accepted') {
+    if (answers[q.id].notes?.trim()) answers[q.id] = {mode: 'custom', text: answers[q.id].notes};
+    else delete answers[q.id];
+    save(); renderAnswerStatus(); renderProgress();
+    return;
+  }
   answers[q.id] = {mode: 'accepted', text: q.recommendation};
   $('response').value = '';
   save(); renderAnswerStatus(); renderProgress();
   advanceAnswer();
 };
+$('accept-notes').onclick = () => {
+  const notes = $('response').value;
+  if (!notes.trim()) {
+    $('answer-status').textContent = 'Type notes above, then select Accept with notes.';
+    $('response').focus();
+    return;
+  }
+  const q = current.questions[index];
+  answers[q.id] = {mode: 'accepted', text: q.recommendation, notes};
+  save(); renderAnswerStatus(); renderProgress();
+  advanceAnswer();
+};
 $('response').oninput = () => {
-  answers[current.questions[index].id] = {mode: 'custom', text: $('response').value};
+  const q = current.questions[index];
+  const a = answers[q.id];
+  if (a?.mode === 'accepted' && typeof a.notes === 'string') a.notes = $('response').value;
+  else answers[q.id] = {mode: 'custom', text: $('response').value};
   save(); renderAnswerStatus(); renderProgress();
 };
 $('response').onkeydown = event => {

@@ -49,6 +49,9 @@ The `wait` command returns one of these results:
 ```
 
 Custom responses use `"mode": "custom"` with the user's text.
+**Accept with notes** uses `"mode": "accepted"` and a separate `"notes"` field.
+The `"text"` field still contains the exact recommendation.
+Read both fields when the user accepts with notes.
 Repeated waits return the same submitted section without consuming it.
 Use a new section id for each follow-up.
 The `read` command returns the complete interview state, including every submitted answer.

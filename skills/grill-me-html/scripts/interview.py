@@ -42,6 +42,8 @@ def save_state(directory, state):
             answer = section.get('answers', {}).get(question['id'])
             if answer:
                 lines.extend(['Accepted recommendation:' if answer['mode'] == 'accepted' else 'Your response:', answer['text'], ''])
+                if answer.get('notes'):
+                    lines.extend(['Your notes:', answer['notes'], ''])
             else:
                 lines.extend(['Awaiting your response.', ''])
     if state.get('summary'):
@@ -148,6 +150,11 @@ def submit(directory, payload):
             if not nonempty(value):
                 raise ValueError('Custom answers must contain text.')
             normalized[q['id']] = {'mode': answer['mode'], 'text': value}
+            if 'notes' in answer:
+                if answer['mode'] != 'accepted' or not isinstance(answer['notes'], str):
+                    raise ValueError('Notes must contain text attached to an accepted recommendation.')
+                if answer['notes'].strip():
+                    normalized[q['id']]['notes'] = answer['notes']
         if 'answers' in section:
             if section['answers'] != normalized:
                 raise ValueError('This section is already submitted. Ask the agent to reopen the decision in a new section.')

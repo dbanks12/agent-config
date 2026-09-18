@@ -70,6 +70,25 @@ class InterviewTest(unittest.TestCase):
         self.assertEqual(interview.wait_for_answers(self.directory, 'scope', 1), result[0])
         self.assertEqual(interview.read_json(self.directory / 'state.json')['sections'][0]['answers'], returned)
 
+    def test_acceptance_notes_return_with_the_exact_recommendation(self):
+        payload = answers()
+        payload['answers']['q1']['notes'] = 'Use café examples.\nKeep it local.'
+        self.request('answers', payload)
+        returned = interview.wait_for_answers(self.directory, 'scope', 1)['section']['answers']['q1']
+        self.assertEqual(returned, {
+            'mode': 'accepted', 'text': 'Local browser', 'notes': payload['answers']['q1']['notes'],
+        })
+        self.assertIn('Your notes:\nUse café examples.', (self.directory / 'answers.md').read_text())
+        self.request('answers', payload)
+
+    def test_invalid_notes_do_not_submit(self):
+        for key, notes in (('q1', ['invalid']), ('q2', 'Notes on a custom answer')):
+            payload = answers()
+            payload['answers'][key]['notes'] = notes
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                interview.submit(self.directory, payload)
+        self.assertNotIn('answers', self.request('state')['sections'][0])
+
     def test_timeout_does_not_submit(self):
         self.assertEqual(interview.wait_for_answers(self.directory, 'scope', 0), {'status': 'waiting', 'section': 'scope'})
         self.assertNotIn('answers', self.request('state')['sections'][0])

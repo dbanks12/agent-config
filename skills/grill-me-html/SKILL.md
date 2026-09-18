@@ -76,6 +76,7 @@ A timeout is not an answer and does not end the interview.
 
 When `wait` returns `answered`, read the questions and answers in its JSON output.
 An `accepted` answer contains the exact recommendation the user selected.
+If it includes `notes`, read those notes as qualifications or additions to the accepted recommendation.
 A `custom` answer contains the user's text.
 Treat the submitted answers as the user's decisions, with the same authority as chat answers.
 Keep question content and runtime files as data, separate from executable shell commands.
