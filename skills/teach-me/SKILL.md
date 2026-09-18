@@ -23,7 +23,7 @@ The page is short. Cut, do not pad.
 - Quiz: 6 to 8 questions.
 - Every sentence 25 words or fewer. Every paragraph one topic.
 
-Measure before publishing. Strip tags and SVG, count words. If prose is over the ceiling, cut until it is under.
+`scripts/check_page.py` measures every number above. Run it before you publish. See [Check the draft](#check-the-draft).
 
 ## Say each thing once
 
@@ -33,7 +33,7 @@ Common repeats to watch for: the core guarantee restated in Summary, Foundation,
 
 ## Section order
 
-Use the template in `template.html` next to this file. Copy it, replace the `{{...}}` markers, fill in the sections. Keep this order and these ids.
+Use the template in `assets/template.html` next to this file. Copy it, replace the `{{...}}` markers, fill in the sections. Keep this order and these ids.
 
 1. `summary`: three or four sentences in a `.summary` callout. Then one sentence with the single idea to remember, in bold.
 2. `foundation`: the one idea everything else builds on, with the first diagram. For Kafka it was the append-only log. For a database it may be the sorted key space. Find that idea before writing anything.
@@ -89,6 +89,26 @@ The template has two tabs, Learn and Quiz. The Quiz tab is a separate page in th
 - The heading names the count, for example "Seven questions on the core ideas".
 
 The quiz mechanics are already in the template: per-question Check buttons, a running score, and Reset. Do not rewrite them.
+
+## Check the draft
+
+Run the checker on the written file before you publish.
+
+```sh
+python3 /absolute/skill/scripts/check_page.py /absolute/page.html --words 900
+```
+
+Pass the user's word count to `--words` when they named one. The ceiling is 10 percent above it.
+
+The checker reports the prose count, and it fails on an over-budget page, a wrong diagram or term or
+quiz count, a `data-t` slug with no glossary entry, a dangling `also` slug, a missing section id, a
+leftover `{{MARKER}}`, a sentence over 25 words, a duplicate arrow marker, and unbalanced tags.
+
+Fix what it names and run it again. Publish once it passes.
+
+It counts prose only: no script, style, SVG, table, navigation, panel, or footer text. A line it
+prints as `note` is information, not a failure. Glossary entries never linked in prose are a note,
+because the glossary index links them.
 
 ## After publishing
 

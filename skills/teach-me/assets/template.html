@@ -537,7 +537,7 @@
     document.querySelector('nav.toc').hidden = isQuiz;
     window.scrollTo({ top: 0 });
   }
-  tabs.forEach(t => t.addEventListener('click', () => { showTab(t.dataset.tab); history.replaceState(null, '', t.dataset.tab === 'quiz' ? '#quiz' : ' '); }));
+  tabs.forEach(t => t.addEventListener('click', () => { showTab(t.dataset.tab); window.history.replaceState(null, '', t.dataset.tab === 'quiz' ? '#quiz' : ' '); }));
   if (location.hash === '#quiz') showTab('quiz');
 
 })();

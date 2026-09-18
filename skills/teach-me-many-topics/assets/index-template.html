@@ -1,0 +1,371 @@
+<title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ground:#EFF2F5; --surface:#FFFFFF; --surface-2:#F6F8FA;
+    --ink:#161B21; --muted:#5B6673; --faint:#8793A1;
+    --line:#D9E0E7; --line-soft:#E6EBF0;
+    --accent:#3F4F8F; --accent-soft:#E7EAF5;
+    --done:#2C7A5B; --done-soft:#DFEFE8;
+    --part:#9A6410; --part-soft:#F6EBD8;
+    --shadow:0 1px 2px rgba(20,28,40,.05),0 8px 24px rgba(20,28,40,.06);
+    --serif:"Newsreader",Georgia,serif;
+    --sans:"Public Sans","Helvetica Neue",Arial,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#12161A; --surface:#1A1F25; --surface-2:#1F252C;
+      --ink:#DFE5EA; --muted:#96A2AE; --faint:#6E7A87;
+      --line:#2B333C; --line-soft:#232A32;
+      --accent:#8D9BD8; --accent-soft:#242B45;
+      --done:#61B892; --done-soft:#1C332A;
+      --part:#D8A14E; --part-soft:#332819;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12161A; --surface:#1A1F25; --surface-2:#1F252C;
+    --ink:#DFE5EA; --muted:#96A2AE; --faint:#6E7A87;
+    --line:#2B333C; --line-soft:#232A32;
+    --accent:#8D9BD8; --accent-soft:#242B45;
+    --done:#61B892; --done-soft:#1C332A;
+    --part:#D8A14E; --part-soft:#332819;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px;margin:0 auto;padding-block:40px 96px;padding-inline:20px;}
+
+  header.top{display:grid;gap:14px;margin-bottom:26px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--faint);}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(32px,5.2vw,44px);
+    line-height:1.08;margin:0;letter-spacing:-.015em;text-wrap:balance;}
+  .lede{margin:0;color:var(--muted);max-width:62ch;}
+
+  .summary{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+    padding:18px 20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .sumrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;margin-bottom:14px;}
+  .bigcount{font-family:var(--mono);font-size:26px;font-weight:500;
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+  .bigcount span{color:var(--faint);font-size:16px;}
+  .sumlabel{font-size:13px;color:var(--muted);}
+  .legend{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);}
+  .legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;}
+  .i-done{background:var(--done);} .i-part{background:var(--part);} .i-todo{background:var(--line);}
+  .bar{height:8px;border-radius:99px;background:var(--line-soft);overflow:hidden;display:flex;}
+  .bar>b{display:block;height:100%;transition:width .35s ease;}
+  .seg-done{background:var(--done);} .seg-part{background:var(--part);}
+
+  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:30px;}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;background:var(--surface);}
+  .seg button{appearance:none;border:0;background:transparent;color:var(--muted);
+    font-family:var(--sans);font-size:13px;font-weight:500;padding:7px 13px;cursor:pointer;}
+  .seg button+button{border-left:1px solid var(--line);}
+  .seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);}
+  .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+  .savestate{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-left:auto;}
+
+  .group{position:relative;padding-left:34px;margin-bottom:34px;}
+  .group::before{content:"";position:absolute;left:9px;top:6px;bottom:-34px;
+    width:2px;background:var(--line);}
+  .group:last-of-type::before{bottom:auto;height:14px;}
+  .station{position:absolute;left:3px;top:5px;width:14px;height:14px;border-radius:50%;
+    background:var(--surface);border:2px solid var(--line);}
+  .group.complete .station{background:var(--done);border-color:var(--done);}
+  .group.started .station{border-color:var(--part);}
+
+  .ghead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:4px;}
+  .ghead h2{font-family:var(--serif);font-weight:600;font-size:21px;margin:0;letter-spacing:-.01em;}
+  .gcount{font-family:var(--mono);font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;}
+  .gnote{font-size:13px;color:var(--muted);margin:0 0 12px;max-width:64ch;}
+
+  ol.items{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:var(--line-soft);
+    border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+  li.item{background:var(--surface);display:grid;
+    grid-template-columns:auto 1fr auto;align-items:start;gap:12px;padding:11px 14px;}
+  li.item[data-s="done"]{background:var(--surface-2);}
+  li.item[data-s="done"] .title a{color:var(--muted);}
+
+  .marks{display:flex;align-items:center;gap:8px;margin-top:2px;}
+  .done-box{width:18px;height:18px;flex:none;accent-color:var(--done);cursor:pointer;margin:0;}
+  .done-box:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .part{appearance:none;cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:500;
+    letter-spacing:.07em;text-transform:uppercase;padding:3px 7px;border-radius:5px;
+    border:1px solid var(--line);background:var(--surface-2);color:var(--faint);flex:none;}
+  .part[aria-pressed="true"]{background:var(--part-soft);border-color:var(--part);color:var(--part);}
+  .part:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  li.item[data-s="done"] .part{visibility:hidden;}
+
+  .meta{min-width:0;}
+  .title{font-weight:500;margin:0;overflow-wrap:anywhere;}
+  .title a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);}
+  .title a:hover,.title a:focus-visible{color:var(--accent);border-bottom-color:var(--accent);outline:none;}
+  .desc{margin:1px 0 0;font-size:13px;color:var(--muted);max-width:60ch;}
+  .num{font-family:var(--mono);font-size:11px;color:var(--faint);
+    font-variant-numeric:tabular-nums;margin-right:7px;}
+  .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--faint);border:1px solid var(--line);border-radius:4px;padding:1px 5px;
+    white-space:nowrap;margin-top:3px;flex:none;}
+
+  .empty{padding:18px;color:var(--muted);font-size:14px;background:var(--surface);
+    border:1px dashed var(--line);border-radius:9px;}
+  footer.note{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--faint);max-width:66ch;}
+
+  @media (max-width:560px){
+    .group{padding-left:26px;} .group::before{left:6px;} .station{left:0;}
+    li.item{grid-template-columns:auto 1fr;} .tag{display:none;}
+    .legend{margin-left:0;width:100%;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">{{EYEBROW}}</div>
+    <h1>{{TITLE}}</h1>
+    <p class="lede">{{LEDE}}</p>
+  </header>
+
+  <div class="summary">
+    <div class="sumrow">
+      <div>
+        <div class="bigcount" id="bigcount">0 <span>/ 0</span></div>
+        <div class="sumlabel">done</div>
+      </div>
+      <div class="legend">
+        <span><i class="i-done"></i>Done</span>
+        <span><i class="i-part"></i>Partly done</span>
+        <span><i class="i-todo"></i>Not started</span>
+      </div>
+    </div>
+    <div class="bar" id="overallbar"><b class="seg-done" style="width:0"></b><b class="seg-part" style="width:0"></b></div>
+  </div>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Filter">
+      <button id="f-all" aria-pressed="true">All</button>
+      <button id="f-core" aria-pressed="false">Core</button>
+      <button id="f-left" aria-pressed="false">Unfinished</button>
+    </div>
+    <div class="savestate" id="savestate" aria-live="polite"></div>
+  </div>
+
+  <main id="route"></main>
+  <footer class="note">{{FOOTNOTE}}</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var DATA = /*{{MANIFEST}}*/{"groups":[]};
+  var GROUPS = DATA.groups || [];
+  var LS_KEY = "teach-index-" + (DATA.key || "default");
+
+  var state = {}, filter = "all";
+  var docRef = null, localOnly = false, ready = false;
+  var writeTimer = null, writing = false, dirty = false;
+
+  var elRoute = document.getElementById("route");
+  var elSave = document.getElementById("savestate");
+  var elBig = document.getElementById("bigcount");
+  var elBar = document.getElementById("overallbar");
+
+  var ALL = [];
+  GROUPS.forEach(function(g){ (g.items||[]).forEach(function(it){ ALL.push({item:it, group:g}); }); });
+
+  function st(slug){ return state[slug] || "todo"; }
+  function setSave(t){ elSave.textContent = t; }
+
+  function visible(rec){
+    if(filter === "core") return !!rec.group.core;
+    if(filter === "left") return st(rec.item.slug) !== "done";
+    return true;
+  }
+
+  function render(){
+    var frag = document.createDocumentFragment(), shown = 0, n = 0;
+
+    GROUPS.forEach(function(g){
+      var items = g.items || [];
+      var rows = items.filter(function(it){ return visible({item:it, group:g}); });
+      var doneN = items.filter(function(it){ return st(it.slug) === "done"; }).length;
+      var started = items.some(function(it){ return st(it.slug) !== "todo"; });
+      if(!rows.length){ n += items.length; return; }
+      shown += rows.length;
+
+      var sec = document.createElement("section");
+      sec.className = "group" + (items.length && doneN === items.length ? " complete"
+                                 : (started ? " started" : ""));
+      var dot = document.createElement("div"); dot.className = "station"; sec.appendChild(dot);
+
+      var head = document.createElement("div"); head.className = "ghead";
+      var h2 = document.createElement("h2"); h2.textContent = g.name || "";
+      var cnt = document.createElement("div"); cnt.className = "gcount";
+      cnt.textContent = doneN + " of " + items.length;
+      head.appendChild(h2); head.appendChild(cnt); sec.appendChild(head);
+
+      if(g.note){
+        var note = document.createElement("p");
+        note.className = "gnote"; note.textContent = g.note; sec.appendChild(note);
+      }
+
+      var ol = document.createElement("ol"); ol.className = "items";
+      items.forEach(function(it){
+        n += 1;
+        if(rows.indexOf(it) === -1) return;
+        var s = st(it.slug);
+
+        var li = document.createElement("li");
+        li.className = "item"; li.setAttribute("data-s", s);
+
+        var marks = document.createElement("div"); marks.className = "marks";
+        var box = document.createElement("input");
+        box.type = "checkbox"; box.className = "done-box";
+        box.id = "done-" + it.slug;
+        box.checked = (s === "done");
+        box.setAttribute("aria-label", "Mark " + it.title + " done");
+        box.addEventListener("change", function(){ setStatus(it.slug, box.checked ? "done" : "todo"); });
+        var part = document.createElement("button");
+        part.type = "button"; part.className = "part";
+        part.textContent = "Part";
+        part.setAttribute("aria-pressed", String(s === "partial"));
+        part.setAttribute("aria-label", "Mark " + it.title + " partly done");
+        part.addEventListener("click", function(){
+          setStatus(it.slug, st(it.slug) === "partial" ? "todo" : "partial");
+        });
+        marks.appendChild(box); marks.appendChild(part); li.appendChild(marks);
+
+        var meta = document.createElement("div"); meta.className = "meta";
+        var title = document.createElement("p"); title.className = "title";
+        var num = document.createElement("span"); num.className = "num";
+        num.textContent = ("0" + n).slice(-2);
+        var a = document.createElement("a");
+        a.href = it.url || "#"; a.target = "_blank"; a.rel = "noopener";
+        a.textContent = it.title || it.slug;
+        title.appendChild(num); title.appendChild(a); meta.appendChild(title);
+        if(it.desc){
+          var d = document.createElement("p"); d.className = "desc";
+          d.textContent = it.desc; meta.appendChild(d);
+        }
+        li.appendChild(meta);
+
+        if(it.tag){
+          var tg = document.createElement("span"); tg.className = "tag";
+          tg.textContent = it.tag; li.appendChild(tg);
+        }
+        ol.appendChild(li);
+      });
+      sec.appendChild(ol); frag.appendChild(sec);
+    });
+
+    elRoute.textContent = "";
+    if(!shown){
+      var e = document.createElement("div"); e.className = "empty";
+      e.textContent = filter === "left" ? "Nothing left. Every page is marked done."
+                                        : "No pages match this filter.";
+      elRoute.appendChild(e);
+    } else { elRoute.appendChild(frag); }
+
+    var total = ALL.length || 1;
+    var done = ALL.filter(function(r){ return st(r.item.slug) === "done"; }).length;
+    var part = ALL.filter(function(r){ return st(r.item.slug) === "partial"; }).length;
+    elBig.textContent = "";
+    elBig.appendChild(document.createTextNode(done + " "));
+    var sp = document.createElement("span"); sp.textContent = "/ " + ALL.length;
+    elBig.appendChild(sp);
+    elBar.children[0].style.width = (done / total * 100) + "%";
+    elBar.children[1].style.width = (part / total * 100) + "%";
+  }
+
+  function setStatus(slug, next){
+    if(next === "todo") delete state[slug]; else state[slug] = next;
+    render(); persist();
+  }
+
+  function persist(){
+    if(localOnly){
+      try { localStorage.setItem(LS_KEY, JSON.stringify(state)); setSave("Saved on this device"); }
+      catch(e){ setSave("Not saved"); }
+      return;
+    }
+    if(!docRef) return;
+    dirty = true; setSave("Saving…");
+    clearTimeout(writeTimer); writeTimer = setTimeout(flush, 400);
+  }
+
+  function flush(){
+    if(writing || !docRef) return;
+    writing = true; dirty = false;
+    docRef.set({ status: state, updated: new Date().toISOString() }).then(function(){
+      writing = false;
+      if(dirty) flush(); else setSave("Saved");
+    }).catch(function(err){
+      writing = false;
+      var code = (err && err.code) || "unavailable";
+      if(code === "invalid_argument" || code === "revoked" || code === "not_granted"){
+        goLocal();
+      } else {
+        setSave("Save failed, retrying");
+        setTimeout(flush, 1500 + Math.random() * 1000);
+      }
+    });
+  }
+
+  function goLocal(){
+    localOnly = true; docRef = null;
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      if(raw && !Object.keys(state).length) state = JSON.parse(raw) || {};
+    } catch(e){}
+    setSave("Saved on this device");
+    render();
+  }
+
+  function start(){
+    render(); setSave("");
+    if(!window.claude || typeof window.claude.use !== "function"){ goLocal(); return; }
+    Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function(r){
+      var db = r[0], user = r[1];
+      if(!db || !user){ goLocal(); return; }
+      return user.id().then(function(uid){
+        if(!uid){ goLocal(); return; }
+        docRef = db.doc("data/users/" + uid + "/progress");
+        docRef.onSnapshot(function(snap){
+          var d = snap.exists ? (snap.data() || {}) : {};
+          var incoming = (d.status && typeof d.status === "object") ? d.status : null;
+          if(!ready){
+            ready = true;
+            if(incoming){ state = incoming; render(); }
+            setSave("Saved");
+          } else if(incoming && !snap.metadata.hasPendingWrites){
+            state = incoming; render();
+          }
+        }, function(){ goLocal(); });
+      });
+    }).catch(function(){ goLocal(); });
+  }
+
+  ["all","core","left"].forEach(function(f){
+    document.getElementById("f-" + f).addEventListener("click", function(){
+      filter = f;
+      ["all","core","left"].forEach(function(o){
+        document.getElementById("f-" + o).setAttribute("aria-pressed", String(o === f));
+      });
+      render();
+    });
+  });
+
+  start();
+})();
+</script>
