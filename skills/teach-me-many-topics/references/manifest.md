@@ -44,13 +44,13 @@ Keep the manifest beside the index output. Edit it and rebuild when the set chan
 | `items[].slug` | yes | Lowercase slug, unique across the whole manifest. |
 | `items[].title` | yes | The page title, as published. |
 | `items[].desc` | no | One line under the title. |
-| `items[].url` | yes | The published artifact URL. Must start with `https://`. |
+| `items[].url` | yes | An `https://` URL for a published page, or a relative `.html` path beside the index for a local set. |
 | `items[].tag` | no | Short label on the right, such as `earlier`. |
 
 ## Rules the script enforces
 
 - Every slug matches `[a-z0-9][a-z0-9-]*` and appears once.
-- Every item carries an `https://` URL, so publish each page before you build.
+- Every item carries an `https://` URL or a relative `.html` path, so build or publish each page first.
 - Every group holds at least one item.
 
 A slug keys one item's saved status. Renaming a slug resets that item's progress.

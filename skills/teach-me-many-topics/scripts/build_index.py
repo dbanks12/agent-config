@@ -15,6 +15,9 @@ from pathlib import Path
 
 TEMPLATE = Path(__file__).resolve().parents[1] / "assets" / "index-template.html"
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+# A published page carries an https URL. A local set carries a relative path
+# beside the index, such as "btree.html" or "pages/btree.html".
+LOCAL = re.compile(r"^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*\.html$")
 
 
 def fail(msg):
@@ -47,8 +50,9 @@ def validate(m):
             if not it.get("title"):
                 fail("item %r needs a title" % slug)
             url = it.get("url", "")
-            if not url.startswith("https://"):
-                fail("item %r needs an https url; publish the page first" % slug)
+            if not (url.startswith("https://") or LOCAL.match(url)):
+                fail("item %r needs an https url or a relative .html path beside "
+                     "the index; build or publish the page first" % slug)
     return sum(len(g["items"]) for g in m["groups"])
 
 

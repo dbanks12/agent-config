@@ -1,11 +1,25 @@
 ---
 name: teach-me
-description: Teach the user one technical subject (a tool, system, protocol, or concept) as a published HTML artifact with clickable glossary terms, simple system diagrams, and a fixed section order. Use when the user asks to be taught something, wants an explainer or primer page, says "explain X to me" for a page-sized answer, or invokes /teach-me <subject>. A word count in the request, such as "/teach-me 1500 words Redis", overrides the default prose budget. Not for short chat answers.
+description: Teach the user one technical subject (a tool, system, protocol, or concept) as an HTML page with clickable glossary terms, simple system diagrams, and a fixed section order. Use when the user asks to be taught something, wants an explainer or primer page, says "explain X to me" for a page-sized answer, or invokes /teach-me <subject>. A word count in the request, such as "/teach-me 1500 words Redis", overrides the default prose budget. Not for short chat answers.
 ---
 
 # Teach me
 
-Build one HTML artifact that teaches a subject to a smart engineer who has never used it. Publish it with the Artifact tool. The Artifact tool requires the `artifact-design` and `artifact-diagramming` skills. Load them, then follow this skill for structure, length, and mechanics. This skill wins where they differ.
+Build one HTML page that teaches a subject to a smart engineer who has never used it.
+Follow this skill for structure, length, and mechanics.
+
+## Where the page goes
+
+The page is the same either way. Only the last step changes.
+
+**Publish it** when the session offers the Artifact tool. Report the URL.
+
+**Write a file** when the session offers no Artifact tool, or when the user asks for a file, an HTML
+file, a local page, or a page they can open in a browser. Report the absolute path.
+
+Load `artifact-design` and `artifact-diagramming` when the session offers them. They set design and
+diagram quality, and this skill wins where they differ. Without them, follow `assets/template.html`,
+which already carries the palette, both themes, and the diagram classes.
 
 ## Audience
 
@@ -23,11 +37,11 @@ The page is short. Cut, do not pad.
 - Quiz: 6 to 8 questions.
 - Every sentence 25 words or fewer. Every paragraph one topic.
 
-`scripts/check_page.py` measures every number above. Run it before you publish. See [Check the draft](#check-the-draft).
+`scripts/check_page.py` measures every number above. Run it before you deliver. See [Check the draft](#check-the-draft).
 
 ## Say each thing once
 
-This is the main failure mode. A concept gets its full explanation in exactly one section. Every later mention is one clause plus the clickable term. Before publishing, read the page once looking only for repeats. Merge or delete them.
+This is the main failure mode. A concept gets its full explanation in exactly one section. Every later mention is one clause plus the clickable term. Before you deliver, read the page once looking only for repeats. Merge or delete them.
 
 Common repeats to watch for: the core guarantee restated in Summary, Foundation, and Guarantees. The "why it exists" argument restated in Summary and Plugging it in. A definition restated in prose that the glossary already carries.
 
@@ -92,7 +106,7 @@ The quiz mechanics are already in the template: per-question Check buttons, a ru
 
 ## Check the draft
 
-Run the checker on the written file before you publish.
+Run the checker on the written file before you publish or hand it over.
 
 ```sh
 python3 /absolute/skill/scripts/check_page.py /absolute/page.html --words 900
@@ -104,15 +118,15 @@ The checker reports the prose count, and it fails on an over-budget page, a wron
 quiz count, a `data-t` slug with no glossary entry, a dangling `also` slug, a missing section id, a
 leftover `{{MARKER}}`, a sentence over 25 words, a duplicate arrow marker, and unbalanced tags.
 
-Fix what it names and run it again. Publish once it passes.
+Fix what it names and run it again. Deliver once it passes.
 
 It counts prose only: no script, style, SVG, table, navigation, panel, or footer text. A line it
 prints as `note` is information, not a failure. Glossary entries never linked in prose are a note,
 because the glossary index links them.
 
-## After publishing
+## After delivering
 
 - Answer follow-up questions in chat, briefly. Do not edit the page for a question.
 - Edit the page only when the user asks for a change or an added topic.
-- Republish to the same path so the URL is stable.
-- The page is done at publish. Do not offer more sections.
+- Republish or rewrite to the same path, so the URL or the file location stays stable.
+- The page is done once delivered. Do not offer more sections.

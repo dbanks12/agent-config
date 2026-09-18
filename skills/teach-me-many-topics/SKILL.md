@@ -1,6 +1,6 @@
 ---
 name: teach-me-many-topics
-description: Teach several subjects as a set of published HTML pages plus an index that tracks which ones you have read. Use when the user names several topics to learn, asks to break one large subject into a course or curriculum, or invokes /teach-me-many-topics. For one subject alone, use teach-me.
+description: Teach several subjects as a set of HTML pages plus an index that tracks which ones you have read. Use when the user names several topics to learn, asks to break one large subject into a course or curriculum, or invokes /teach-me-many-topics. For one subject alone, use teach-me.
 ---
 
 # Teach me many topics
@@ -9,6 +9,21 @@ Build one page per topic with [teach-me](../teach-me/SKILL.md), then one index p
 
 Each page carries about 900 words, 4 to 6 diagrams, and one foundation idea.
 That budget decides everything below. A topic too broad for one page teaches nothing.
+
+## Where the set goes
+
+Decide this first, because it sets every link in the index.
+
+**Published set.** The session offers the Artifact tool. Each page gets a claude.ai URL, and the
+manifest carries those URLs.
+
+**Local set.** The session offers no Artifact tool, or the user asks for files, HTML files, or pages
+they can open in a browser. Write every page into one directory, name each file `<slug>.html` after
+its manifest slug, and set each manifest URL to that same `<slug>.html`. The index then links its
+neighbours by relative path.
+
+A local index saves progress in browser storage, on one device, and no agent can read it back.
+A published index saves progress per viewer and survives across devices.
 
 ## Settle the topic list
 
@@ -48,10 +63,11 @@ Give each subagent:
 - The instruction to call the Skill tool with `skill="teach-me"` and follow it exactly.
 - The topic's foundation idea, in one sentence.
 - What to cover, and what to exclude because a sibling page owns it.
-- A distinct output path.
-- The instruction to publish with the Artifact tool and report the URL.
+- Its output path. In a local set, that path is `<directory>/<slug>.html`.
+- For a published set, the instruction to publish with the Artifact tool and report the URL.
+  For a local set, the instruction to write the file and report the path.
 
-Collect the URL each subagent reports.
+Collect what each subagent reports, and put it in the manifest as that item's URL.
 
 ## Build the index
 
@@ -64,21 +80,26 @@ python3 /absolute/skill/scripts/build_index.py /absolute/manifest.json --out /ab
 The script rejects a duplicate slug, a missing URL, and an unreplaced marker.
 Fix the manifest and run it again until it writes the file.
 
-Publish the index with the Artifact tool. Declare the capabilities that save progress:
+For a published set, publish the index with the Artifact tool and declare the capabilities that save
+progress:
 
 ```
 capabilities: {"db": {}, "user": {}}
 ```
 
-The index writes each viewer's progress to `data/users/<id>/progress`, private to that viewer.
-Without those capabilities the page falls back to browser storage, which one device holds alone.
+The index then writes each viewer's progress to `data/users/<id>/progress`, private to that viewer.
 
-Report the index URL and the page count.
+For a local set, write the index as `index.html` in the same directory as the pages. It falls back
+to browser storage on its own.
+
+Report the index location and the page count.
 
 ## Change a set later
 
-Keep the manifest. Add the new items, run the script again, and republish with `url` set to the
-index's own URL. Stable slugs keep the saved progress.
+Keep the manifest. Add the new items and run the script again. For a published set, republish with
+`url` set to the index's own URL. For a local set, overwrite the same file. Stable slugs keep the
+saved progress either way.
 
 To read a user's progress in a later session, call the Artifact tool with `action: "read_db"`,
-`db_op: "get"`, collection `data/users/me`, and doc id `progress`.
+`db_op: "get"`, collection `data/users/me`, and doc id `progress`. A local set keeps progress in the
+browser, where no agent reaches it, so ask the user instead.
