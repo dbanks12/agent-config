@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grill me · Decision studio</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#202c35;background:#f5f4ef;font-size:16px;--accent:#246b57;--muted:#62716f;--line:#dce2da}
+*{box-sizing:border-box}body{margin:0}main{max-width:920px;margin:auto;padding:48px 24px 100px}header{margin-bottom:30px}.eyebrow{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:750}h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(2rem,5vw,3rem);margin:12px 0}h2{font-size:1.5rem;line-height:1.3;margin:16px 0}p{line-height:1.65}.muted{color:var(--muted)}.topline,.row{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.badge{background:#e4eee6;border-radius:20px;padding:8px 13px;font-size:.82rem;color:#245642}.estimate{font-size:.88rem;color:var(--muted);margin-top:18px}progress{width:100%;height:6px;accent-color:var(--accent);margin-top:10px}#connection{font-size:.85rem;color:#984620;min-height:1.2em}#history{max-height:280px;overflow:auto;margin:24px 0;scrollbar-width:thin}details{border:1px solid var(--line);border-radius:12px;background:#fcfcf8;margin:8px 0;padding:12px 16px}summary{cursor:pointer;font-size:.9rem;line-height:1.5}summary span{color:var(--muted)}.past-answer{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.prose{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65}nav{display:flex;gap:8px;overflow:auto;padding:4px 0 18px}button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid var(--line);background:white;padding:11px 17px;color:inherit}button:hover{border-color:var(--accent)}button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #71aa97;outline-offset:3px}button:disabled{opacity:.45;cursor:default}nav button{padding:8px 12px;white-space:nowrap}nav button[aria-current="step"]{background:var(--accent);color:white;border-color:var(--accent)}nav button.answered:not([aria-current="step"]){background:#e4eee6}.card{border:1px solid var(--line);border-radius:20px;padding:32px;background:#fffefa;box-shadow:0 14px 45px #243b2c08}.recommendation{border-left:3px solid var(--accent);background:#eef3ec;border-radius:0 10px 10px 0;padding:18px 20px;margin:24px 0}.recommendation p{margin:8px 0 16px}.label{font-weight:650;font-size:.85rem}textarea{display:block;resize:vertical;width:100%;min-height:145px;border:1px solid #bccac1;border-radius:10px;padding:14px;margin-top:10px;font:inherit;line-height:1.6;background:white}footer{border-top:1px solid var(--line);padding-top:22px;margin-top:25px}.primary{background:var(--accent);color:white;border-color:var(--accent)}#answer-status{font-size:.85rem;color:var(--accent);min-height:1.4em;margin-top:10px}#error{color:#a42a24;white-space:pre-wrap}#waiting{text-align:center;padding:45px 20px}.pulse{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--accent);margin-right:7px}#completion{border-left:3px solid var(--accent);padding:8px 24px;margin:25px 0}[hidden]{display:none!important}@media(max-width:600px){main{padding:25px 16px 60px}.card{padding:22px 18px}.row button{flex:1}#history{max-height:220px}}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.8rem;line-height:1.6;background:#eef1eb;padding:14px;border-radius:8px}#recovery{margin-top:28px}#recovery p{font-size:.9rem}#recovery code{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="topline"><div class="eyebrow">Grill me / Decision studio</div><span class="badge" id="phase">Connecting</span></div>
+<h1 id="title">Make the next decision.</h1>
+<p class="muted">Consider the recommendation. Make it yours. Work through one section at a time.</p>
+<div class="estimate" id="estimate"></div><progress id="progress" value="0" max="1" aria-label="Answered questions in this section"></progress>
+</header>
+<div id="connection" role="status" aria-live="polite"></div>
+<div id="history" aria-label="Completed sections"></div>
+<section id="active" hidden>
+<div class="topline"><div class="eyebrow" id="section-title"></div><span class="muted" id="count"></span></div>
+<nav id="nav" aria-label="Questions"></nav>
+<div class="card">
+<div class="eyebrow" id="question-number"></div>
+<h2 id="question-title" tabindex="-1"></h2>
+<div class="prose" id="question-body"></div>
+<div class="recommendation"><div class="label">Agent’s recommendation</div><p class="prose" id="recommendation"></p><button id="accept" type="button">Accept recommendation</button></div>
+<label class="label" for="response">Or write your own response</label>
+<textarea id="response" placeholder="Your decision, changes, or uncertainty…"></textarea>
+<div id="answer-status" role="status" aria-live="polite"></div>
+<footer><div class="row"><button id="previous" type="button">← Previous</button><button id="next" type="button">Next question →</button><button id="submit" class="primary" type="button" hidden>Send section to agent →</button></div></footer>
+</div>
+</section>
+<section id="waiting" hidden><p><span class="pulse"></span><strong id="waiting-title">Answers saved. Waiting for your agent.</strong></p><p class="muted" id="waiting-copy">The next section appears automatically. If your agent stops, use the resume command below.</p></section>
+<section id="completion" hidden><h2>Shared understanding</h2><div class="prose" id="summary"></div></section>
+<details id="recovery" hidden>
+<summary><strong>Agent paused? Resume your session</strong></summary>
+<p>Submitted answers stay on disk. Run this command in a terminal on the same machine.</p>
+<pre id="resume-command" tabindex="0" aria-label="Resume command"></pre>
+<button type="button" id="copy-resume">Copy resume command</button>
+<p id="resume-note" class="muted"></p>
+<div id="picker-prompt" hidden><p>After you select the original session, paste this message:</p><pre id="resume-prompt"></pre></div>
+<p>Readable answers: <code id="transcript-path"></code><br>Stored interview: <code id="answers-path"></code></p>
+<details><summary>Restart the page server</summary><pre id="restart-command"></pre></details>
+</details>
+<p id="error" role="alert"></p>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+// Run with NODE_PATH pointing to an installed Playwright package.
+const {chromium} = require('playwright');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
+const {execFileSync, execFile} = require('node:child_process');
+const {promisify} = require('node:util');
+const assert = require('node:assert/strict');
+const helper = path.resolve(__dirname, '../scripts/interview.py');
+const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'grill-browser-'));
+const cliArgs = (command, args = []) => [helper, command, '--dir', directory, ...args];
+const cli = (command, args) => JSON.parse(execFileSync('python3', cliArgs(command, args), {encoding: 'utf8'}));
+const question = (id, title) => ({id, title, body: 'Choose the boundary for this decision.', recommendation: 'Start with one local process.'});
+function publish(section) {
+  const file = path.join(directory, 'section.json');
+  fs.writeFileSync(file, JSON.stringify(section));
+  cli('publish', ['--file', file]);
+}
+(async () => {
+  let browser;
+  try {
+    const session = '00000000-0000-4000-8000-000000000001';
+    let connection = cli('start', ['--title', 'Shape the browser interview', '--agent', 'codex', '--session-id', session]);
+    publish({id: 'scope', title: 'Scope and workflow', questions: [question('q1', 'Where should the interview run?'), question('q2', 'How should answers return?')], remaining: {min: 3, max: 6}});
+    browser = await chromium.launch({headless: true, executablePath: process.env.CHROMIUM_PATH});
+    const page = await browser.newPage({viewport: {width: 1100, height: 1000}});
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(connection.url);
+    await page.getByRole('button', {name: 'Accept recommendation', exact: true}).click();
+    await page.getByRole('button', {name: 'Next question'}).click();
+    assert.equal(await page.locator('#submit').isDisabled(), true);
+    await page.locator('#response').fill('Return answers to the original session. <script>alert(1)</script>');
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector('#response').value.startsWith('Return answers'));
+    await page.getByRole('button', {name: 'Previous'}).click();
+    assert.equal(await page.locator('#accept').getAttribute('aria-pressed'), 'true');
+    await page.getByRole('button', {name: 'Next question'}).click();
+    const waiter = promisify(execFile)('python3', cliArgs('wait', ['--section', 'scope', '--timeout', '10']));
+    await page.locator('#submit').click();
+    await page.locator('#waiting').waitFor({state: 'visible'});
+    const returned = JSON.parse((await waiter).stdout);
+    assert.equal(returned.status, 'answered');
+    assert.equal(returned.section.answers.q1.mode, 'accepted');
+    assert.match(returned.section.answers.q2.text, /<script>/);
+    assert.equal(await page.locator('#history details').getAttribute('open'), null);
+    await page.locator('#history summary').click();
+    assert.match(await page.locator('#history').innerText(), /<script>alert\(1\)<\/script>/);
+    publish({id: 'recovery', title: 'Recovery', questions: [question('q3', 'What should happen after a reload?')], remaining: {min: 0, max: 2}});
+    await page.getByRole('heading', {name: 'What should happen after a reload?'}).waitFor();
+    assert.match(await page.locator('#estimate').innerText(), /0–2/);
+    await page.locator('#history summary').click();
+    if (process.env.GRILL_SCREENSHOT) await page.screenshot({path: process.env.GRILL_SCREENSHOT, fullPage: true});
+    await page.setViewportSize({width: 390, height: 844});
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    // No agent wait process exists now. The independent server must retain this submission.
+    await page.locator('#accept').click();
+    await page.locator('#submit').click();
+    await page.locator('#waiting').waitFor({state: 'visible'});
+    await page.locator('#recovery > summary').click();
+    assert.match(await page.locator('#resume-command').innerText(), new RegExp(session));
+    assert.match(await page.locator('#resume-command').innerText(), /workspace-write -a on-request/);
+    assert.match(await page.locator('#resume-command').innerText(), /read.*--dir/);
+    assert.match(fs.readFileSync(path.join(directory, 'answers.md'), 'utf8'), /Return answers to the original session/);
+    assert.match(fs.readFileSync(path.join(directory, 'resume.txt'), 'utf8'), new RegExp(session));
+    cli('stop');
+    // Wait for HTTP shutdown without leaving a second server in the same directory.
+    await page.waitForFunction(() => document.querySelector('#connection').textContent.startsWith('Connection lost'));
+    connection = cli('start');
+    await page.goto(connection.url);
+    await page.locator('#waiting').waitFor({state: 'visible'});
+    assert.equal(cli('wait', ['--section', 'recovery', '--timeout', '1']).status, 'answered');
+    const summary = path.join(directory, 'summary.txt');
+    fs.writeFileSync(summary, 'Use a local page. Keep the launching session active.');
+    cli('finish', ['--file', summary]);
+    await page.locator('#completion').waitFor({state: 'visible'});
+    assert.equal(await page.locator('#history details').count(), 2);
+    assert.deepEqual(errors, []);
+    console.log('Browser checks passed: real tool return, custom input, reload, navigation, history, follow-up, mobile, stored offline answers, resume command, server restart, completion.');
+  } finally {
+    if (browser) await browser.close();
+    try { cli('stop'); } finally { fs.rmSync(directory, {recursive: true, force: true}); }
+  }
+})().catch(error => { console.error(error); process.exit(1); });

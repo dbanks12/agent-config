@@ -50,6 +50,12 @@ Three layers. Each layer calls the one below it.
 
 `cross-review/update-models.sh add <family> <name> [<cli-model>]` adds a trigger name and re-renders the skill descriptions.
 
+## Browser interviews
+
+Use `$grill-me-html` in Codex or `/grill-me-html` in Claude Code for a browser interview.
+[The skill](skills/grill-me-html/SKILL.md) provides recommendation buttons, custom answers, question navigation, changing estimates, and collapsed section history.
+Submitted answers return to the launching session and remain on disk with a readable transcript and resume commands.
+
 ## Imported Pocock skills
 
 Eight skills come from [mattpocock/skills](https://github.com/mattpocock/skills) at commit `74ca5fe077456a0b3b2f5310cf9430999fd0b5fd`.
