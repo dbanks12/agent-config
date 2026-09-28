@@ -69,3 +69,9 @@ Use `$skill-name` in Codex or `/skill-name` in Claude Code.
 The `grill-me` and `handoff` instructions support agents without a Skill tool.
 TDD includes the upstream codebase-design documents as local references.
 Code review uses existing tracker guidance or a supplied spec without requiring the upstream setup skill.
+
+## Imported Hunk skills
+
+`hunk-review` and `hunk-extensions` come from the [hunkdiff](https://github.com/modem-dev/hunk) npm package at version `0.22.0`.
+Each copied skill includes the upstream MIT license.
+`hunk skill path` prints the bundled source. Copy it again after a Hunk upgrade.

@@ -44,3 +44,7 @@ skills/grill-me-html ~/.claude/skills/grill-me-html
 skills/grill-me-html ~/.codex/skills/grill-me-html
 skills/teach-me-many-topics ~/.claude/skills/teach-me-many-topics
 skills/teach-me-many-topics ~/.codex/skills/teach-me-many-topics
+skills/hunk-review ~/.claude/skills/hunk-review
+skills/hunk-review ~/.codex/skills/hunk-review
+skills/hunk-extensions ~/.claude/skills/hunk-extensions
+skills/hunk-extensions ~/.codex/skills/hunk-extensions
