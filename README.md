@@ -75,3 +75,21 @@ Code review uses existing tracker guidance or a supplied spec without requiring 
 `hunk-review` and `hunk-extensions` come from the [hunkdiff](https://github.com/modem-dev/hunk) npm package at version `0.22.0`.
 Each copied skill includes the upstream MIT license.
 `hunk skill path` prints the bundled source. Copy it again after a Hunk upgrade.
+
+## Slide decks and diagrams
+
+`slide-deck` builds an HTML deck and a PDF from a Markdown `slides.md` file. `excalidraw-skill` drives a live Excalidraw canvas. The deck skill draws its figures on that canvas, crops them, and inlines them into the slides.
+
+Both skills live in [dbanks12/claude-authoring-tools](https://github.com/dbanks12/claude-authoring-tools), a private repo. This repo pins it as the submodule `vendor/claude-authoring-tools`, and `links` points at the skills inside it. `./install.sh` initializes the submodule. To update it, run `git -C vendor/claude-authoring-tools pull origin master` and commit the new pointer.
+
+Deck repos pin the same tool repo as their own `slidegen/` submodule and build in CI. See `vendor/claude-authoring-tools/skills/slide-deck/README-ci.md`. `examples/demo-deck` in that repo shows every feature.
+
+Prerequisites:
+
+- Node.js with `npx`. The canvas CLI runs as `npx -y mcp-excalidraw-server <command>` and starts the canvas server at `http://127.0.0.1:3000`.
+- A browser tab open at `http://127.0.0.1:3000`. Screenshots, image exports, and Mermaid conversion need it.
+- Python 3 with Pillow: `pip install --user --break-system-packages pillow`.
+- Chromium or Google Chrome for PDF output.
+- Optional: register the canvas as an MCP server. For Codex, run `codex mcp add excalidraw -- npx -y mcp-excalidraw-server`. The CLI works without it.
+
+To disable the two skills, comment out their four lines in `links` and delete the four symlinks in `~/.claude/skills` and `~/.codex/skills`.

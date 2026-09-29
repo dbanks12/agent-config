@@ -1,0 +1,3 @@
+[submodule "vendor/claude-authoring-tools"]
+	path = vendor/claude-authoring-tools
+	url = git@github.com:dbanks12/claude-authoring-tools.git

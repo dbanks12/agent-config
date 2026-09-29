@@ -24,6 +24,9 @@ link() {
   echo "linked: $dst -> $src"
 }
 
+# skills from other repos (for example vendor/claude-authoring-tools) are submodules
+[[ $check -eq 1 ]] || git -C "$root" submodule update --init --quiet
+
 while read -r src dst; do
   [[ -z "$src" || "$src" == \#* ]] && continue
   link "$src" "$dst"

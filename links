@@ -48,3 +48,7 @@ skills/hunk-review ~/.claude/skills/hunk-review
 skills/hunk-review ~/.codex/skills/hunk-review
 skills/hunk-extensions ~/.claude/skills/hunk-extensions
 skills/hunk-extensions ~/.codex/skills/hunk-extensions
+vendor/claude-authoring-tools/skills/slide-deck ~/.claude/skills/slide-deck
+vendor/claude-authoring-tools/skills/slide-deck ~/.codex/skills/slide-deck
+vendor/claude-authoring-tools/skills/excalidraw-skill ~/.claude/skills/excalidraw-skill
+vendor/claude-authoring-tools/skills/excalidraw-skill ~/.codex/skills/excalidraw-skill
