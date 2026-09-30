@@ -111,6 +111,12 @@
   .title a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);}
   .title a:hover,.title a:focus-visible{color:var(--accent);border-bottom-color:var(--accent);outline:none;}
   .desc{margin:1px 0 0;font-size:13px;color:var(--muted);max-width:60ch;}
+  .summary{margin:6px 0 0;font-size:13.5px;color:var(--ink);max-width:66ch;}
+  .res{margin:6px 0 0;padding:0;list-style:none;font-size:12.5px;color:var(--muted);}
+  .res li{margin:2px 0;}
+  .res a{color:var(--muted);}
+  .quiz{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:11.5px;color:var(--faint);}
+  .quiz.fin{color:var(--accent);}
   .num{font-family:var(--mono);font-size:11px;color:var(--faint);
     font-variant-numeric:tabular-nums;margin-right:7px;}
   .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
@@ -173,8 +179,6 @@
   var LS_KEY = "teach-index-" + (DATA.key || "default");
 
   var state = {}, filter = "all";
-  var docRef = null, localOnly = false, ready = false;
-  var writeTimer = null, writing = false, dirty = false;
 
   var elRoute = document.getElementById("route");
   var elSave = document.getElementById("savestate");
@@ -184,7 +188,8 @@
   var ALL = [];
   GROUPS.forEach(function(g){ (g.items||[]).forEach(function(it){ ALL.push({item:it, group:g}); }); });
 
-  function st(slug){ return state[slug] || "todo"; }
+  // A finished quiz marks the page done unless the reader unmarked it by hand.
+  function st(slug){ return state[slug] || (quizOf(slug) ? "done" : "todo"); }
   function setSave(t){ elSave.textContent = t; }
 
   function visible(rec){
@@ -251,13 +256,35 @@
         var num = document.createElement("span"); num.className = "num";
         num.textContent = ("0" + n).slice(-2);
         var a = document.createElement("a");
-        a.href = it.url || "#"; a.target = "_blank"; a.rel = "noopener";
+        a.href = it.url || "#";
+        // A set page opens in this frame: a new tab gets separate browser storage.
+        if(/^https:/.test(it.url || "")){ a.target = "_blank"; a.rel = "noopener"; }
         a.textContent = it.title || it.slug;
         title.appendChild(num); title.appendChild(a); meta.appendChild(title);
         if(it.desc){
           var d = document.createElement("p"); d.className = "desc";
           d.textContent = it.desc; meta.appendChild(d);
         }
+        if(it.summary){
+          var su = document.createElement("p"); su.className = "summary";
+          su.textContent = it.summary; meta.appendChild(su);
+        }
+        if(it.resources && it.resources.length){
+          var ul = document.createElement("ul"); ul.className = "res";
+          it.resources.forEach(function(r){
+            var rl = document.createElement("li"), ra = document.createElement("a");
+            ra.href = r.url; ra.target = "_blank"; ra.rel = "noopener";
+            ra.textContent = r.title; rl.appendChild(document.createTextNode("Read: "));
+            rl.appendChild(ra); ul.appendChild(rl);
+          });
+          meta.appendChild(ul);
+        }
+        var q = quizOf(it.slug), qs = document.createElement("span");
+        qs.className = "quiz" + (q ? " fin" : "");
+        qs.textContent = q ? "Quiz " + q.score + " / " + q.total + ", finished "
+                             + new Date(q.finishedAt).toLocaleDateString()
+                           : "Quiz not finished";
+        meta.appendChild(qs);
         li.appendChild(meta);
 
         if(it.tag){
@@ -289,73 +316,34 @@
   }
 
   function setStatus(slug, next){
-    if(next === "todo") delete state[slug]; else state[slug] = next;
+    if(next === "todo" && !quizOf(slug)) delete state[slug]; else state[slug] = next;
     render(); persist();
   }
 
+  // Progress lives in this browser only: marks under LS_KEY, and each page's
+  // quiz result under teach-quiz:<key>/<slug>, written by the page's Finish button.
+  // Pages must share this index's origin, so publish the set as one artifact.
+  function quizOf(slug){
+    try { return JSON.parse(localStorage.getItem("teach-quiz:" + DATA.key + "/" + slug) || "null"); }
+    catch(e){ return null; }
+  }
   function persist(){
-    if(localOnly){
-      try { localStorage.setItem(LS_KEY, JSON.stringify(state)); setSave("Saved on this device"); }
-      catch(e){ setSave("Not saved"); }
-      return;
-    }
-    if(!docRef) return;
-    dirty = true; setSave("Saving…");
-    clearTimeout(writeTimer); writeTimer = setTimeout(flush, 400);
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); setSave("Saved in this browser"); }
+    catch(e){ setSave("This browser blocks storage. Progress is not saved."); }
   }
-
-  function flush(){
-    if(writing || !docRef) return;
-    writing = true; dirty = false;
-    docRef.set({ status: state, updated: new Date().toISOString() }).then(function(){
-      writing = false;
-      if(dirty) flush(); else setSave("Saved");
-    }).catch(function(err){
-      writing = false;
-      var code = (err && err.code) || "unavailable";
-      if(code === "invalid_argument" || code === "revoked" || code === "not_granted"){
-        goLocal();
-      } else {
-        setSave("Save failed, retrying");
-        setTimeout(flush, 1500 + Math.random() * 1000);
-      }
-    });
-  }
-
-  function goLocal(){
-    localOnly = true; docRef = null;
-    try {
-      var raw = localStorage.getItem(LS_KEY);
-      if(raw && !Object.keys(state).length) state = JSON.parse(raw) || {};
-    } catch(e){}
-    setSave("Saved on this device");
+  function load(){
+    try { state = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; } catch(e){ state = {}; }
     render();
   }
-
   function start(){
-    render(); setSave("");
-    if(!window.claude || typeof window.claude.use !== "function"){ goLocal(); return; }
-    Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function(r){
-      var db = r[0], user = r[1];
-      if(!db || !user){ goLocal(); return; }
-      return user.id().then(function(uid){
-        if(!uid){ goLocal(); return; }
-        docRef = db.doc("data/users/" + uid + "/progress");
-        docRef.onSnapshot(function(snap){
-          var d = snap.exists ? (snap.data() || {}) : {};
-          var incoming = (d.status && typeof d.status === "object") ? d.status : null;
-          if(!ready){
-            ready = true;
-            if(incoming){ state = incoming; render(); }
-            setSave("Saved");
-          } else if(incoming && !snap.metadata.hasPendingWrites){
-            state = incoming; render();
-          }
-        }, function(){ goLocal(); });
-      });
-    }).catch(function(){ goLocal(); });
+    // Set pages read this to link back here.
+    try { localStorage.setItem("teach-index-url:" + DATA.key, location.href); } catch(e){}
+    load(); setSave("Saved in this browser");
+    // Refresh scores when a page in another tab finishes its quiz.
+    window.addEventListener("storage", load);
+    window.addEventListener("focus", load);
+    document.addEventListener("visibilitychange", function(){ if(!document.hidden) load(); });
   }
-
   ["all","core","left"].forEach(function(f){
     document.getElementById("f-" + f).addEventListener("click", function(){
       filter = f;

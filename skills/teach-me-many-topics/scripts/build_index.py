@@ -53,12 +53,51 @@ def validate(m):
             if not (url.startswith("https://") or LOCAL.match(url)):
                 fail("item %r needs an https url or a relative .html path beside "
                      "the index; build or publish the page first" % slug)
+            for r in it.get("resources", []):
+                if not r.get("title") or not str(r.get("url", "")).startswith("https://"):
+                    fail("item %r has a resource without a title and an https url" % slug)
     return sum(len(g["items"]) for g in m["groups"])
 
 
 def esc(s):
     return (str(s).replace("&", "&amp;").replace("<", "&lt;")
             .replace(">", "&gt;").replace('"', "&quot;"))
+
+
+# A published artifact serves files beside the page without the page's document
+# skeleton, so each local page gets its own head. Each also gets a link back to
+# the index, whose URL the index saves in browser storage when it loads.
+HEAD = ('<!doctype html>\n<meta charset="utf-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n')
+NAV_MARK = "<!-- teach-set-nav -->"
+NAV = NAV_MARK + """
+<nav id="setBack" hidden style="max-width:1100px;margin:0 auto;padding:12px 16px 0;font:13px/1.4 ui-monospace,monospace;">
+  <a href="#" style="color:var(--accent,inherit);">&larr; Course index</a>
+</nav>
+<script>(function(){try{var u=localStorage.getItem("teach-index-url:%s");
+if(u){var n=document.getElementById("setBack");n.querySelector("a").href=u;n.hidden=false;}}catch(e){}})();</script>
+"""
+
+
+def prepare_pages(m, directory):
+    n = 0
+    for g in m["groups"]:
+        for it in g["items"]:
+            if it["url"].startswith("https://"):
+                continue
+            page = directory / it["url"]
+            if not page.is_file():
+                fail("page %s for item %r is missing; build it first" % (page, it["slug"]))
+            html = page.read_text(encoding="utf-8")
+            if NAV_MARK not in html:
+                cut = html.find("</style>")
+                cut = cut + len("</style>") if cut != -1 else 0
+                html = html[:cut] + "\n" + NAV % m["key"] + html[cut:]
+            if not html.lstrip().lower().startswith("<!doctype"):
+                html = HEAD + html
+            page.write_text(html, encoding="utf-8")
+            n += 1
+    return n
 
 
 def build(manifest_path, out_path):
@@ -78,6 +117,9 @@ def build(manifest_path, out_path):
                 "desc": it.get("desc", ""),
                 "url": it["url"],
                 "tag": it.get("tag", ""),
+                "summary": it.get("summary", ""),
+                "resources": [{"title": r["title"], "url": r["url"]}
+                              for r in it.get("resources", [])],
             } for it in g["items"]],
         } for g in m["groups"]],
     }, ensure_ascii=False)
@@ -96,7 +138,9 @@ def build(manifest_path, out_path):
         fail("unreplaced markers: " + ", ".join(left))
 
     Path(out_path).write_text(html, encoding="utf-8")
-    print("wrote %s: %d items in %d groups" % (out_path, total, len(m["groups"])))
+    pages = prepare_pages(m, Path(out_path).parent)
+    print("wrote %s: %d items in %d groups; prepared %d local pages"
+          % (out_path, total, len(m["groups"]), pages))
 
 
 def main():

@@ -14,16 +14,22 @@ That budget decides everything below. A topic too broad for one page teaches not
 
 Decide this first, because it sets every link in the index.
 
-**Published set.** The session offers the Artifact tool. Each page gets a claude.ai URL, and the
-manifest carries those URLs.
+Either way, write every page into one directory, name each file `<slug>.html` after its manifest
+slug, and set each manifest URL to that same `<slug>.html`. The index links its neighbours by
+relative path.
+
+**Published set.** The session offers the Artifact tool. Publish the whole set as **one** artifact:
+the index is the page, and every `<slug>.html` goes in `files`. Each artifact has its own origin,
+so pages published as separate artifacts cannot share browser storage, and the index would never
+see their quiz scores.
 
 **Local set.** The session offers no Artifact tool, or the user asks for files, HTML files, or pages
-they can open in a browser. Write every page into one directory, name each file `<slug>.html` after
-its manifest slug, and set each manifest URL to that same `<slug>.html`. The index then links its
-neighbours by relative path.
+they can open in a browser. Tell the user to open the set through a local server, such as
+`python3 -m http.server` in that directory. Some browsers give each `file://` page its own storage.
 
-A local index saves progress in browser storage, on one device, and no agent can read it back.
-A published index saves progress per viewer and survives across devices.
+Progress lives in the reader's browser storage, one origin per set: the index's done marks, and each
+page's quiz score, written by the page's Finish button. It is private to that browser, and no agent
+can read it back.
 
 ## Settle the topic list
 
@@ -63,9 +69,13 @@ Give each subagent:
 - The instruction to call the Skill tool with `skill="teach-me"` and follow it exactly.
 - The topic's foundation idea, in one sentence.
 - What to cover, and what to exclude because a sibling page owns it.
-- Its output path. In a local set, that path is `<directory>/<slug>.html`.
-- For a published set, the instruction to publish with the Artifact tool and report the URL.
-  For a local set, the instruction to write the file and report the path.
+- Its output path, `<directory>/<slug>.html`, and the instruction to write the file there and report
+  the path. The subagent never publishes. The set publishes as one artifact.
+- Its quiz key, `<manifest key>/<slug>`, to replace `{{QUIZ_KEY}}`. The index reads the score
+  under that key.
+- Whether to write a quiz. Pass the user's request through.
+- A scratch directory of its own, such as `<scratchpad>/<slug>/`. Subagents that share one
+  scratchpad overwrite each other's drafts.
 
 Collect what each subagent reports, and put it in the manifest as that item's URL.
 
@@ -77,29 +87,24 @@ Write the manifest. The schema and its rules live in [references/manifest.md](re
 python3 /absolute/skill/scripts/build_index.py /absolute/manifest.json --out /absolute/index.html
 ```
 
-The script rejects a duplicate slug, a missing URL, and an unreplaced marker.
+The script rejects a duplicate slug, a missing URL, a missing page file, and an unreplaced marker.
 Fix the manifest and run it again until it writes the file.
 
-For a published set, publish the index with the Artifact tool and declare the capabilities that save
-progress:
+The script also prepares every local page in place. It adds the document head that files published
+beside a page lack, and a link back to the index. The index opens pages in its own frame, because a
+framed page and a new tab keep separate browser storage.
 
-```
-capabilities: {"db": {}, "user": {}}
-```
+Write the index as `index.html` in the same directory as the pages.
 
-The index then writes each viewer's progress to `data/users/<id>/progress`, private to that viewer.
-
-For a local set, write the index as `index.html` in the same directory as the pages. It falls back
-to browser storage on its own.
+For a published set, publish `index.html` with the Artifact tool and map every page into `files`,
+`{"<slug>.html": "<directory>/<slug>.html"}`. The set needs no capabilities.
 
 Report the index location and the page count.
 
 ## Change a set later
 
-Keep the manifest. Add the new items and run the script again. For a published set, republish with
-`url` set to the index's own URL. For a local set, overwrite the same file. Stable slugs keep the
-saved progress either way.
+Keep the manifest. Add the new items and run the script again. For a published set, republish the
+index to the same artifact, passing the new and changed pages in `files`. For a local set, overwrite
+the same files. Stable slugs and a stable manifest key keep the saved progress.
 
-To read a user's progress in a later session, call the Artifact tool with `action: "read_db"`,
-`db_op: "get"`, collection `data/users/me`, and doc id `progress`. A local set keeps progress in the
-browser, where no agent reaches it, so ask the user instead.
+Progress stays in the reader's browser, where no agent reaches it. To learn a user's scores, ask them.

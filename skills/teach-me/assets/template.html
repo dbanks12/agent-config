@@ -285,6 +285,7 @@
     letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
     border-bottom: 2px solid transparent; margin-bottom: -1px;
   }
+  .tabs[hidden] { display: none; }
   .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
   .tabs button:hover, .tabs button:focus-visible { color: var(--accent); outline: none; }
   .score { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-bottom: 20px; }
@@ -310,6 +311,7 @@
   }
   button.check:hover, button.check:focus-visible, .quiz-actions button:focus-visible { filter: brightness(1.08); outline: none; }
   .quiz-actions button { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .quiz-actions button.finish { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
   .verdict { font-size: 15px; flex: 1 1 260px; line-height: 1.5; }
   .verdict.ok strong { color: var(--accent); }
   .verdict.bad strong { color: #B5521A; }
@@ -327,7 +329,7 @@
     </div>
   </header>
 
-  <div class="tabs" role="tablist">
+  <div class="tabs" role="tablist" hidden>
     <button type="button" role="tab" data-tab="learn" aria-selected="true">Learn</button>
     <button type="button" role="tab" data-tab="quiz" aria-selected="false">Quiz</button>
   </div>
@@ -364,11 +366,12 @@
 
   <section id="quizpage" hidden>
     <div class="kicker">Check yourself</div>
-    <h2>{{QUIZ_HEADING}}</h2>
-    <p>Answer each one, then check it. Nothing is recorded. Typed answers accept close spellings.</p>
+    <h2>Questions on the core ideas</h2>
+    <p>Answer each one, then check it. Typed answers accept close spellings. Finish saves your score in this browser only.</p>
     <div class="score" id="score">0 checked</div>
+    <div class="score" id="saved"></div>
     <div id="quiz"></div>
-    <div class="quiz-actions"><button type="button" id="quizReset">Reset quiz</button></div>
+    <div class="quiz-actions"><button type="button" id="quizFinish" class="finish">Finish quiz</button> <button type="button" id="quizReset">Reset quiz</button></div>
   </section>
 
   <footer>{{FOOTER}}</footer>
@@ -457,7 +460,7 @@
   document.querySelectorAll('button.t').forEach(b => { if (!b.type) b.type = 'button'; });
 
   const Q = [
-    /* QUIZ: 6 to 8 items.
+    /* QUIZ: empty by default, which hides the Quiz tab. Add 6 to 8 items only when the user asks.
        { t: "mc", q: "Question?", o: ["A", "B", "C", "D"], a: 1, why: "One or two sentences explaining the right answer." }
        { t: "text", q: "Question?", accept: ["answer", "synonym"], why: "..." }  */
   ];
@@ -524,9 +527,31 @@
     }
   });
   document.getElementById('quizReset').addEventListener('click', () => { results.fill(null); renderQuiz(); });
+
+  // Finish saves {score, total, finishedAt} under teach-quiz:<QUIZ_KEY>.
+  // A teach-me-many-topics index on the same origin reads the same key.
+  const QUIZ_KEY = 'teach-quiz:' + '{{QUIZ_KEY}}';
+  const savedEl = document.getElementById('saved');
+  function readSaved() {
+    try { return JSON.parse(localStorage.getItem(QUIZ_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function showSaved(note) {
+    const s = readSaved();
+    savedEl.textContent = note || (s ? `Finished: ${s.score} of ${s.total}, ${new Date(s.finishedAt).toLocaleDateString()}. Saved in this browser.` : '');
+  }
+  document.getElementById('quizFinish').addEventListener('click', () => {
+    const right = results.filter(r => r === true).length;
+    const unchecked = results.filter(r => r === null).length;
+    const rec = { score: right, total: Q.length, finishedAt: new Date().toISOString() };
+    try { localStorage.setItem(QUIZ_KEY, JSON.stringify(rec)); }
+    catch (e) { showSaved(`Finished: ${right} of ${Q.length}. This browser blocks storage, so the score was not saved.`); return; }
+    showSaved(unchecked ? `Finished: ${right} of ${Q.length}. ${unchecked} unchecked counted as wrong. Saved in this browser.` : '');
+  });
+  showSaved();
   renderQuiz();
 
-  // tabs
+  // tabs: shown only when the page has a quiz
+  document.querySelector('.tabs').hidden = Q.length === 0;
   const learn = document.getElementById('learnpage');
   const quiz = document.getElementById('quizpage');
   const tabs = document.querySelectorAll('.tabs button');
@@ -538,7 +563,7 @@
     window.scrollTo({ top: 0 });
   }
   tabs.forEach(t => t.addEventListener('click', () => { showTab(t.dataset.tab); window.history.replaceState(null, '', t.dataset.tab === 'quiz' ? '#quiz' : ' '); }));
-  if (location.hash === '#quiz') showTab('quiz');
+  if (Q.length && location.hash === '#quiz') showTab('quiz');
 
 })();
 </script>

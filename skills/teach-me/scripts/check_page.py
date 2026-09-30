@@ -39,8 +39,8 @@ CHROME = [
 
 
 def body_only(html):
-    """Drop script, style, svg, tables, and page chrome."""
-    body = strip(strip(strip(html, "script"), "style"), "svg")
+    """Drop script, style, svg, code blocks, tables, and page chrome."""
+    body = strip(strip(strip(strip(html, "script"), "style"), "svg"), "pre")
     body = re.sub(r"<table\b.*?</table>", " ", body, flags=re.S | re.I)
     for pat in CHROME:
         body = re.sub(pat, " ", body, flags=re.S | re.I)
@@ -60,7 +60,7 @@ def text_of(html):
 
 
 def prose_words(html):
-    """Word count over prose only: no diagrams, tables, glossary bodies, or chrome."""
+    """Word count over prose only: no diagrams, code, tables, glossary bodies, or chrome."""
     return len([w for w in text_of(body_only(html)).split() if w != "."])
 
 
@@ -106,7 +106,9 @@ def count_quiz(html):
     m = re.search(r"\b(?:const|var|let)\s+Q\s*=\s*\[", html)
     if not m:
         return 0
-    return len(re.findall(r"\bwhy\s*:", html[m.end():]))
+    # Skip the template's example items, which sit in a block comment.
+    rest = re.sub(r"/\*.*?\*/", " ", html[m.end():], flags=re.S)
+    return len(re.findall(r"\bwhy\s*:", rest))
 
 
 def check(path, budget, quiet):
@@ -150,8 +152,11 @@ def check(path, budget, quiet):
     if dangling:
         fails.append("see-also slugs with no entry: " + ", ".join(dangling))
 
+    # A page has no quiz by default. A quiz, once added, has a fixed size.
     quiz = count_quiz(html)
-    if not QUIZ[0] <= quiz <= QUIZ[1]:
+    if quiz == 0:
+        notes.append("no quiz")
+    elif not QUIZ[0] <= quiz <= QUIZ[1]:
         fails.append("%d quiz questions, want %d to %d" % (quiz, *QUIZ))
     else:
         notes.append("%d quiz questions" % quiz)
