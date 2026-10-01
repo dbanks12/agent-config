@@ -70,8 +70,11 @@ def user(uid):
             u["id"]: u.get("real_name") or u["profile"].get("real_name") or u["name"]
             for u in paginate("users.list", "members", limit=1000)})
     if uid not in USERS:  # external (Slack Connect) users are missing from users.list
-        u = call("users.info", user=uid)["user"]
-        USERS[uid] = u.get("real_name") or u["profile"].get("display_name") or u["name"]
+        try:
+            u = call("users.info", user=uid)["user"]
+            USERS[uid] = u.get("real_name") or u["profile"].get("display_name") or u["name"]
+        except SystemExit:
+            USERS[uid] = uid
     return USERS[uid]
 
 
