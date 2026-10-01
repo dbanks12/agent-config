@@ -145,6 +145,11 @@ def check(path, budget, quiet):
     elif defined:
         notes.append("%d glossary terms" % len(defined))
 
+    # Links are information, not a pass condition.
+    prose_links = len(re.findall(r'<a\s[^>]*href="https://', html))
+    term_links = len(re.findall(r'\blink\s*:\s*\{\s*url\s*:', html))
+    notes.append("%d prose links, %d glossary links" % (prose_links, term_links))
+
     also = set()
     for m in re.finditer(r"also\s*:\s*\[([^\]]*)\]", html):
         also.update(re.findall(r"""["']([A-Za-z0-9_-]+)["']""", m.group(1)))

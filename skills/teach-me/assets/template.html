@@ -259,6 +259,7 @@
   .panel-body { padding: 22px 22px 32px; overflow-y: auto; }
   .panel-body h3 { margin: 0 0 10px; font-family: var(--serif); font-size: 26px; font-weight: 600; }
   .panel-body p { font-size: 16px; }
+  .panel-body .golink a { color: var(--accent); font-weight: 500; }
   .panel-body .also { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
   .panel-body .also .eyebrow { margin-bottom: 8px; }
   .panel-body .also button.t {
@@ -393,7 +394,8 @@
 <script>
 (function () {
   const G = {
-    /* GLOSSARY: "slug": { name: "Display name", def: "One to three plain sentences.", also: ["other-slug"] }, */
+    /* GLOSSARY: "slug": { name: "Display name", def: "One to three plain sentences.", also: ["other-slug"],
+                           link: { url: "https://…", label: "Open the kata repo" } },   // link is optional */
   };
 
   const panel = document.getElementById('panel');
@@ -409,7 +411,10 @@
     if (!g) return;
     const also = (g.also || []).filter(k => G[k]).map(k =>
       `<button class="t" type="button" data-t="${k}">${G[k].name}</button>`).join('');
-    body.innerHTML = `<h3>${g.name}</h3><p>${g.def}</p>` +
+    // link: an optional {url, label} to the term's source, docs, or code.
+    const link = g.link && /^https:\/\//.test(g.link.url)
+      ? `<p class="golink"><a href="${g.link.url}" target="_blank" rel="noopener">${g.link.label || 'Read the source'} &rarr;</a></p>` : '';
+    body.innerHTML = `<h3>${g.name}</h3><p>${g.def}</p>` + link +
       (also ? `<div class="also"><div class="eyebrow">See also</div>${also}</div>` : '');
     backBtn.hidden = history.length < 2;
     body.scrollTop = 0;

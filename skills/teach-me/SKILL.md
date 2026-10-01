@@ -79,7 +79,17 @@ Every word a newcomer might not know is a glossary term. Mark it in prose as `<b
 - Definitions must stand alone. A reader who opens one from the glossary index has no surrounding context.
 - If the term is an abbreviation or acronym, start `def` with its expansion. Example: "Fee Payment Contract. A contract that pays a transaction's fee for the user."
 - Cross-link generously in `also`. The Back button lets the reader retrace the chain.
+- Give `link: { url, label }` to every term that has a canonical source: a paper, a talk, a doc page, a repository, a kata, a library, or a named essay. The panel shows it under the definition. Example: `"gilded-rose": { …, link: { url: "https://github.com/emilybache/GildedRose-Refactoring-Kata", label: "Open the kata repo" } }`.
 - The glossary index at the bottom is generated from `G`. Every slug used in a `data-t` must exist in `G`.
+
+## Links
+
+Link out often. A reader should reach the real thing in one click.
+
+- Hyperlink every named source in prose: a paper, book chapter, talk, blog post, spec, doc page, repository, file, pull request, or tool. Use `<a href="https://…" target="_blank" rel="noopener">`.
+- Prefer the most specific target: the chapter, the section anchor, or the file, not the site's home page.
+- A word can carry both a glossary button and a link only through the glossary entry's `link` field. Do not nest an `<a>` inside a `button.t`.
+- Open every URL before you use it. Leave out a link you could not open.
 
 ## Diagrams
 
