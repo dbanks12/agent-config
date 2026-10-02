@@ -6,6 +6,10 @@ This file and the shared skills live in `dbanks12/agent-config`. Paths under `~/
 
 Always create pull requests as drafts.
 
+# Git identity
+
+Never set the git author or committer by hand. Do not pass `-c user.name`, `-c user.email`, `--author`, or `GIT_AUTHOR_*`/`GIT_COMMITTER_*` variables, and do not run `git config user.*`. Use the identity from the user's global or local git config as is. If no identity is configured, stop and ask.
+
 # Sandbox rule
 
 When you launch Codex or Claude Code yourself, from a skill, a script, a pane, or a subprocess, keep its sandbox and approvals on.
