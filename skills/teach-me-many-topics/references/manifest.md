@@ -42,6 +42,8 @@ Keep the manifest beside the index output. Edit it and rebuild when the set chan
 | `eyebrow` | no | Small label above the title. |
 | `lede` | no | Intro sentence under the title. |
 | `footnote` | no | Line under the list. |
+| `summary` | no | Two to four sentences under the title that say what the set covers and how to use it. |
+| `resources` | no | Up to five `{title, url, note}` readings for the whole set, shown under the summary. `note` is one short clause. |
 | `groups[].name` | yes | The group heading. |
 | `groups[].note` | no | One or two sentences on the group's place in the order. |
 | `groups[].core` | no | `true` puts the group in the Core filter. |

@@ -33,6 +33,10 @@ def validate(m):
     if not SLUG.match(m.get("key", "")):
         fail("manifest needs a key: lowercase letters, digits and hyphens")
 
+    for r in m.get("resources", []):
+        if not r.get("title") or not str(r.get("url", "")).startswith("https://"):
+            fail("a top-level resource needs a title and an https url")
+
     seen = set()
     for g in m["groups"]:
         if not g.get("name"):
@@ -100,6 +104,21 @@ def prepare_pages(m, directory):
     return n
 
 
+def top_block(m):
+    """The optional summary and top-resources list under the title."""
+    out = ""
+    if m.get("summary"):
+        out += '<p class="intro">%s</p>\n' % esc(m["summary"])
+    if m.get("resources"):
+        items = "".join(
+            '<li><a href="%s" target="_blank" rel="noopener">%s</a>%s</li>'
+            % (esc(r["url"]), esc(r["title"]),
+               ' <span class="note">%s</span>' % esc(r["note"]) if r.get("note") else "")
+            for r in m["resources"])
+        out += '<section class="topres"><h2>Top resources</h2><ol>%s</ol></section>\n' % items
+    return out
+
+
 def build(manifest_path, out_path):
     m = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
     total = validate(m)
@@ -127,6 +146,7 @@ def build(manifest_path, out_path):
     payload = payload.replace("</", "<\\/")
 
     html = html.replace("/*{{MANIFEST}}*/{\"groups\":[]}", payload)
+    html = html.replace("{{TOP}}", top_block(m))
     for marker, value in (("{{TITLE}}", m["title"]),
                           ("{{EYEBROW}}", m.get("eyebrow", "")),
                           ("{{LEDE}}", m.get("lede", "")),
