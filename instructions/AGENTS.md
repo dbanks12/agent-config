@@ -6,6 +6,13 @@ This file and the shared skills live in `dbanks12/agent-config`. Paths under `~/
 
 Always create pull requests as drafts.
 
+Never stack pull requests without `gh stack`. A PR whose base is not the default branch is a stack.
+
+- To create a new stack, run `gh stack init <branches...>` and then `gh stack submit --auto`.
+- To stack PRs that already exist, run `gh stack link <PRs...>`.
+- Rebase with `gh stack rebase`. Push with `gh stack push`.
+- Do not use `gh pr create --base <feature-branch>`. In Claude Code, `claude-hooks/require-gh-stack.sh` blocks it.
+
 # Git identity
 
 Never set the git author or committer by hand. Do not pass `-c user.name`, `-c user.email`, `--author`, or `GIT_AUTHOR_*`/`GIT_COMMITTER_*` variables, and do not run `git config user.*`. Use the identity from the user's global or local git config as is. If no identity is configured, stop and ask.
