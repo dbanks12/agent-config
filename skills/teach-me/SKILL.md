@@ -67,7 +67,8 @@ Skip a section only when the subject truly has nothing for it. Do not add sectio
 Apply the [shared writing rules](../../instructions/AGENTS.md#all-writing), including their heading examples.
 
 - Plain words. Short sentences. Active voice. Name the actor.
-- Name each section's subject or task in its heading. Template labels identify sections, not required heading text.
+- Name the specific mechanism, checks, or task in each heading. A reader should predict the section's content from its heading alone.
+- Template labels identify sections, not required heading text.
 - Give a physical analogy at first contact with an abstract noun. Shelves and workers. Channels and folders. Then drop the analogy.
 - Numbers only when they change a decision. Put them in a table.
 - Kickers (`.kicker`) are one or two words naming the section's role: Summary, Foundation, Integration, Guarantees, Orientation, Judgement.
