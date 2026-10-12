@@ -56,9 +56,8 @@ Use the template in `assets/template.html` next to this file. Copy it, replace t
 5. `plug`: how a real system uses it. One before-and-after comparison diagram, then a numbered list of steps in the order teams actually do them, then one complete example system diagram.
 6. `guarantees`: what it promises and what it does not. Use a table where the content is a matrix. Include a short failure-handling list.
 7. `compare`: a table placing the subject next to tools the reader may confuse it with and next to its real alternatives. Name the category of each. Say "different job" plainly when it is.
-8. `fit`: a two-column `.compare` grid, "Reach for it when" and "Think twice when". Then one sentence saying what the subject is not.
-9. `glossary`: leave the template's index in place. The script fills it.
-10. `quizpage`: the Quiz tab. Leave it in place. It stays hidden until the page has a quiz. See "Quiz" below.
+8. `glossary`: leave the template's index in place. The script fills it.
+9. `quizpage`: the Quiz tab. Leave it in place. It stays hidden until the page has a quiz. See "Quiz" below.
 
 Skip a section only when the subject truly has nothing for it. Do not add sections unless the user asks. When the user asks for an added topic, add one section of 300 words or fewer with one diagram, and put it in the nav.
 
@@ -71,7 +70,7 @@ Apply the [shared writing rules](../../instructions/AGENTS.md#all-writing), incl
 - Template labels identify sections, not required heading text.
 - Give a physical analogy at first contact with an abstract noun. Shelves and workers. Channels and folders. Then drop the analogy.
 - Numbers only when they change a decision. Put them in a table.
-- Kickers (`.kicker`) are one or two words naming the section's role: Summary, Foundation, Integration, Guarantees, Orientation, Judgement.
+- Kickers (`.kicker`) are one or two words naming the section's role: Summary, Foundation, Integration, Guarantees, Orientation.
 - Numbered lists only for real sequences. Bulleted lists for parallel items.
 
 ## Clickable terms

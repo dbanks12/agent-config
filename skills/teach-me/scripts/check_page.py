@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 SECTIONS = ["summary", "foundation", "blocks", "flow", "plug",
-            "guarantees", "compare", "fit", "glossary", "quizpage"]
+            "guarantees", "compare", "glossary", "quizpage"]
 
 DIAGRAMS = (4, 6)
 TERMS = (25, 40)
