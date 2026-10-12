@@ -120,6 +120,24 @@ Four selected instructions from Ylan Segal's Zinsser-inspired Claude configurati
 - Strengthen unity and flow
 - Focus on word choice and sentence structure
 
+## Headings and rhetorical patterns
+
+- Name the subject in conceptual headings. Start task headings with a direct verb.
+- Use complete sentences to explain relationships between facts.
+- Avoid slogan-like parallel fragments and stock teaching preambles. State the subject or behavior directly.
+- Keep counts and lists when the facts require them. Do not add items or numerical framing for rhythm.
+- Before delivery, check headings, callouts, and summaries for these patterns. Rewrite each occurrence unless it conveys a necessary fact.
+
+**Examples:**
+
+- Task heading, Google, verbatim: "Creating an instance" → "Create an instance".
+- Concept heading, Google, verbatim: "Migrating to Google Cloud" → "Migration to Google Cloud".
+- Ornamental triad, quoted from Colin Gorrie's analysis: "walkable, eclectic, and full of character". Describe a relevant property with evidence instead.
+- Actual heading from our migration walkthrough: "Two runtimes, one settlement chain". State the relationship: "The rollups share an L1 chain".
+- Actual teach-me heading: "Two words before anything else". Name the terms instead: "Portals and SIPAs".
+
+Attribution and context: [writing-sources.md](writing-sources.md).
+
 # Additional rules for technical writing
 
 Use ASD-STE100-style Simplified Technical English for technical output. This rule applies to documentation, procedures, error messages, commit messages, runbooks, pull-request descriptions, and explanations of code.

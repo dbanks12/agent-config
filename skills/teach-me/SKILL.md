@@ -1,6 +1,6 @@
 ---
 name: teach-me
-description: Teach the user one technical subject (a tool, system, protocol, or concept) as an HTML page with clickable glossary terms, simple system diagrams, and a fixed section order. Use when the user asks to be taught something, wants an explainer or primer page, says "explain X to me" for a page-sized answer, or invokes /teach-me <subject>. A word count in the request, such as "/teach-me 1500 words Redis", overrides the default prose budget. Not for short chat answers.
+description: Teach the user one technical subject (a tool, system, protocol, or concept) as an HTML page with clickable glossary terms, simple system diagrams, and a fixed section order. Use when the user asks to be taught something, wants an explainer or primer page, says "explain X to me" for a page-sized answer, or invokes /teach-me with a subject. A word count in the request, such as "/teach-me 1500 words Redis", overrides the default prose budget. Not for short chat answers.
 ---
 
 # Teach me
@@ -49,9 +49,9 @@ Common repeats to watch for: the core guarantee restated in Summary, Foundation,
 
 Use the template in `assets/template.html` next to this file. Copy it, replace the `{{...}}` markers, fill in the sections. Keep this order and these ids.
 
-1. `summary`: three or four sentences in a `.summary` callout. Then one sentence with the single idea to remember, in bold.
+1. `summary`: three or four sentences in a `.summary` callout. State the main behavior directly. Omit a separate slogan or takeaway preamble.
 2. `foundation`: the one idea everything else builds on, with the first diagram. For Kafka it was the append-only log. For a database it may be the sorted key space. Find that idea before writing anything.
-3. `blocks`: the named parts. Open with a `.summary` callout titled "Two words before anything else" that gives plain analogies for the two nouns the reader will meet most. Then one `h3` per part.
+3. `blocks`: the named parts. Open with a `.summary` callout that defines unfamiliar terms through plain analogies. Name those terms in its heading. Let the subject determine which terms need definitions. Then use one `h3` per part.
 4. `flow`: one numbered list of what happens to one request or record, end to end.
 5. `plug`: how a real system uses it. One before-and-after comparison diagram, then a numbered list of steps in the order teams actually do them, then one complete example system diagram.
 6. `guarantees`: what it promises and what it does not. Use a table where the content is a matrix. Include a short failure-handling list.
@@ -64,7 +64,10 @@ Skip a section only when the subject truly has nothing for it. Do not add sectio
 
 ## Writing
 
+Apply the [shared writing rules](../../instructions/AGENTS.md#all-writing), including their heading examples.
+
 - Plain words. Short sentences. Active voice. Name the actor.
+- Name each section's subject or task in its heading. Template labels identify sections, not required heading text.
 - Give a physical analogy at first contact with an abstract noun. Shelves and workers. Channels and folders. Then drop the analogy.
 - Numbers only when they change a decision. Put them in a table.
 - Kickers (`.kicker`) are one or two words naming the section's role: Summary, Foundation, Integration, Guarantees, Orientation, Judgement.
@@ -125,6 +128,9 @@ Replace `{{QUIZ_KEY}}` with the page slug. When a teach-me-many-topics brief nam
 Leave the marker's replacement in place on a page without a quiz.
 
 ## Check the draft
+
+Read the headings, callouts, and summary before running the checker. Replace rhetorical framing with the subject or behavior it describes.
+The checker validates structure and length. It does not validate writing style.
 
 Run the checker on the written file before you publish or hand it over.
 

@@ -8,6 +8,18 @@ Ylan Segal, [Improving Writing with AI: A Zinsser-Inspired Approach](https://yla
 
 AGENTS.md quotes the first four bullets from the published Claude configuration without changes. The two remaining bullets are omitted.
 
+## Headings and rhetorical patterns
+
+Google's [Headings and titles](https://developers.google.com/style/headings) provides the task and concept heading pairs, quoted without changes.
+Google licenses this content under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+Colin Gorrie, [Why ChatGPT writes like that](https://www.deadlanguagesociety.com/p/rhetorical-analysis-ai), July 9, 2025.
+The ornamental triad is a short excerpt from the Claude-generated letter that Gorrie examines under "Compulsive parallelism".
+Gorrie discusses excessive repetition of rhetorical devices. He does not classify every factual list as poor writing.
+
+The last two examples come from our PR #1119 migration walkthrough and the former teach-me instructions.
+Their replacements are local edits, not quotations from Google or Gorrie.
+
 ## Technical writing examples
 
 Google's technical writing courses provide the seven examples:
