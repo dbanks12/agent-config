@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Behavior checks. Clipboard tests use a fake xclip and never change the desktop clipboard."""
+import base64
 import importlib.util
 import json
 import os
@@ -139,6 +140,7 @@ class ViewerTests(unittest.TestCase):
         self.snapshot = self.root / "scrollback.txt"
         self.master, self.slave = pty.openpty()
         self.process = None
+        self.output = b""
         fake = self.root / "xclip"
         fake.write_text('#!/bin/sh\ncase " $* " in *" -out "*) cat "$CLIPBOARD_TEST_FILE";; *) cat > "$CLIPBOARD_TEST_FILE";; esac\n')
         fake.chmod(0o700)
@@ -151,7 +153,7 @@ class ViewerTests(unittest.TestCase):
         until = time.monotonic() + 10
         while time.monotonic() < until:
             if select.select([self.master], [], [], .03)[0]:
-                os.read(self.master, 65536)
+                self.output += os.read(self.master, 65536)
             if check(): return
             if self.process.poll() is not None: self.fail(f"Viewer exited early: {self.process.returncode}")
         self.fail("Viewer did not become ready")
@@ -217,6 +219,22 @@ class ViewerTests(unittest.TestCase):
         os.write(self.master, f':call writefile([getreg("+")], "{register_file}")\r'.encode())
         self.wait_for(lambda: register_file.exists())
         self.assertEqual(register_file.read_text(), "external clipboard\n")
+        os.write(self.master, b"\x1b:q!\r")
+        self.process.wait(timeout=5)
+        self.assertEqual(self.process.returncode, 0)
+
+    def test_popup_neovim_copies_through_osc52(self):
+        herdr = self.root / "herdr"
+        herdr.write_text("#!/bin/sh\nprintf 'alpha\\nbeta\\ngamma\\n'\n")
+        herdr.chmod(0o700)
+        env = self.env | {"HERDR_BIN_PATH": str(herdr), "HERDR_SOCKET_PATH": "/unused", "HERDR_ACTIVE_PANE_ID": "w1:p2"}
+        env.pop("DISPLAY", None)
+        self.process = subprocess.Popen([app.sys.executable, str(app.SELF), "nvim", "--popup"], stdin=self.slave, stdout=self.slave, stderr=self.slave, env=env, start_new_session=True)
+        # Select the "alpha" and "beta" rows below the snapshot header, then yank them.
+        os.write(self.master, b"ggjVjy")
+        expected = b"\x1b]52;c;" + base64.b64encode(b"alpha\nbeta\n")
+        self.wait_for(lambda: expected in self.output)
+        self.assertFalse((self.root / "clipboard").exists())
         os.write(self.master, b"\x1b:q!\r")
         self.process.wait(timeout=5)
         self.assertEqual(self.process.returncode, 0)

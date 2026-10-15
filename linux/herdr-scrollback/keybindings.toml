@@ -9,3 +9,13 @@ key = "prefix+ctrl+v"
 type = "shell"
 command = '"$HOME/.local/bin/herdr-scrollback" nvim'
 description = "copy scrollback in external Neovim"
+
+# On a host without a desktop, such as a server for `herdr --remote`, use this
+# entry for prefix+ctrl+v instead. Neovim opens in a popup and copies through OSC 52.
+# [[keys.command]]
+# key = "prefix+ctrl+v"
+# type = "popup"
+# command = '"$HOME/.local/bin/herdr-scrollback" nvim --popup'
+# description = "copy scrollback in popup Neovim"
+# width = "95%"
+# height = "95%"

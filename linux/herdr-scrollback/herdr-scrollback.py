@@ -137,20 +137,40 @@ def nvim_binary():
     raise RuntimeError("Install Neovim before opening this viewer.")
 
 
-def nvim_view(snapshot):
+# Copy through the terminal with OSC 52. Paste reads the unnamed register,
+# because terminals rarely answer OSC 52 paste queries.
+OSC52_CLIPBOARD = """lua << EOF
+local osc52 = require('vim.ui.clipboard.osc52')
+local function paste()
+  return {vim.fn.split(vim.fn.getreg(''), '\\n'), vim.fn.getregtype('')}
+end
+vim.g.clipboard = {
+  name = 'Herdr snapshot OSC 52',
+  copy = {['+'] = osc52.copy('+'), ['*'] = osc52.copy('*')},
+  paste = {['+'] = paste, ['*'] = paste},
+}
+EOF
+"""
+
+
+def nvim_view(snapshot, osc52=False):
     config = snapshot.parent / "viewer.vim"
-    copy = clipboard_command()
-    xclip = require("xclip")
-    provider = {
-        "name": "Herdr snapshot clipboard",
-        "copy": {"+": ["sh", "-c", copy],
-                 "*": ["sh", "-c", copy.replace("-selection clipboard", "-selection primary")]},
-        "paste": {"+": [xclip, "-selection", "clipboard", "-out"],
-                  "*": [xclip, "-selection", "primary", "-out"]},
-        "cache_enabled": 0,
-    }
+    if osc52:
+        clipboard = OSC52_CLIPBOARD
+    else:
+        copy = clipboard_command()
+        xclip = require("xclip")
+        provider = {
+            "name": "Herdr snapshot clipboard",
+            "copy": {"+": ["sh", "-c", copy],
+                     "*": ["sh", "-c", copy.replace("-selection clipboard", "-selection primary")]},
+            "paste": {"+": [xclip, "-selection", "clipboard", "-out"],
+                      "*": [xclip, "-selection", "primary", "-out"]},
+            "cache_enabled": 0,
+        }
+        clipboard = "let g:clipboard = " + json.dumps(provider) + "\n"
     private_write(config, "set nomodeline noswapfile notitle mouse= nowrap\n"
-                  + "let g:clipboard = " + json.dumps(provider) + "\n"
+                  + clipboard
                   + "set clipboard=unnamedplus\n")
     return subprocess.run([nvim_binary(), "--noplugin", "-u", str(config), "-i", "NONE",
                            "-n", "-R", "+$", "--", str(snapshot)],
@@ -235,9 +255,27 @@ def fit_viewer(columns):
     raise RuntimeError("The viewer could not settle at the source column count.")
 
 
+def write_snapshot(directory, pane, text):
+    snapshot = directory / "scrollback.txt"
+    stamp = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
+    header = f"Herdr {pane} | latest 1000 retained rendered rows at most | {stamp}\n"
+    private_write(snapshot, header + text)
+    return snapshot
+
+
+def popup(mode, pane):
+    # A Herdr popup keybind supplies the terminal. Copies travel back to the client through OSC 52.
+    if mode == "tmux":
+        raise RuntimeError("The popup viewer supports Neovim only.")
+    nvim_binary()
+    text = capture(pane, os.environ.copy())
+    with tempfile.TemporaryDirectory(prefix="herdr-scrollback-") as temp:
+        return nvim_view(write_snapshot(Path(temp), pane, text), osc52=True)
+
+
 def launch(mode, pane):
     if not os.environ.get("DISPLAY"):
-        raise RuntimeError("This viewer needs an X11 desktop session.")
+        raise RuntimeError("This viewer needs an X11 desktop session. Without one, use --popup in a Herdr popup keybind.")
     terminal = require("alacritty")
     clipboard_command()
     require("tmux") if mode == "tmux" else nvim_binary()
@@ -245,10 +283,7 @@ def launch(mode, pane):
     text = capture(pane, os.environ.copy())
     with tempfile.TemporaryDirectory(prefix="herdr-scrollback-") as temp:
         directory = Path(temp)
-        snapshot = directory / "scrollback.txt"
-        stamp = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
-        header = f"Herdr {pane} | latest 1000 retained rendered rows at most | {stamp}\n"
-        private_write(snapshot, header + text)
+        snapshot = write_snapshot(directory, pane, text)
         try:
             # Regolith already floats this class before the window can resize Herdr.
             return subprocess.run(
@@ -270,6 +305,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", nargs="?", choices=["tmux", "nvim", "vim"])
     parser.add_argument("--pane", help="Explicit source pane. Otherwise use the keybind's active pane.")
+    parser.add_argument("--popup", action="store_true",
+                        help="View in the current terminal, such as a Herdr popup, and copy through OSC 52.")
     parser.add_argument("--view", nargs=2, metavar=("MODE", "FILE"), help=argparse.SUPPRESS)
     parser.add_argument("--columns", type=int, help=argparse.SUPPRESS)
     parser.add_argument("--emit", type=Path, help=argparse.SUPPRESS)
@@ -289,12 +326,15 @@ def main():
         pane = args.pane or os.environ.get("HERDR_ACTIVE_PANE_ID")
         if not args.mode or not pane or not os.environ.get("HERDR_SOCKET_PATH"):
             raise RuntimeError("Use a Herdr keybind, or specify --pane and HERDR_SOCKET_PATH.")
-        return launch(args.mode, pane)
+        return (popup if args.popup else launch)(args.mode, pane)
     except KeyboardInterrupt:
         return 130
     except (OSError, RuntimeError, ValueError, KeyError, subprocess.SubprocessError) as error:
         message = str(error)
         print(f"Herdr scrollback: {message}", file=sys.stderr)
+        if args.popup and sys.stdin.isatty():
+            # The popup closes when the helper exits. Keep the message visible.
+            input("Press Enter to close.")
         notifier = shutil.which("notify-send")
         if notifier:
             try:

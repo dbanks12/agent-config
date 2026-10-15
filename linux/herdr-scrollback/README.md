@@ -77,4 +77,16 @@ python3 linux/herdr-scrollback/test_scrollback.py
 
 To remove the integration, remove both custom keybind entries and reload Herdr's configuration.
 Remove `~/.local/bin/herdr-scrollback` if you no longer need manual exports.
-Opening Neovim inside Herdr is a possible later change. This version creates only external windows.
+
+## Popup mode for hosts without a desktop
+
+A server without X11 cannot open the external window.
+On such a host, `--popup` opens Neovim in the current terminal instead.
+Use it with the popup keybind entry in `keybindings.toml`.
+Attach with `herdr --remote <host> --remote-keybindings server`, because remote attach does not send local custom commands.
+
+A yank sends the text through OSC 52 to the client terminal, which sets the desktop clipboard.
+Alacritty accepts OSC 52 copies by default. Herdr 0.9.5 passes them through remote attach.
+Paste from `+` reads the unnamed register, because the provider does not query the terminal clipboard.
+Popup mode needs Python 3, Herdr, and Neovim 0.10 or later. It supports Neovim only.
+If the helper fails, the popup shows the error until you press Enter.
