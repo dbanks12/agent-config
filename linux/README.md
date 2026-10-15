@@ -25,8 +25,11 @@ Run this command as the normal Codex user:
 ```
 
 The script follows [OpenAI's Ubuntu instructions](https://learn.chatgpt.com/docs/sandboxing#prerequisites).
-It installs `apparmor-profiles` and `apparmor-utils` through apt.
-It copies Ubuntu's `bwrap-userns-restrict` profile from `/usr/share/apparmor/extra-profiles/` into `/etc/apparmor.d/` and loads it.
+It installs `bubblewrap`, `apparmor-profiles`, and `apparmor-utils` through apt.
+Codex uses its bundled Bubblewrap when `/usr/bin/bwrap` is missing, and the profile does not cover that copy.
+If `/etc/apparmor.d/` lacks Ubuntu's `bwrap-userns-restrict` profile, the script copies it from `/usr/share/apparmor/extra-profiles/`.
+Ubuntu 26.04 already ships the profile in `/etc/apparmor.d/`.
+The script then loads the profile.
 The profile allows Bubblewrap to create namespaces and restricts namespace creation by its child programs.
 Codex still sets its filesystem and network limits through Bubblewrap.
 The system-wide namespace restriction stays enabled.
