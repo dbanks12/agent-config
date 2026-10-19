@@ -17,6 +17,17 @@ Never stack pull requests without `gh stack`. A PR is a stack when its base is t
 
 Never set the git author or committer by hand. Do not pass `-c user.name`, `-c user.email`, `--author`, or `GIT_AUTHOR_*`/`GIT_COMMITTER_*` variables, and do not run `git config user.*`. Use the identity from the user's global or local git config as is. If no identity is configured, stop and ask.
 
+# Long jobs and cleanup
+
+`/tmp` is a RAM tmpfs on this host. Leaked processes and files hold RAM until something removes them.
+
+- Run each long command under `timeout`, for example `timeout 3600 cargo mutants ...`.
+- After a Gradle build, run `./gradlew --stop` if `pgrep -af GradleWrapperMain` shows no other build.
+- Before you finish, stop each background job you started, by PID.
+- Before you finish, delete the large files in your scratchpad that you no longer need.
+
+`linux/cleanup/` in this repo removes the leaks that remain.
+
 # Sandbox rule
 
 When you launch Codex or Claude Code yourself, from a skill, a script, a pane, or a subprocess, keep its sandbox and approvals on.
