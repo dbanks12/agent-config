@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the agent /tmp janitor every hour
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

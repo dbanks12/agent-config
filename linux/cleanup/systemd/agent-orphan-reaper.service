@@ -1,0 +1,8 @@
+[Unit]
+Description=Report leaked build and QA process trees whose parent died
+Documentation=file://%h/projects/agent-config/linux/cleanup/README.md
+
+[Service]
+Type=oneshot
+# Dry run. To kill, add --apply with `systemctl --user edit agent-orphan-reaper.service`.
+ExecStart=%h/projects/agent-config/linux/cleanup/orphan-reaper.py --min-age 2

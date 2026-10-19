@@ -1,0 +1,10 @@
+[Unit]
+Description=Report stale agent scratch, pnpm store, and pytest dirs in /tmp
+Documentation=file://%h/projects/agent-config/linux/cleanup/README.md
+
+[Service]
+Type=oneshot
+# Dry run. To delete, add --apply with `systemctl --user edit agent-tmp-janitor.service`.
+ExecStart=%h/projects/agent-config/linux/cleanup/tmp-janitor.py --max-age 24
+Nice=10
+IOSchedulingClass=idle
