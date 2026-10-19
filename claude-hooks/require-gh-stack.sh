@@ -18,7 +18,7 @@ if [[ $cmd =~ ^[[:space:]]*cd[[:space:]]+([^[:space:]\;\&\|]+)[[:space:]]*(\&\&|
   [[ $target == /* ]] || target=$dir/$target
   dir=$target
 fi
-[ -n "$dir" ] && cd "$dir" 2>/dev/null
+if [ -n "$dir" ]; then cd "$dir" 2>/dev/null || true; fi
 repo=$(flag '--repo|-R')
 gh_repo=()
 [ -n "$repo" ] && gh_repo=(--repo "$repo")
