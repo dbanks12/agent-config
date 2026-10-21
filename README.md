@@ -75,7 +75,7 @@ Each copied skill includes the upstream MIT license.
 
 `slide-deck` builds an HTML deck and a PDF from a Markdown `slides.md` file. `excalidraw-skill` drives a live Excalidraw canvas. The deck skill draws its figures on that canvas, crops them, and inlines them into the slides.
 
-Both skills live in [dbanks12/claude-authoring-tools](https://github.com/dbanks12/claude-authoring-tools), a private repo. This repo pins it as the submodule `vendor/claude-authoring-tools`, and `links` points at the skills inside it. `./install.sh` initializes the submodule. To update it, run `git -C vendor/claude-authoring-tools pull origin master` and commit the new pointer.
+`slide-deck` lives in [dbanks12/claude-authoring-tools](https://github.com/dbanks12/claude-authoring-tools), a private repo. `excalidraw-skill` lives in its own repo, [dbanks12/excalidraw-skill](https://github.com/dbanks12/excalidraw-skill). This repo pins them as the submodules `vendor/claude-authoring-tools` and `vendor/excalidraw-skill`, and `links` points at the skills inside them. `./install.sh` initializes the submodules. To update one, run `git -C vendor/<name> pull origin <default branch>` and commit the new pointer. The default branch is `master` for `claude-authoring-tools` and `main` for `excalidraw-skill`.
 
 Deck repos pin the same tool repo as their own `slidegen/` submodule and build in CI. See `vendor/claude-authoring-tools/skills/slide-deck/README-ci.md`. `examples/demo-deck` in that repo shows every feature.
 
