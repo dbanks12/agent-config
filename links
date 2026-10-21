@@ -54,3 +54,5 @@ vendor/excalidraw-skill ~/.claude/skills/excalidraw-skill
 vendor/excalidraw-skill ~/.codex/skills/excalidraw-skill
 skills/slack-read ~/.claude/skills/slack-read
 skills/slack-read ~/.codex/skills/slack-read
+skills/explainer ~/.claude/skills/explainer
+skills/explainer ~/.codex/skills/explainer

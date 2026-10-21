@@ -59,6 +59,8 @@ Use the template in `assets/template.html` next to this file. Copy it, replace t
 8. `glossary`: leave the template's index in place. The script fills it.
 9. `quizpage`: the Quiz tab. Leave it in place. It stays hidden until the page has a quiz. See "Quiz" below.
 
+When the user asks for a narrated explainer, follow the `explainer` skill with the teach-me host. Its player sits after `summary` and does not count toward the length budget.
+
 Skip a section only when the subject truly has nothing for it. Do not add sections unless the user asks. When the user asks for an added topic, add one section of 300 words or fewer with one diagram, and put it in the nav.
 
 ## Writing

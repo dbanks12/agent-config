@@ -16,6 +16,60 @@ To clean `/tmp` and stop leaked build processes, see [Linux cleanup](linux/clean
 
 `check.sh` enforces the skill pattern. `install.sh` runs it and installs it as the git pre-commit hook.
 
+## Dependencies
+
+`install.sh` links files and initializes the submodules. It installs no tools. Install these on a new machine before you run it.
+
+### Core
+
+These are required for `install.sh`, the hooks, and the cross-model skills.
+
+| Tool | Used by | Install (Ubuntu / macOS) |
+|---|---|---|
+| bash, git, GNU coreutils (`timeout`, `stat -c`) | `install.sh`, `cross-review/*.sh` | Preinstalled / `brew install coreutils bash`, then put `$(brew --prefix)/opt/coreutils/libexec/gnubin` first on `PATH` |
+| Access to the private repo `dbanks12/claude-authoring-tools` | `install.sh` submodule init | An SSH key on the GitHub account |
+| Python 3.11 or later, standard library only | Most skill scripts, `statusline/install.py` | `sudo apt install python3` / `brew install python` |
+| jq | `claude-hooks/*.sh` | `sudo apt install jq` / `brew install jq` |
+| `gh`, logged in, with the `gh stack` extension | `create-pr`, `claude-hooks/require-gh-stack.sh` | Install from [cli.github.com](https://cli.github.com), then `gh auth login` and `gh extension install github/gh-stack` |
+| `claude` and `codex` CLIs, logged in | `call-claude`, `call-codex`, `review-*`, `review-by-council` | `npm i -g @anthropic-ai/claude-code @openai/codex` |
+| bubblewrap with the AppArmor profile (Ubuntu only) | The Codex sandbox | `./linux/install-codex-sandbox.sh`. See [Linux sandbox setup](linux/README.md) |
+
+`install.sh` does not register the Claude Code hooks. Add them to `~/.claude/settings.json` by hand, with this repo's absolute path:
+
+```json
+"hooks": {
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        { "type": "command", "command": "bash <repo>/claude-hooks/require-gh-stack.sh", "timeout": 10 },
+        { "type": "command", "command": "bash <repo>/claude-hooks/block-pattern-kills.sh", "timeout": 10 }
+      ]
+    }
+  ]
+}
+```
+
+### Per skill
+
+A skill without a row needs nothing beyond the core tools.
+
+| Skill | Needs | Install (Ubuntu / macOS) |
+|---|---|---|
+| `excalidraw-skill` | Node.js with `npx`. The first canvas command fetches `mcp-excalidraw-server@2.1.2` | [nvm](https://github.com/nvm-sh/nvm), then `nvm install --lts` / `brew install node` |
+| `slide-deck` | Node.js, Pillow, and Chromium or Google Chrome for PDF output | `pip install --user --break-system-packages pillow` / `pip3 install pillow`. Install Chrome from google.com/chrome |
+| `explainer` | Bun. Narrated mode also needs `ffprobe` (from ffmpeg) and an ElevenLabs key. The Excalidraw look needs Node.js | `npm i -g bun`, then `sudo apt install ffmpeg` / `brew install bun ffmpeg`. For the key, follow "Key setup" in [the skill](skills/explainer/SKILL.md) |
+| `slack-read` | A Slack user token in `SLACK_TOKEN`, with the scopes listed in [the skill](skills/slack-read/SKILL.md) | Create a Slack app and export the token in your shell profile |
+| `hunk-review`, `hunk-extensions` | The `hunk` CLI. Extensions also need Bun | `npm i -g hunkdiff@0.22.0` |
+| `herdr` | Herdr 0.9.0, run with `HERDR_ENV=1` | See [herdr-scrollback](linux/herdr-scrollback/README.md) for the full terminal setup |
+
+To check the core tools, run:
+
+```sh
+for t in git jq gh claude codex python3 node npx bun ffprobe; do command -v "$t" >/dev/null || echo "missing: $t"; done
+gh extension list | grep -q gh-stack || echo "missing: gh stack"
+```
+
 ## Edit
 
 Edit files in this repo and commit. The installed paths are symlinks, so changes apply at once.
@@ -71,6 +125,12 @@ Code review uses existing tracker guidance or a supplied spec without requiring 
 Each copied skill includes the upstream MIT license.
 `hunk skill path` prints the bundled source. Copy it again after a Hunk upgrade.
 
+## Narrated explainers
+
+`explainer` builds a narrated, animated explainer page. It runs standalone, inside a `teach-me` page, or as a companion to a slide deck. It comes from the `explainer` skill in [alejoamiras/aa-skills](https://github.com/alejoamiras/aa-skills/tree/main/skills/explainer) at commit `b5b5b53`, used with the author's permission. `player.js`, `scripts/tts.ts`, and `scripts/narrate.sh` are upstream copies with two comment fixes. `SKILL.md` drops the upstream `blueprint` coupling. It adds the hosts, the Excalidraw look, and `scripts/tag_svg.py`.
+
+Captions mode needs only Bun. Narration also needs `ffprobe` and an ElevenLabs key in `~/.config/elevenlabs/.env`. See [Dependencies](#per-skill).
+
 ## Slide decks and diagrams
 
 `slide-deck` builds an HTML deck and a PDF from a Markdown `slides.md` file. `excalidraw-skill` drives a live Excalidraw canvas. The deck skill draws its figures on that canvas, crops them, and inlines them into the slides.
@@ -79,12 +139,8 @@ Each copied skill includes the upstream MIT license.
 
 Deck repos pin the same tool repo as their own `slidegen/` submodule and build in CI. See `vendor/claude-authoring-tools/skills/slide-deck/README-ci.md`. `examples/demo-deck` in that repo shows every feature.
 
-Prerequisites:
+For their tools, see [Dependencies](#per-skill). The canvas CLI runs as `npx -y mcp-excalidraw-server <command>` and starts the canvas server at `http://127.0.0.1:3000`. Screenshots and image exports render headless. Only Mermaid conversion needs a browser tab open at that URL.
 
-- Node.js with `npx`. The canvas CLI runs as `npx -y mcp-excalidraw-server <command>` and starts the canvas server at `http://127.0.0.1:3000`.
-- A browser tab open at `http://127.0.0.1:3000`. Screenshots, image exports, and Mermaid conversion need it.
-- Python 3 with Pillow: `pip install --user --break-system-packages pillow`.
-- Chromium or Google Chrome for PDF output.
-- Optional: register the canvas as an MCP server. For Codex, run `codex mcp add excalidraw -- npx -y mcp-excalidraw-server`. The CLI works without it.
+Optional: register the canvas as an MCP server. For Codex, run `codex mcp add excalidraw -- npx -y mcp-excalidraw-server`. The CLI works without it.
 
 To disable the two skills, comment out their four lines in `links` and delete the four symlinks in `~/.claude/skills` and `~/.codex/skills`.
