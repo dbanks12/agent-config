@@ -38,6 +38,12 @@ When you launch Codex or Claude Code yourself, from a skill, a script, a pane, o
 
 This rule is about processes you start. It does not change code that a project under review ships.
 
+# Process kills
+
+Stop only processes you started, by PID. Use `$!` of the process, or check each line of `pgrep -af <pattern>` before you run `kill <pid>`.
+
+Never use `pkill` or `killall`. They match other sessions' processes and live services. In Claude Code, `claude-hooks/block-pattern-kills.sh` blocks them.
+
 # Karpathy guidelines
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
