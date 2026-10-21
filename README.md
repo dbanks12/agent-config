@@ -71,6 +71,15 @@ Code review uses existing tracker guidance or a supplied spec without requiring 
 Each copied skill includes the upstream MIT license.
 `hunk skill path` prints the bundled source. Copy it again after a Hunk upgrade.
 
+## Narrated explainers
+
+`explainer` builds a narrated, animated explainer page. It runs standalone, inside a `teach-me` page, or as a companion to a slide deck. It comes from the `explainer` skill in [alejoamiras/aa-skills](https://github.com/alejoamiras/aa-skills/tree/main/skills/explainer) at commit `b5b5b53`, used with the author's permission. `player.js`, `scripts/tts.ts`, and `scripts/narrate.sh` are upstream copies with two comment fixes. `SKILL.md` drops the upstream `blueprint` coupling. It adds the hosts, the Excalidraw look, and `scripts/tag_svg.py`.
+
+Prerequisites:
+
+- Bun and `ffprobe` (from ffmpeg). Captions mode needs only Bun.
+- For narration: an ElevenLabs key in `~/.config/elevenlabs/.env`. Follow "Key setup" in `skills/explainer/SKILL.md`.
+
 ## Slide decks and diagrams
 
 `slide-deck` builds an HTML deck and a PDF from a Markdown `slides.md` file. `excalidraw-skill` drives a live Excalidraw canvas. The deck skill draws its figures on that canvas, crops them, and inlines them into the slides.
