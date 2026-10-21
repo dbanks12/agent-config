@@ -87,7 +87,7 @@ page.html        # standalone or slide-deck page
    - **Every scene is a pure function of time**: `(el, local, p, t) => void` from `local` (scene) or `t` (global) seconds, using `Explainer.seg/lerp`. No CSS animations or transitions, no state kept between frames. Backward seeks must render correctly.
    - Stage: SVG at `viewBox="0 0 640 360"` (text at least 24 units), or one `<canvas>` at logical 1280×720 redrawn by `draw(t)` from every scene callback (text that carries meaning at least 30 units, headlines 96+). Keep an empty `[data-scene]` div per scene with an `aria-label`. Theme colors come from tokens, never from browser defaults.
    - **Excalidraw look**: draw each scene's final state with `excalidraw-skill` (brief, `place.py`, lint, render, critique). Export it to `scenes/<id>.excalidraw`, then `timeout 120 npx -y mcp-excalidraw-server@2.1.2 render scenes/<id>.excalidraw --format svg --out scenes/<id>.svg` and `python3 <this skill dir>/scripts/tag_svg.py scenes/<id>.excalidraw scenes/<id>.svg scenes/<id>.tagged.svg`. Add `--strip-fonts` for every scene but the first: each export embeds the full font set (about 250 KB), and the inline SVGs share one copy. Inline the tagged SVG in the scene's `[data-scene]` div. The scene function reveals elements by `[data-id]` with opacity and transform. A bound label carries `data-container`, so reveal it with its box. Keep the SVG's own `viewBox`.
-   - An arrow's `[data-id]` group holds the shaft as its first child `g` and each arrowhead as a later `g`. To draw an arrow on, animate `stroke-dashoffset` on the shaft's paths, and fade the arrowheads in as the shaft finishes. Set the shaft's opacity to 0 while its progress is 0: round line caps draw a dot even for a zero-length dash.
+   - An arrow's `[data-id]` group lists the shaft first and each arrowhead after it. A `place.py` arrow has `path` children. A bound arrow wraps each part in a `g`. To draw an arrow on, animate `stroke-dashoffset` on the shaft's paths, and fade the arrowheads in as the shaft finishes. Set the shaft's opacity to 0 while its progress is 0: round line caps draw a dot even for a zero-length dash.
    - Cue animations to spoken words with `Explainer.cue(timings, "word", n)`. The index `n` counts occurrences across the WHOLE script, so a word that also appears earlier needs its real index. Check each cue against the printed list.
    - Fades with no exit time default to a large finite number such as `1e9`, never `Infinity`: `(t - Infinity) / (Infinity - Infinity)` is NaN, and a NaN that reaches a coordinate makes the element silently vanish (canvas also ignores a NaN `globalAlpha` and keeps the previous one).
    - teach-me host: the page's prose stays complete without the explainer. Scene SVGs sit in `div`s, never in a `<figure>`, and define no marker with id `arr`, so teach-me's diagram checks still pass.
@@ -149,7 +149,7 @@ The user chose a plaintext key file for this one key: `~/.config/elevenlabs/.env
 
 ## Key setup (once per machine, by the user)
 
-1. ElevenLabs plan: the free tier works for testing (built-in voices only, non-commercial, attribution required). **Starter** ($6/month as of 2026-10) adds a commercial licence and Voice Library voices over the API.
+1. ElevenLabs plan: the free tier works for testing (built-in voices only, non-commercial, attribution required). **Starter** (6 US dollars a month as of 2026-10) adds a commercial licence and Voice Library voices over the API.
 2. Create a key at elevenlabs.io → Settings → API keys: Text to Speech **Access**, everything else **No Access**, a monthly quota of about 50,000 characters.
 3. With the key on the clipboard: `mkdir -p ~/.config/elevenlabs && (umask 077; printf 'ELEVENLABS_API_KEY=%s\n' "$(xclip -o -selection clipboard)" > ~/.config/elevenlabs/.env)`. On Wayland, use `wl-paste`. On macOS, use `pbpaste`.
 4. With a voice id on the clipboard (Voices → a voice's menu → Copy voice ID): `printf 'ELEVENLABS_VOICE_ID=%s\n' "$(xclip -o -selection clipboard)" >> ~/.config/elevenlabs/.env`.
@@ -160,6 +160,6 @@ Upstream verified these:
 - `/with-timestamps` returns a 1:1 alignment for `eleven_multilingual_v2` (2026-10-06, two voices) and for `eleven_v4` with audio tags in the text (2026-10-07; tags come back as their own words). `eleven_v3` is untested.
 - A `files`-published `narration.mp3` loads, plays, and seeks inside an Artifact on desktop (2026-10-06). Mobile is untested.
 
-Verified here on 2026-10-21: `tag_svg.py` matches the `render --format svg` output of `mcp-excalidraw-server@2.1.2` for rectangles, bound and free text, and bound arrows.
+Verified here on 2026-10-21: an `eleven_v4` narration with five audio tags returned an exact alignment (`approx: false`). `tag_svg.py` matches the `render --format svg` output of `mcp-excalidraw-server@2.1.2` for rectangles, bound and free text, bound arrows, and `place.py` arrows.
 
 Record each new result in this file when confirmed.
