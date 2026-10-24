@@ -1,8 +1,8 @@
 ---
 name: finish-pr
-description: Take an open PR from draft to reviewable. Cross-tool review, a slim description with a diagram, and lean tests. Optionally flip it ready, address Greptile, and watch CI.
+description: Take an open PR from draft to reviewable. Cross-tool review, a slim description with a diagram, and lean tests. Optionally flip it ready, address Greptile, watch CI, and merge.
 disable-model-invocation: true
-argument-hint: "[ready] [ci]"
+argument-hint: "[ready] [ci] [merge]"
 ---
 
 # Finish a pull request
@@ -13,6 +13,7 @@ Arguments:
 
 - `ready` (also `ready_and_greptile`, `greptile`): run step 4.
 - `ci`: run step 5. It works with or without `ready`.
+- `merge`: run steps 5 and 6. Step 6 runs last.
 
 The bar for every fix in this skill is a **real problem**: a defect a user could hit, such as wrong funds movement, a crash, data loss, a security hole, or a broken flow. Style preferences, speculative hardening, and "consider also" ideas are not real problems. Record them as rejected and move on.
 
@@ -70,6 +71,12 @@ Push all commits. Watch the checks with `timeout 3600 gh pr checks --watch`. For
 
 If the cause is clear and the fix is small, fix it in a new commit, push, and watch again. Otherwise, stop and report the failure with the log excerpt. A flaky failure unrelated to the diff is a report, not a fix. Done when all required checks pass, or every failure is reported.
 
+## 6. Merge (`merge`)
+
+Merge only after every earlier step is done and all required checks pass on the latest pushed commit. If a check failed, a Greptile comment has no reply, or a fix is not pushed, stop and report.
+
+Merge with the repository's allowed method, for example `gh pr merge --squash`. Do not pass `--admin` and do not bypass branch protection. If a review or other rule blocks the merge, stop and report the blocker. Done when GitHub shows the PR as merged.
+
 ## Report
 
-List each review finding and Greptile comment with its disposition, the commits you added, and the final CI state.
+List each review finding and Greptile comment with its disposition, the commits you added, the final CI state, and the merge result.
