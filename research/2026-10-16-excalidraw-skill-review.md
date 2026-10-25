@@ -453,7 +453,7 @@ Reference: mechanics.md (CLI, MCP, REST), style-system.md
 
 ## 9. Verification plan for the changes
 
-- Build Changes 4 and 5 first. Redraw three existing diagrams: the demo flow, one SIPA or oxide figure, and one PR change. Compare word count, crossings, and your own read time before and after.
+- Build Changes 4 and 5 first. Redraw three existing diagrams: the demo flow, one protocol figure, and one PR change. Compare word count, crossings, and your own read time before and after.
 - Run the new evals with the skill and without it, using the `skill-creator` eval tooling.
 - Test the Change 8 workarounds against 2.1.2 before you delete any script.
 
