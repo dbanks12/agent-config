@@ -3,4 +3,4 @@
 	url = git@github.com:dbanks12/claude-authoring-tools.git
 [submodule "vendor/excalidraw-skill"]
 	path = vendor/excalidraw-skill
-	url = git@github.com:dbanks12/excalidraw-skill.git
+	url = https://github.com/dbanks12/excalidraw-skill.git
