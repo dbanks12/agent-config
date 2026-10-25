@@ -2,9 +2,28 @@
 
 Shared instructions, skills, and hooks for Claude Code and Codex. You edit one repo, and both tools see each change at once.
 
-![install.sh reads the links file and symlinks repo files into ~/.claude and ~/.codex](docs/install.png)
+## Dependencies
+
+This repo pins two skill repos as submodules in `vendor/`:
+
+- [dbanks12/excalidraw-skill](https://github.com/dbanks12/excalidraw-skill): public.
+- [dbanks12/claude-authoring-tools](https://github.com/dbanks12/claude-authoring-tools): private. Without access, `install.sh` skips `slide-deck`.
+
+`install.sh` installs no tools. The core set is bash, git, Python 3.11 or later, `jq`, and `gh` with the `gh stack` extension. You also need the `claude` and `codex` CLIs. On macOS, install GNU coreutils for `timeout`.
+
+| Skill | Also needs |
+|---|---|
+| `excalidraw-skill`, `slide-deck` | Node.js with `npx`. `slide-deck` also needs Pillow and Chrome for PDFs |
+| `explainer` | Bun. Narration also needs `ffprobe` and an ElevenLabs key |
+| `slack-read` | A Slack user token in `SLACK_TOKEN` |
+| `hunk-review`, `hunk-extensions` | `npm i -g hunkdiff@0.22.0` |
+| `herdr` | Herdr 0.9.0, run with `HERDR_ENV=1` |
+
+On Ubuntu, Codex needs a Bubblewrap profile. See [Linux setup](linux/README.md). For `/tmp` cleanup, see [Linux cleanup](linux/cleanup/README.md).
 
 ## Install
+
+![install.sh reads the links file and symlinks repo files into ~/.claude and ~/.codex](docs/install.png)
 
 ```sh
 ./install.sh          # link files into ~/.claude and ~/.codex
@@ -12,8 +31,6 @@ Shared instructions, skills, and hooks for Claude Code and Codex. You edit one r
 ```
 
 `install.sh` reads `links` and creates one symlink for each line. It backs up replaced files to `~/.local/state/agent-config/backups/`. It also runs `check.sh` and installs it as the pre-commit hook.
-
-`vendor/claude-authoring-tools` is a private submodule. Without access, `install.sh` skips the `slide-deck` skill and links the rest.
 
 Your local `~/.claude/settings.json` and `~/.codex/config.toml` stay outside this repo. To enable the Claude Code hook, add it to `settings.json` with this repo's absolute path:
 
@@ -53,20 +70,6 @@ The review skills let one tool ask the other for a second opinion. Each layer ca
 `finish-pr` takes your open draft PR to a reviewable state. It runs a review with the other tool, trims comments and tests, and rewrites the description around one diagram. Arguments add the optional steps: `ready`, `ci`, and `merge`.
 
 ![finish-pr runs review, trim, and description steps, then optional ready, CI, and merge steps](docs/finish-pr.png)
-
-## Dependencies
-
-`install.sh` installs no tools. The core set is bash, git, Python 3.11 or later, `jq`, and `gh` with the `gh stack` extension. You also need the `claude` and `codex` CLIs. On macOS, install GNU coreutils for `timeout`.
-
-| Skill | Also needs |
-|---|---|
-| `excalidraw-skill`, `slide-deck` | Node.js with `npx`. `slide-deck` also needs Pillow and Chrome for PDFs |
-| `explainer` | Bun. Narration also needs `ffprobe` and an ElevenLabs key |
-| `slack-read` | A Slack user token in `SLACK_TOKEN` |
-| `hunk-review`, `hunk-extensions` | `npm i -g hunkdiff@0.22.0` |
-| `herdr` | Herdr 0.9.0, run with `HERDR_ENV=1` |
-
-On Ubuntu, Codex needs a Bubblewrap profile. See [Linux setup](linux/README.md). For `/tmp` cleanup, see [Linux cleanup](linux/cleanup/README.md).
 
 ## Layout
 
