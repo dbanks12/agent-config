@@ -11,7 +11,10 @@ check=0; failed=0; backed_up=0
 
 link() {
   local src="$root/$1" dst="${2/#\~/$HOME}"
-  [[ -e "$src" ]] || { echo "missing source: $src" >&2; failed=1; return; }
+  if [[ ! -e "$src" || ( -d "$src" && -z "$(ls -A "$src")" ) ]]; then
+    [[ "$1" == vendor/* ]] && { echo "skipped: $dst (submodule not cloned)" >&2; return; }
+    echo "missing source: $src" >&2; failed=1; return
+  fi
   [[ -L "$dst" && "$(readlink -f "$dst")" == "$(readlink -f "$src")" ]] && return
   if [[ $check -eq 1 ]]; then echo "drift: $dst" >&2; failed=1; return; fi
   mkdir -p "$(dirname "$dst")"
@@ -25,7 +28,13 @@ link() {
 }
 
 # skills from other repos (for example vendor/claude-authoring-tools) are submodules
-[[ $check -eq 1 ]] || git -C "$root" submodule update --init --quiet
+# a private submodule fails to clone without access, so its links are skipped
+if [[ $check -eq 0 ]]; then
+  for sub in $(git -C "$root" config -f .gitmodules --get-regexp '\.path$' | awk '{print $2}'); do
+    git -C "$root" submodule update --init --quiet -- "$sub" ||
+      echo "warning: $sub did not clone, its skills are skipped" >&2
+  done
+fi
 
 while read -r src dst; do
   [[ -z "$src" || "$src" == \#* ]] && continue
