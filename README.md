@@ -30,7 +30,7 @@ These are required for `install.sh`, the hooks, and the cross-model skills.
 | Access to the private repo `dbanks12/claude-authoring-tools` | `install.sh` submodule init | An SSH key on the GitHub account |
 | Python 3.11 or later, standard library only | Most skill scripts, `statusline/install.py` | `sudo apt install python3` / `brew install python` |
 | jq | `claude-hooks/*.sh` | `sudo apt install jq` / `brew install jq` |
-| `gh`, logged in, with the `gh stack` extension | `create-pr`, `claude-hooks/require-gh-stack.sh` | Install from [cli.github.com](https://cli.github.com), then `gh auth login` and `gh extension install github/gh-stack` |
+| `gh`, logged in, with the `gh stack` extension | `create-pr` | Install from [cli.github.com](https://cli.github.com), then `gh auth login` and `gh extension install github/gh-stack` |
 | `claude` and `codex` CLIs, logged in | `call-claude`, `call-codex`, `review-*`, `review-by-council` | `npm i -g @anthropic-ai/claude-code @openai/codex` |
 | bubblewrap with the AppArmor profile (Ubuntu only) | The Codex sandbox | `./linux/install-codex-sandbox.sh`. See [Linux sandbox setup](linux/README.md) |
 
@@ -42,7 +42,6 @@ These are required for `install.sh`, the hooks, and the cross-model skills.
     {
       "matcher": "Bash",
       "hooks": [
-        { "type": "command", "command": "bash <repo>/claude-hooks/require-gh-stack.sh", "timeout": 10 },
         { "type": "command", "command": "bash <repo>/claude-hooks/block-pattern-kills.sh", "timeout": 10 }
       ]
     }

@@ -56,3 +56,5 @@ skills/slack-read ~/.claude/skills/slack-read
 skills/slack-read ~/.codex/skills/slack-read
 skills/explainer ~/.claude/skills/explainer
 skills/explainer ~/.codex/skills/explainer
+skills/finish-pr ~/.claude/skills/finish-pr
+skills/finish-pr ~/.codex/skills/finish-pr
