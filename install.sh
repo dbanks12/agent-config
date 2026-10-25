@@ -28,7 +28,7 @@ link() {
 }
 
 # skills from other repos (for example vendor/claude-authoring-tools) are submodules
-# a private submodule fails to clone without access, so its links are skipped
+# a submodule that fails to clone is skipped, with its links
 if [[ $check -eq 0 ]]; then
   for sub in $(git -C "$root" config -f .gitmodules --get-regexp '\.path$' | awk '{print $2}'); do
     git -C "$root" submodule update --init --quiet -- "$sub" ||

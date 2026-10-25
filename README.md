@@ -4,10 +4,10 @@ Shared instructions, skills, and hooks for Claude Code and Codex. You edit one r
 
 ## Dependencies
 
-This repo pins two skill repos as submodules in `vendor/`:
+This repo pins two public skill repos as submodules in `vendor/`. `install.sh` clones them.
 
-- [dbanks12/excalidraw-skill](https://github.com/dbanks12/excalidraw-skill): public.
-- [dbanks12/claude-authoring-tools](https://github.com/dbanks12/claude-authoring-tools): private. Without access, `install.sh` skips `slide-deck`.
+- [dbanks12/excalidraw-skill](https://github.com/dbanks12/excalidraw-skill): `excalidraw-skill`.
+- [dbanks12/claude-authoring-tools](https://github.com/dbanks12/claude-authoring-tools): `slide-deck`.
 
 `install.sh` installs no tools. The core set is bash, git, Python 3.11 or later, `jq`, and `gh` with the `gh stack` extension. You also need the `claude` and `codex` CLIs. On macOS, install GNU coreutils for `timeout`.
 
