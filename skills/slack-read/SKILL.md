@@ -9,10 +9,10 @@ Read Slack through `scripts/slack.py`. It needs `SLACK_TOKEN`, a user token with
 
 ```sh
 S=~/.claude/skills/slack-read/scripts/slack.py      # Codex: ~/.codex/skills/slack-read/scripts/slack.py
-python3 $S channels obsidion                         # find a channel name and id
-python3 $S history team-obsidion --since 14d > /tmp/obs.txt
-python3 $S history team-oxide --since 2026-08-01 --until 2026-08-15
-python3 $S thread 'https://aztecprotocol.slack.com/archives/C0ADAFFC25S/p1790264897310429'
+python3 $S channels backend                          # find a channel name and id
+python3 $S history team-backend --since 14d > /tmp/backend.txt
+python3 $S history team-frontend --since 2026-08-01 --until 2026-08-15
+python3 $S thread 'https://example.slack.com/archives/C0123456789/p1700000000123456'
 ```
 
 - `history` prints each top-level message under a `=== <permalink>` line, with thread replies indented below it. The default window is the last 7 days.
