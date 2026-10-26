@@ -26,7 +26,14 @@
     const clock = q(".xp-time");
     const caption = q(".xp-captions");
     const chapters = q(".xp-chapters");
-    const speed = q(".xp-speed");
+    // Pages built before the speed control lack .xp-speed, so add it to the controls.
+    let speed = q(".xp-speed");
+    if (!speed) {
+      speed = document.createElement("select");
+      speed.className = "xp-speed";
+      speed.setAttribute("aria-label", "Playback speed");
+      q(".xp-controls").append(speed);
+    }
     const els = Object.fromEntries([...stage.querySelectorAll("[data-scene]")].map((el) => [el.dataset.scene, el]));
     const last = timings.scenes.at(-1);
     // The media file is the authority on length; timings may end early (trailing silence) or late.
@@ -124,18 +131,16 @@
       rate = r;
       if (audio) audio.playbackRate = audio.defaultPlaybackRate = r;
     }
-    if (speed) {
-      speed.replaceChildren(
-        ...[0.75, 1, 1.25, 1.5, 2].map((r) => {
-          const o = document.createElement("option");
-          o.value = String(r);
-          o.textContent = `${r}×`;
-          o.selected = r === 1;
-          return o;
-        }),
-      );
-      speed.addEventListener("change", () => setRate(Number(speed.value)));
-    }
+    speed.replaceChildren(
+      ...[0.75, 1, 1.25, 1.5, 2].map((r) => {
+        const o = document.createElement("option");
+        o.value = String(r);
+        o.textContent = `${r}×`;
+        o.selected = r === 1;
+        return o;
+      }),
+    );
+    speed.addEventListener("change", () => setRate(Number(speed.value)));
 
     bar.step = "0.05";
     bar.addEventListener("input", () => seek(Number(bar.value)));
