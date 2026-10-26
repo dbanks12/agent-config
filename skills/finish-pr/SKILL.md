@@ -63,7 +63,16 @@ Embed it as `![<alt text that states the diagram's point>](https://github.com/<o
 
 ## 4. Flip ready and address Greptile (`ready`, `greptile`)
 
-Push all commits. With `ready`, run `gh pr ready`. With `greptile`, run `gh pr comment --body "@greptileai"` and leave the PR a draft. Wait for a new review from `greptile-apps`. Poll `gh pr view --json reviews` every two minutes, with Monitor in Claude Code. Time out after 30 minutes and report. Read its inline comments with `gh api repos/<owner>/<repo>/pulls/<pr>/comments`.
+Push all commits. Record the time as `since`. With `ready`, run `gh pr ready`. With `greptile`, run `gh pr comment --body "@greptileai"` and leave the PR a draft.
+
+Poll every 30 seconds, with Monitor in Claude Code. Each poll lists the `greptile-apps[bot]` inline comments created after `since`:
+
+```bash
+gh api --paginate "repos/<owner>/<repo>/pulls/<pr>/comments?since=<since>" \
+  --jq '.[] | select(.user.login == "greptile-apps[bot]") | "\(.id) \(.path):\(.line)"'
+```
+
+Address each new comment as soon as it appears. Do not wait for the full review. Keep polling until `gh pr view --json reviews` shows a new review from `greptile-apps` and no new comments arrive for one minute. Time out after 30 minutes and report.
 
 Fix each real problem in a new commit and reply to its thread with the commit. Reply to the others with a one-line reason. Done when every Greptile comment has a reply.
 
