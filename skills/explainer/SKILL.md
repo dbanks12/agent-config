@@ -102,6 +102,7 @@ page.html        # standalone or slide-deck page
        <button class="xp-play" type="button">Play</button>
        <input class="xp-bar" type="range" min="0" value="0" aria-label="Position">
        <span class="xp-time"></span>
+       <select class="xp-speed" aria-label="Playback speed"></select>
      </div>
      <ol class="xp-chapters"></ol>
      <details><summary>Transcript</summary><div class="xp-transcript"></div></details>
@@ -124,6 +125,7 @@ page.html        # standalone or slide-deck page
    - Canvas stage: draw it into 3×3 grid canvases (one sheet per nine times), save each as a JPEG, and read them. SVG stage: element screenshots of `.xp-stage`. Cover each scene's start, midpoint, and end, the main word cues, and two scene boundaries.
    - Check that the right scene shows, every headline is visible, labels are readable, and nothing overlaps or sits off-stage.
    - Seek backwards across two scenes and confirm the earlier state renders. Pause and resume. Play the last two seconds.
+   - Set the speed to 2× while playing. Confirm that the clock advances about two seconds per second and the position does not jump.
    - Fix and recheck at most twice. Then report what still looks wrong.
    - The user listens once. An agent cannot judge pronunciation, a tag that landed wrong, or a cut-off sentence.
 7. **Hand off and publish.** The driver does this step.

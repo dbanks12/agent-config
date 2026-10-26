@@ -4,7 +4,7 @@
 // free-running CSS animations or transitions.
 //
 // Explainer.mount({
-//   root,                       // element holding .xp-stage, .xp-controls, .xp-captions, .xp-chapters, .xp-transcript
+//   root,                       // element holding .xp-stage, .xp-controls, .xp-captions, .xp-chapters, .xp-transcript, .xp-speed
 //   timings,                    // parsed timings.json (inline it; never fetch it — file:// blocks that)
 //   audio,                      // an <audio> element, or null for captions-only
 //   scenes: { [id]: (el, local, p, t) => void },  // local = seconds into the scene, p = 0..1, t = global seconds
@@ -26,6 +26,7 @@
     const clock = q(".xp-time");
     const caption = q(".xp-captions");
     const chapters = q(".xp-chapters");
+    const speed = q(".xp-speed");
     const els = Object.fromEntries([...stage.querySelectorAll("[data-scene]")].map((el) => [el.dataset.scene, el]));
     const last = timings.scenes.at(-1);
     // The media file is the authority on length; timings may end early (trailing silence) or late.
@@ -35,8 +36,9 @@
     let base = 0;
     let startedAt = null;
     let raf = 0;
+    let rate = 1;
     const now = () =>
-      clamp(audio ? audio.currentTime : startedAt === null ? base : base + (performance.now() - startedAt) / 1000, 0, total());
+      clamp(audio ? audio.currentTime : startedAt === null ? base : base + ((performance.now() - startedAt) / 1000) * rate, 0, total());
     const playing = () => (audio ? !audio.paused && !audio.ended : startedAt !== null);
     const atEnd = () => (audio ? audio.ended : false) || now() >= total() - 0.05;
 
@@ -112,6 +114,28 @@
         schedule();
       }
     });
+
+    // Captions-only clock: fold the time played at the old rate into base before the rate changes.
+    function setRate(r) {
+      if (!audio && startedAt !== null) {
+        base = now();
+        startedAt = performance.now();
+      }
+      rate = r;
+      if (audio) audio.playbackRate = audio.defaultPlaybackRate = r;
+    }
+    if (speed) {
+      speed.replaceChildren(
+        ...[0.75, 1, 1.25, 1.5, 2].map((r) => {
+          const o = document.createElement("option");
+          o.value = String(r);
+          o.textContent = `${r}×`;
+          o.selected = r === 1;
+          return o;
+        }),
+      );
+      speed.addEventListener("change", () => setRate(Number(speed.value)));
+    }
 
     bar.step = "0.05";
     bar.addEventListener("input", () => seek(Number(bar.value)));
