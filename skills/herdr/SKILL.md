@@ -94,7 +94,7 @@ IDs and live agent names are scoped to one server. Two saved SSH machines can bo
 
 ## When to open a pane
 
-Open, split, or create a pane only when the user's request contains the word "pane". "Use codex", "ask astra", "hand this to codex", or "get a second opinion" do not open a pane. Handle those requests in the current pane, for example with the `review-with-<tool>` skill in your skills directory, or by running the agent CLI directly. If the user wants a pane, they will say so. Ask before opening one in any other case.
+Open, split, or create a pane only when the user's request contains the word "pane". "Use codex", "ask astra", "hand this to codex", or "get a second opinion" do not open a pane. Handle those requests in the current pane, for example with the `review-with-<tool>` skill in your skills directory, or by running the agent CLI directly. If the user wants a pane, they will say so. A request to Codex for an artifact also opens a pane (see "Artifacts from Codex" in AGENTS.md). Ask before opening one in any other case.
 
 ## Start and coordinate an agent
 

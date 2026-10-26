@@ -44,6 +44,30 @@ Stop only processes you started, by PID. Use `$!` of the process, or check each 
 
 Never use `pkill` or `killall`. They match other sessions' processes and live services. In Claude Code, `claude-hooks/block-pattern-kills.sh` blocks them.
 
+# Artifacts from Codex
+
+This section applies to Codex. Claude Code publishes Artifacts itself.
+
+Codex has no Artifact tool. Headless Claude Code (`claude --print`) has none either. When the user asks Codex for an artifact, give the job to an interactive Claude Code session. A request for a page, an HTML file, or a file is not a request for an artifact. Build that HTML yourself.
+
+1. Write a brief to a new file under `/tmp`. Give the goal, the source files, and the decisions you already made. If you already wrote the HTML, name it and ask only for the publish.
+2. If `HERDR_ENV=1`, start Claude Code in a sibling pane. The artifact request authorizes this pane.
+
+   ```bash
+   herdr pane split --current --direction right --cwd "$PWD" --no-focus
+   herdr agent start artifact --kind claude --pane <new pane id>
+   herdr agent prompt artifact "Read <brief path>. Make it as an Artifact, publish it, and reply with the URL." --wait
+   ```
+
+   If `agent_status` is `blocked`, tell the user to answer the prompt in the pane. Then run `herdr agent wait artifact`. Read the URL with `herdr agent read` and give it to the user.
+3. Outside Herdr, give the user this command to run:
+
+   ```bash
+   claude "Read <brief path>. Make it as an Artifact, publish it, and reply with the URL."
+   ```
+
+4. Delete the brief after Claude Code replies with the URL.
+
 # Karpathy guidelines
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
