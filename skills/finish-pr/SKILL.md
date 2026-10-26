@@ -1,8 +1,8 @@
 ---
 name: finish-pr
-description: Take an open PR from draft to reviewable. Cross-tool review, a slim description with a diagram, and lean tests. Optionally flip it ready, address Greptile, watch CI, and merge.
+description: Take an open PR from draft to reviewable. Cross-tool review, a slim description with a diagram, and lean tests. Optionally flip it ready or request Greptile on the draft, address Greptile, watch CI, and merge.
 disable-model-invocation: true
-argument-hint: "[ready] [ci] [merge]"
+argument-hint: "[ready|greptile] [ci|ci-draft] [merge]"
 ---
 
 # Finish a pull request
@@ -11,8 +11,10 @@ Run the steps in order on the PR for the current branch. Find it with `gh pr vie
 
 Arguments:
 
-- `ready` (also `ready_and_greptile`, `greptile`): run step 4.
-- `ci`: run step 5. It works with or without `ready`.
+- `ready` (also `ready_and_greptile`): run step 4.
+- `greptile`: run step 4, but keep the PR a draft. Comment `@greptileai` instead of `gh pr ready`.
+- `ci`: run step 5. It works with or without `ready` or `greptile`.
+- `ci-draft`: run step 5, but first label the PR `ci-draft`.
 - `merge`: run steps 5 and 6. Step 6 runs last.
 
 The bar for every fix in this skill is a **real problem**: a defect a user could hit, such as wrong funds movement, a crash, data loss, a security hole, or a broken flow. Style preferences, speculative hardening, and "consider also" ideas are not real problems. Record them as rejected and move on.
@@ -59,15 +61,15 @@ git push origin "$sha:refs/heads/<branch>-pr-assets"
 
 Embed it as `![<alt text that states the diagram's point>](https://github.com/<owner>/<repo>/blob/<sha>/diagram.png?raw=true)`. Update the body with `gh pr edit --body-file`. Done when the rendered body shows the image and has no section beyond the list above.
 
-## 4. Flip ready and address Greptile (`ready`)
+## 4. Flip ready and address Greptile (`ready`, `greptile`)
 
-Push all commits. Run `gh pr ready`. Wait for a new review from `greptile-apps`. Poll `gh pr view --json reviews` every two minutes, with Monitor in Claude Code. Time out after 30 minutes and report. Read its inline comments with `gh api repos/<owner>/<repo>/pulls/<pr>/comments`.
+Push all commits. With `ready`, run `gh pr ready`. With `greptile`, run `gh pr comment --body "@greptileai"` and leave the PR a draft. Wait for a new review from `greptile-apps`. Poll `gh pr view --json reviews` every two minutes, with Monitor in Claude Code. Time out after 30 minutes and report. Read its inline comments with `gh api repos/<owner>/<repo>/pulls/<pr>/comments`.
 
 Fix each real problem in a new commit and reply to its thread with the commit. Reply to the others with a one-line reason. Done when every Greptile comment has a reply.
 
-## 5. Watch CI (`ci`)
+## 5. Watch CI (`ci`, `ci-draft`)
 
-Push all commits. Watch the checks with `timeout 3600 gh pr checks --watch`. For each failure, read the job log with `gh run view --log-failed`.
+Push all commits. With `ci-draft`, run `gh pr edit --add-label ci-draft`. Watch the checks with `timeout 3600 gh pr checks --watch`. For each failure, read the job log with `gh run view --log-failed`.
 
 If the cause is clear and the fix is small, fix it in a new commit, push, and watch again. Otherwise, stop and report the failure with the log excerpt. A flaky failure unrelated to the diff is a report, not a fix. Done when all required checks pass, or every failure is reported.
 
