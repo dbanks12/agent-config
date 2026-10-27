@@ -2,7 +2,7 @@
 // Usage: qa.sh <work dir> [extra seconds...]
 // Serves the work dir with HTTP Range support, then checks: console errors, a [data-scene] div per scene,
 // the right scene at each sampled time, a backward seek, pause and resume, the 10 s skip keys, 2x speed,
-// and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
+// the ? prompt, and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -107,6 +107,19 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   check(s1 - s0 > 3.2 && s1 - s0 < 4.8, `2x speed advances ${(s1 - s0).toFixed(2)} s in 2 s`);
   await page.click(".xp-play");
   await page.selectOption(".xp-speed", "1");
+
+  const a0 = Math.min(20, tm.duration - 1);
+  await seek(a0);
+  await page.click(".xp-ask");
+  const askOpen = await page.$eval(".xp-ask-panel", (x) => !x.hidden);
+  const askTxt = await page.$eval(".xp-ask-text", (x) => x.value);
+  const recent = tm.words.filter((x) => x.s >= a0 - 5 && x.s <= a0).map((x) => x.w).join(" ");
+  await page.click(".xp-ask-modes input[value=explainer]");
+  const askExp = await page.$eval(".xp-ask-text", (x) => x.value);
+  await page.keyboard.press("Escape");
+  const askShut = await page.$eval(".xp-ask-panel", (x) => x.hidden);
+  check(askOpen && askShut && askTxt.includes(recent) && askTxt.includes("confused") && /Answer in text/.test(askTxt) && /Make an explainer/.test(askExp),
+    `the ? button opens a prompt with the last 5 s of narration, switches modes, and closes on Escape`);
 
   await seek(tm.duration - 2);
   await page.click(".xp-play");

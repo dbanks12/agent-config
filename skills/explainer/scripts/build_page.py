@@ -82,6 +82,7 @@ def main():
     for s in tm["scenes"]:
         s["text"] = re.sub(r"\s+", " ", re.sub(r"\[[a-z ]+\]", " ", s["text"])).strip()
     meta = json.loads((w / "page.json").read_text())
+    tm["page"] = {"title": meta["title"], "lede": meta.get("lede", "")}
 
     if (w / "cues.json").exists():
         stage, scenes_js = excalidraw_stage(w, tm)
