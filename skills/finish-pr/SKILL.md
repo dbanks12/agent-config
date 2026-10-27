@@ -55,7 +55,7 @@ Upload the images through the GitHub REST API. Do not commit them with local git
 
 ```bash
 R=repos/<owner>/<repo>
-blob=$(jq -n --arg c "$(base64 -w0 diagram.png)" '{content: $c, encoding: "base64"}' \
+blob=$(base64 -w0 diagram.png | jq -Rs '{content: ., encoding: "base64"}' \
   | gh api $R/git/blobs --input - --jq .sha)
 # Repeat for each image. Put every blob in one tree.
 tree=$(jq -n --arg b "$blob" '{tree: [{path: "diagram.png", mode: "100644", type: "blob", sha: $b}]}' \
