@@ -71,7 +71,7 @@ This file and its scripts and assets hold everything a job needs. Read the sourc
 
 The procedure is fixed, so do not deliberate over it. Spend your thinking on the script and the drawings. Batch each step's writes and commands into one tool call where you can.
 
-1. **Open the job in one call**: `<this skill dir>/scripts/start.sh <slug> <source files...>`. It creates the work dir with `scenes/` and a Git repo, prints the style history (step 3), and prints each source with line numbers.
+1. **Open the job in one call**: `<this skill dir>/scripts/start.sh <slug> <source files...>`. It creates the work dir with `scenes/` and a Git repo, prints the work dir, prints the style history (step 3), and prints each source with line numbers. If an earlier job already has `<slug>`, it uses `<slug>-2`, `<slug>-3`, and so on. Use the work dir it prints.
    **Draft `narration.json`** from the sources the user named, the teach-me page, or the deck's `slides.md`: 5–13 scenes, 300–750 words (about 2–5 minutes at 150 words a minute), at most 6,000 characters. A slide-deck explainer has one scene per slide, or per group of slides that make one point.
    - **Open with context, about 40 seconds (around 100 words)**: how the system works today and the few terms the rest depends on. A viewer who has never seen this codebase must follow everything after it. It comes out of the 2–5 minutes, not on top.
    - Then walk the mechanism: the problem, the change or the parts, what happens in order, what can go wrong and what guards it.
