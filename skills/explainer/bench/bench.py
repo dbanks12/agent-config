@@ -2,7 +2,7 @@
 """Run the explainer skill headless on fixed inputs and measure where the time goes.
 
 Usage:
-  bench.py run [--inputs install,player] [--label NAME] [--narrated] [--serial]
+  bench.py run [--inputs install,player] [--repeat N] [--label NAME] [--narrated] [--serial]
   bench.py report [RUN_DIR ...]      # default: every run under the results root
 
 Each input runs in its own `claude -p` session, in a fresh copy of bench/inputs/<name>/. The session
@@ -46,12 +46,12 @@ def git_rev():
     return r.stdout.strip() + (" (dirty)" if dirty.strip() else "")
 
 
-def run_one(name, run_dir, narrated):
-    out = run_dir / name
+def run_one(name, sample, run_dir, narrated):
+    out = run_dir / f"{name}-{sample}"
     src = out / "src"
     shutil.copytree(HERE / "inputs" / name, src)
     topic = (src / "topic.txt").read_text().strip()
-    slug = f"bench-{name}-{run_dir.name[:15]}"
+    slug = f"bench-{name}-{sample}-{run_dir.name[:15]}"
     session = str(uuid.uuid4())
     mode = "narrated" if narrated else "captions only; do not use ElevenLabs"
     prompt = PROMPT.format(topic=topic, src=src, mode=mode, slug=slug)
@@ -83,7 +83,7 @@ def run_one(name, run_dir, narrated):
     page = out / "job" / "page.html"
     meta["page_bytes"] = page.stat().st_size if page.exists() else 0
     (out / "meta.json").write_text(json.dumps(meta, indent=1))
-    print(f"bench: {name} finished in {timeline.fmt(wall)}, exit {code}, page {meta['page_bytes']} bytes", flush=True)
+    print(f"bench: {name}-{sample} finished in {timeline.fmt(wall)}, exit {code}, page {meta['page_bytes']} bytes", flush=True)
 
 
 def cmd_run(a):
@@ -94,11 +94,12 @@ def cmd_run(a):
     run_dir = ROOT / f"{time.strftime('%Y%m%d-%H%M%S')}-{a.label}"
     run_dir.mkdir(parents=True)
     print(f"bench: {run_dir}", flush=True)
+    jobs = [(n, k, run_dir, a.narrated) for k in range(1, a.repeat + 1) for n in names]
     if a.serial:
-        for n in names:
-            run_one(n, run_dir, a.narrated)
+        for j in jobs:
+            run_one(*j)
     else:
-        threads = [threading.Thread(target=run_one, args=(n, run_dir, a.narrated)) for n in names]
+        threads = [threading.Thread(target=run_one, args=j) for j in jobs]
         for t in threads:
             t.start()
         for t in threads:
@@ -108,7 +109,7 @@ def cmd_run(a):
 
 def summarize(out):
     meta = json.loads((out / "meta.json").read_text())
-    row = {"run": out.parent.name, "input": meta["input"], "wall": meta["wall_s"], "exit": meta["exit"],
+    row = {"run": out.parent.name, "input": meta["input"], "sample": out.name, "wall": meta["wall_s"], "exit": meta["exit"],
            "page": meta["page_bytes"] > 0}
     if (out / "timeline.json").exists():
         turns = json.loads((out / "timeline.json").read_text())
@@ -122,12 +123,19 @@ def summarize(out):
 def report(run_dirs):
     rows = [summarize(m.parent) for d in run_dirs for m in sorted(Path(d).glob("*/meta.json"))]
     f = timeline.fmt
-    print(f"\n{'run':34} {'input':8} {'wall':>7} {'model':>7} {'tool':>7} {'bgwait':>7} {'req':>4} ok  top phases")
+    means = {}
+    for r in rows:
+        if r["exit"] == 0 and r["page"]:
+            means.setdefault((r["run"], r["input"]), []).append(r["wall"])
+    print(f"\n{'run':34} {'sample':10} {'wall':>7} {'model':>7} {'tool':>7} {'bgwait':>7} {'req':>4} ok  top phases")
     for r in rows:
         ok = "y" if r["exit"] == 0 and r["page"] else "n"
         ph = " ".join(f"{k}:{f(v)}" for k, v in sorted(r.get("phases", {}).items(), key=lambda kv: -kv[1])[:4])
-        print(f"{r['run'][:34]:34} {r['input']:8} {f(r['wall']):>7} {f(r.get('model', 0)):>7} {f(r.get('tool', 0)):>7}"
+        print(f"{r['run'][:34]:34} {r['sample']:10} {f(r['wall']):>7} {f(r.get('model', 0)):>7} {f(r.get('tool', 0)):>7}"
               f" {f(r.get('bg', 0)):>7} {r.get('req', 0):>4} {ok:2}  {ph}")
+    print(f"\n{'run':34} {'input':8} {'mean wall':>9}  samples")
+    for (run, inp), walls in means.items():
+        print(f"{run[:34]:34} {inp:8} {f(sum(walls) / len(walls)):>9}  {' '.join(f(w) for w in walls)}")
 
 
 def main():
@@ -135,6 +143,7 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run")
     r.add_argument("--inputs", default="install,player")
+    r.add_argument("--repeat", type=int, default=1, help="samples per input")
     r.add_argument("--label", default="run")
     r.add_argument("--narrated", action="store_true")
     r.add_argument("--serial", action="store_true", help="run inputs one after another, not in parallel")
