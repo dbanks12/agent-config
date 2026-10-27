@@ -5,6 +5,12 @@ Diagram(<scene id>, title) prefixes every id with the scene id, so the ids below
 s1-repo--claude (an arrow), s1-repo--claude-label (its label), s2-rules, s2-rules-title, and so on.
 cues.json names these full ids. Positions are top-left corners on a grid you choose: keep a scene
 inside about 900 x 500 so it reads at 640 x 360, and 80-130 px between boxes.
+
+place.py API (all positions in px, ids without the scene prefix):
+  box(name, x, y, label, sub=None, fam="gray")   diamond(name, x, y, question, fam="blue")
+  arrow(a, b, label=None, dashed=False, route="straight" | "elbow", via=[(x, y)])
+  zone(name, x, y, w, h, title)   panel(name, x, y, title, [lines])   note(name, x, y, text)   start(name, x, y)
+  fam: gray, blue, green, orange, purple, red, teal. A diamond doubles its label's size.
 """
 import os
 import sys
