@@ -155,7 +155,7 @@
       const d = skip[e.key], el = e.target;
       if (!d || e.altKey || e.ctrlKey || e.metaKey || el.isContentEditable) return;
       const ours = root.contains(el)
-        ? el === bar || !el.matches("input, select, textarea")
+        ? el === bar || !(el.matches("input, select, textarea") || el.closest(".xp-ask-panel"))
         : (el === document.body || el === document.documentElement) && document.querySelector(".xp") === root;
       if (!ours) return;
       e.preventDefault();
@@ -183,6 +183,83 @@
           return p;
         }),
       );
+
+    // The red "?" pauses and builds a prompt for an agent: the topic, the last 5 s of narration, and the viewer's confusion.
+    let ask = q(".xp-ask");
+    if (!ask) {
+      ask = document.createElement("button");
+      ask.type = "button";
+      ask.className = "xp-ask";
+      ask.textContent = "?";
+      ask.title = "Confused? Ask an agent about this moment";
+      ask.setAttribute("aria-label", ask.title);
+      q(".xp-controls").append(ask);
+    }
+    const group = `xp-ask-${Math.random().toString(36).slice(2)}`;
+    const panel = document.createElement("div");
+    panel.className = "xp-ask-panel";
+    panel.hidden = true;
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "Ask an agent about this moment");
+    panel.innerHTML = `<p class="xp-ask-head">Confused? Ask an agent</p>
+      <p class="xp-ask-hint">Copy this prompt into Claude or another agent.</p>
+      <div class="xp-ask-modes" role="radiogroup" aria-label="What to ask for">
+        <label><input type="radio" name="${group}" value="text" checked> Explain in text</label>
+        <label><input type="radio" name="${group}" value="explainer"> Make an explainer video</label>
+      </div>
+      <textarea class="xp-ask-text" rows="9" readonly aria-label="Prompt to copy"></textarea>
+      <div class="xp-ask-actions">
+        <button type="button" class="xp-ask-copy">Copy prompt</button>
+        <button type="button" class="xp-ask-close">Close</button>
+        <span class="xp-ask-status" aria-live="polite"></span>
+      </div>`;
+    q(".xp-controls").after(panel);
+    const askText = (mode) => {
+      const t = now(), scene = timings.scenes.find((s) => t < s.end) ?? last;
+      const said = timings.words.filter((w) => w.s >= t - 5 && w.s <= t).map((w) => w.w).join(" ") || scene.text;
+      const info = timings.page ?? {}, title = info.title || document.title;
+      return [
+        `I'm watching a narrated explainer${title ? `, "${title}"` : ""}.${info.lede ? ` ${info.lede}` : ""}`,
+        `It covers: ${timings.scenes.map((s) => s.title).join("; ")}.`,
+        "",
+        `At ${fmt(t)} of ${fmt(total())}, in the part "${scene.title}", the narrator said:`,
+        `"${said}"`,
+        "",
+        "I'm confused about this part and need it explained further.",
+        mode === "explainer"
+          ? "Make an explainer: a short narrated explainer that goes deeper on just this part."
+          : "Answer in text: explain this part more simply, with a concrete example, and say how it fits the rest of the topic.",
+      ].join("\n");
+    };
+    const text = panel.querySelector(".xp-ask-text");
+    const status = panel.querySelector(".xp-ask-status");
+    const fill = () => {
+      text.value = askText(panel.querySelector("input:checked").value);
+      status.textContent = "";
+    };
+    const close = () => {
+      panel.hidden = true;
+      ask.focus();
+    };
+    ask.addEventListener("click", () => {
+      pause();
+      fill();
+      panel.hidden = false;
+      panel.querySelector("input:checked").focus();
+    });
+    panel.addEventListener("change", fill);
+    panel.addEventListener("keydown", (e) => e.key === "Escape" && close());
+    panel.querySelector(".xp-ask-close").addEventListener("click", close);
+    // Clipboard writes work only inside the click; where they are refused, select the text for a manual copy.
+    panel.querySelector(".xp-ask-copy").addEventListener("click", () => {
+      const manual = () => {
+        text.focus();
+        text.select();
+        status.textContent = "Press Ctrl+C (⌘C on a Mac) to copy.";
+      };
+      const copied = () => (status.textContent = "Copied. Paste it into your agent.");
+      navigator.clipboard?.writeText(text.value).then(copied, manual) ?? manual();
+    });
     render();
     return { seek, render, pause };
   }
