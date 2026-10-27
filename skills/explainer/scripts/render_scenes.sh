@@ -2,8 +2,9 @@
 # Draw, lint, render, and tag Excalidraw scenes in parallel, one private canvas per scene.
 # Usage: render_scenes.sh <scenes dir> <id>...
 # <scenes dir>/scenes.py <id> prints one scene's element JSON (place.py output). For each id this writes
-# <id>.excalidraw, <id>.png, <id>.svg, and <id>.tagged.svg, prints lint problems, and tiles every PNG into
-# sheet.jpg. Rerun it with only the ids you changed. Every canvas server it starts is stopped on exit.
+# <id>.excalidraw, <id>.png, <id>.svg, <id>.tagged.svg, and <id>.lint, and tiles every PNG into sheet.jpg.
+# It prints all lint problems at the end, and its last line names the scenes that failed lint.
+# Rerun it with only the ids you changed. Every canvas server it starts is stopped on exit.
 set -euo pipefail
 [[ $# -ge 2 ]] || { echo "usage: render_scenes.sh <scenes dir> <id>..." >&2; exit 1; }
 
@@ -28,7 +29,7 @@ one() {  # one <id> <index>
     python3 scenes.py "$id" | x add >/dev/null
     x export --out "$id.excalidraw" >/dev/null
   )
-  python3 "$excalidraw/scripts/lint_diagram.py" "$id.excalidraw" | grep -v '^OK' | sed "s/^/$id: /" || true
+  python3 "$excalidraw/scripts/lint_diagram.py" "$id.excalidraw" | grep -v '^OK' | sed "s/^/$id: /" > "$id.lint" || true
   x render "$id.excalidraw" --scale 1 --out "$id.png" >/dev/null &
   x render "$id.excalidraw" --format svg --out "$id.svg" >/dev/null
   wait
@@ -61,4 +62,10 @@ if [[ $# -eq 1 ]]; then
 else
   ffmpeg -loglevel error -y "${inputs[@]}" -filter_complex "${filters}${labels}xstack=inputs=$#:layout=${layout%|}:fill=gray" sheet.jpg
 fi
-echo "render_scenes: $# scenes, sheet.jpg"
+# The lint lines come last, so a session that reads only the tail still sees them.
+lint_failed=()
+for id in "$@"; do
+  cat "$id.lint"
+  if grep -q FAIL "$id.lint"; then lint_failed+=("$id"); fi
+done
+echo "render_scenes: $# scenes, sheet.jpg, lint ${lint_failed[*]:+FAIL: }${lint_failed[*]:-clean}"
