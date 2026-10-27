@@ -1,8 +1,8 @@
 ---
 name: finish-pr
-description: Take an open PR from draft to reviewable. Cross-tool review, a slim description with a diagram, and lean tests. Optionally flip it ready or request Greptile on the draft, address Greptile, watch CI, and merge.
+description: Take an open PR from draft to reviewable. Cross-tool review, a slim description with a diagram, and lean tests. Optionally flip it ready or request Greptile on the draft, address Greptile, watch CI, link a narrated explainer, and merge.
 disable-model-invocation: true
-argument-hint: "[ready|greptile] [ci|ci-draft] [merge]"
+argument-hint: "[ready|greptile] [ci|ci-draft] [explainer [--review <level>]] [merge]"
 ---
 
 # Finish a pull request
@@ -16,6 +16,7 @@ Arguments:
 - `ci`: run step 5. It works with or without `ready` or `greptile`.
 - `ci-draft`: run step 5, but first label the PR `ci-draft`.
 - `merge`: run steps 5 and 6. Step 6 runs last.
+- `explainer`: run step 7. It starts after step 3 and finishes before step 6. Options after it, such as `--review medium`, pass to the explainer skill.
 
 The bar for every fix in this skill is a **real problem**: a defect a user could hit, such as wrong funds movement, a crash, data loss, a security hole, or a broken flow. Style preferences, speculative hardening, and "consider also" ideas are not real problems. Record them as rejected and move on.
 
@@ -48,6 +49,7 @@ Rewrite the body to carry only what a reviewer needs:
 - **Diagram**: one Excalidraw diagram of the flow or structure that changed. Draw it with the `excalidraw-skill` skill and render a PNG.
 - **Screenshots**: for a UI change, the before and after captures, in a table with one column per viewport.
 - Any `Fixes <issue>` lines from the old body.
+- With `explainer`, the explainer link from step 7.
 
 Cut file-by-file lists, test inventories, and history of how the work went.
 
@@ -91,10 +93,23 @@ If the cause is clear and the fix is small, fix it in a new commit, push, and wa
 
 ## 6. Merge (`merge`)
 
-Merge only after every earlier step is done and all required checks pass on the latest pushed commit. If a check failed, a Greptile comment has no reply, or a fix is not pushed, stop and report.
+Merge only after every earlier step is done, step 7 too with `explainer`, and all required checks pass on the latest pushed commit. If a check failed, a Greptile comment has no reply, or a fix is not pushed, stop and report.
 
 Merge with the repository's allowed method, for example `gh pr merge --squash`. Do not pass `--admin` and do not bypass branch protection. If a review or other rule blocks the merge, stop and report the blocker. Done when GitHub shows the PR as merged.
 
+## 7. Link an explainer (`explainer`)
+
+The `explainer` argument is the user's request for one explainer of this PR, so it authorizes that job under the explainer skill's rules. Start it as soon as step 3 is done, as the explainer skill's background worker, so it runs while steps 4 and 5 wait on Greptile and CI.
+
+- Sources: the slim PR description and the changed files the script describes. Host: standalone.
+- Look: the Excalidraw sketch, to match the PR diagram, so skip the style board. Use another look only when the user named one.
+- Mode: `narrated` when the explainer skill's preflight passes, else `captions`.
+- Publish the page as a private Artifact. In Codex, follow "Artifacts from Codex" in `AGENTS.md`.
+- Add one line under the diagram: `▶ [Narrated explainer, <m:ss>](<artifact url>)`, or `Captioned explainer` in `captions` mode. Update the body the way step 3 does.
+- Tell the user that the Artifact is private. Reviewers can open it only after the user shares it from the page's Share menu.
+
+Done when the PR body shows the link and the explainer's manifest says `ready`.
+
 ## Report
 
-List each review finding and Greptile comment with its disposition, the commits you added, the final CI state, and the merge result.
+List each review finding and Greptile comment with its disposition, the commits you added, the final CI state, the explainer link, and the merge result.
