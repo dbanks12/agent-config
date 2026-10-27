@@ -149,8 +149,8 @@
     document.addEventListener("visibilitychange", () => {
       if (document.hidden && playing()) pause();
     });
-    // Left/right arrows and h/l skip 10 s, from inside the player or with nothing focused. Other form fields keep their keys.
-    const skip = { ArrowLeft: -10, h: -10, ArrowRight: 10, l: 10 };
+    // Left/right arrows and h/l skip 5 s, from inside the player or with nothing focused. Other form fields keep their keys.
+    const skip = { ArrowLeft: -5, h: -5, ArrowRight: 5, l: 5 };
     document.addEventListener("keydown", (e) => {
       const d = skip[e.key], el = e.target;
       if (!d || e.altKey || e.ctrlKey || e.metaKey || el.isContentEditable) return;

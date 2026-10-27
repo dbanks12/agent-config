@@ -1,7 +1,7 @@
 // Step 6 checks for a built explainer. Run through qa.sh, which supplies Playwright.
 // Usage: qa.sh <work dir> [extra seconds...]
 // Serves the work dir with HTTP Range support, then checks: console errors, a [data-scene] div per scene,
-// the right scene at each sampled time, a backward seek, pause and resume, the 10 s skip keys, 2x speed,
+// the right scene at each sampled time, a backward seek, pause and resume, the 5 s skip keys, 2x speed,
 // the ? prompt, and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
 const http = require("node:http");
 const fs = require("node:fs");
@@ -95,7 +95,7 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   const k1 = await position();
   await page.keyboard.press("h");
   const k2 = await position();
-  const want1 = Math.min(k0 + 10, tm.duration), want2 = Math.max(want1 - 10, 0);
+  const want1 = Math.min(k0 + 5, tm.duration), want2 = Math.max(want1 - 5, 0);
   check(Math.abs(k1 - want1) < 0.1 && Math.abs(k2 - want2) < 0.1, `right arrow skips to ${k1.toFixed(2)} s and h back to ${k2.toFixed(2)} s`);
 
   await page.click(".xp-play");
