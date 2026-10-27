@@ -132,7 +132,7 @@
       if (audio) audio.playbackRate = audio.defaultPlaybackRate = r;
     }
     speed.replaceChildren(
-      ...[0.75, 1, 1.25, 1.5, 2].map((r) => {
+      ...[0.75, 1, 1.25, 1.5, 2, 3, 4].map((r) => {
         const o = document.createElement("option");
         o.value = String(r);
         o.textContent = `${r}×`;
