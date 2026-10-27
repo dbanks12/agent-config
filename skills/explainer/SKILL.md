@@ -49,9 +49,14 @@ timings.json     # scene start/end + word cues, written by scripts/tts.ts
 cache/           # audio + alignment by hash of text+voice+model; a rerun with unchanged text sends nothing
 manifest.json    # consent, sources, mode, review, styles, status, artifact URL
 styles.html      # the four-look style board (step 3)
-scenes/          # Excalidraw scenes and tagged SVGs (Excalidraw look only)
-explainer.html   # teach-me fragment, or
-page.html        # standalone or slide-deck page
+page.json        # page title and lede (step 5)
+scenes/          # Excalidraw look: scenes.py, renders, tagged SVGs, sheet.jpg
+cues.json        # Excalidraw look: when each element appears
+stage.html       # other looks: the scene divs, with
+scenes.js        # the scene functions
+qa/              # contact sheets from qa.sh
+explainer.html   # teach-me fragment, written by build_page.py
+page.html        # standalone or slide-deck page, written by build_page.py
 ```
 
 `manifest.json`: `{ consent: {quote, at}, host, topic, sources: {<path>: sha256}, mode, chars, request_id, script_review: {model, rounds, outcome: "clean|stopped", unresolved}, styles_offered: [{name, description, verdict: "picked|not picked|rejected"}], style, style_verdict, status: "scripting|reviewing|styling|narrating|building|qa|ready|failed", failure, artifact_url }`. Update `status` at every step.
@@ -84,52 +89,17 @@ page.html        # standalone or slide-deck page
    - `captions` (chosen up front, or as a fallback): write `narration.captions.json`, the final script with its tags removed, then `bun <this skill dir>/scripts/tts.ts <abs narration.captions.json> <abs work dir> --captions-only`. No key is read. The timeline is synthetic, at 150 words a minute.
    - One paid request per narration: `tts.ts` creates a `cache/<hash>.pending` marker before sending and removes it once the audio is saved. **Exit 4 means the outcome is unknown and may be billed: never delete the marker or resubmit. Tell the user.** Exit 2 (HTTP error) and 3 (no key) fall back to `captions`.
    - `approx: true` in `timings.json` means the alignment did not match the text. Scene times are scaled over the audio and there are no word cues. Cue animations to scene starts only, and check transitions by eye in QA.
-   - Print the word list with start times once (`jq -r '[.words[]|"\(.w)@\(.s)"]|join(" ")'`). Pick every cue in step 5 from it.
-5. **Build** in the chosen look. Animate the real mechanism, never decoration.
-   - **Strip the tags first**: drop `[...]` tokens from `timings.words` and from each scene's `text` before inlining, so captions, transcript, and cues never show them.
-   - Inline `player.js` (this directory) and the stripped timings verbatim. Never fetch them: `file://` blocks it. Keep `<` escaped inside the JSON. Never paste narration or titles into the HTML by hand: the player fills chapters and the transcript from the timings as text.
+5. **Build** in the chosen look. Animate the real mechanism, never decoration. `<this skill dir>/scripts/build_page.py <abs work dir>` assembles the page. It strips the audio tags, inlines `player.js`, the timings, and the stage, adds the `<audio>` in `narrated` mode, and writes `page.html` plus the teach-me fragment `explainer.html`. Write `page.json` (`{"title": "...", "lede": "..."}`) and the look's files below, then run it. Never write the page shell, the player wiring, or the timings by hand.
+   - **Excalidraw look**: write `scenes/scenes.py`, where `python3 scenes.py <id>` prints one scene's final state as `place.py` elements (`excalidraw-skill`: brief, `place.py`). Prefix each element id with its scene id (`s3-cache`). Then run `<this skill dir>/scripts/render_scenes.sh <abs work dir>/scenes <ids...>`. It draws, lints, renders, and tags every scene in parallel, and tiles the renders into `scenes/sheet.jpg`. Read the sheet once and critique it. Fix, then rerun with only the changed ids.
+   - Then write `cues.json`: `[[scene, element id, "show" | "draw", word, nth], ...]`, with `nth` optional (default 1). The element appears when the voice reaches the nth use of the word inside that scene. `show` fades a box and its label in. `draw` draws an arrow on, then fades its heads and label in. An element with no cue stays visible for the whole scene.
+   - **Other looks**: write `stage.html`, one `<div data-scene="<id>" aria-label="..." hidden>` per scene holding its SVG or canvas, and `scenes.js`, which defines `const SCENES = { s1: (el, local, p, t) => {...} }`. `TIMINGS` and `Explainer` are in scope. An optional `style.css` adds styles after the player's (`assets/xp.css`), whose `--xp-*` tokens carry the theme colors.
    - **Every scene is a pure function of time**: `(el, local, p, t) => void` from `local` (scene) or `t` (global) seconds, using `Explainer.seg/lerp`. No CSS animations or transitions, no state kept between frames. Backward seeks must render correctly.
-   - Stage: SVG at `viewBox="0 0 640 360"` (text at least 24 units), or one `<canvas>` at logical 1280×720 redrawn by `draw(t)` from every scene callback (text that carries meaning at least 30 units, headlines 96+). Keep an empty `[data-scene]` div per scene with an `aria-label`. Theme colors come from tokens, never from browser defaults. Add `[hidden] { display: none !important; }`: a `display` rule on the scene divs otherwise beats the browser's own `[hidden]` rule, and every scene shows at once.
-   - **Excalidraw look**: draw each scene's final state with `excalidraw-skill` (brief, `place.py`, lint, render, critique). Export it to `scenes/<id>.excalidraw`, then `timeout 120 npx -y mcp-excalidraw-server@2.1.2 render scenes/<id>.excalidraw --format svg --out scenes/<id>.svg` and `python3 <this skill dir>/scripts/tag_svg.py scenes/<id>.excalidraw scenes/<id>.svg scenes/<id>.tagged.svg`. Add `--strip-fonts` for every scene but the first: each export embeds the full font set (about 250 KB), and the inline SVGs share one copy. Inline the tagged SVG in the scene's `[data-scene]` div. The scene function reveals elements by `[data-id]` with opacity and transform. A bound label carries `data-container`, so reveal it with its box. Keep the SVG's own `viewBox`.
-   - An arrow's `[data-id]` group lists the shaft first and each arrowhead after it. A `place.py` arrow has `path` children. A bound arrow wraps each part in a `g`. To draw an arrow on, animate `stroke-dashoffset` on the shaft's paths, and fade the arrowheads in as the shaft finishes. Set the shaft's opacity to 0 while its progress is 0: round line caps draw a dot even for a zero-length dash.
-   - Cue animations to spoken words with `Explainer.cue(timings, "word", n)`. The index `n` counts occurrences across the WHOLE script, so a word that also appears earlier needs its real index. Check each cue against the printed list.
+   - Stage: SVG at `viewBox="0 0 640 360"` (text at least 24 units), or one `<canvas>` at logical 1280×720 redrawn by `draw(t)` from every scene callback (text that carries meaning at least 30 units, headlines 96+). Theme colors come from tokens, never from browser defaults.
+   - In `scenes.js`, cue animations to spoken words with `Explainer.cue(TIMINGS, "word", n)`. The index `n` counts occurrences across the WHOLE script, so a word that also appears earlier needs its real index.
    - Fades with no exit time default to a large finite number such as `1e9`, never `Infinity`: `(t - Infinity) / (Infinity - Infinity)` is NaN, and a NaN that reaches a coordinate makes the element silently vanish (canvas also ignores a NaN `globalAlpha` and keeps the previous one).
    - teach-me host: the page's prose stays complete without the explainer. Scene SVGs sit in `div`s, never in a `<figure>`, and define no marker with id `arr`, so teach-me's diagram checks still pass.
-
-   ```html
-   <section class="xp" aria-label="Narrated explainer">
-     <div class="xp-stage">
-       <div data-scene="s1" hidden><svg viewBox="0 0 640 360" role="img" aria-label="…">…</svg></div>
-     </div>
-     <p class="xp-captions"></p>
-     <div class="xp-controls">
-       <button class="xp-play" type="button">Play</button>
-       <input class="xp-bar" type="range" min="0" value="0" aria-label="Position">
-       <span class="xp-time"></span>
-       <select class="xp-speed" aria-label="Playback speed"></select>
-     </div>
-     <ol class="xp-chapters"></ol>
-     <details><summary>Transcript</summary><div class="xp-transcript"></div></details>
-     <audio class="xp-audio" src="narration.mp3" preload="metadata"></audio> <!-- omit in captions mode -->
-     <script type="application/json" id="xp-timings">…stripped timings…</script>
-     <script>/* player.js, inlined */</script>
-     <script>
-       Explainer.mount({
-         root: document.querySelector(".xp"),
-         timings: JSON.parse(document.getElementById("xp-timings").textContent),
-         audio: document.querySelector(".xp-audio"),
-         scenes: { s1: (el, t, p) => { /* set attributes from t */ } },
-       });
-     </script>
-   </section>
-   ```
-6. **QA in a headless browser** (Playwright, or the session's browser tools) against a local server with `narration.mp3` beside the page. The server must answer HTTP Range requests, or the audio cannot seek and every seek lands at 0. Python's `http.server` does not.
-   - No console errors. Every scene in `timings.scenes` has a `[data-scene]` element.
-   - Seek by setting the audio's `currentTime` and waiting for `seeked` plus two animation frames. In `captions` mode there is no audio: set the position bar's value, dispatch `input`, and wait two frames.
-   - Canvas stage: draw it into 3×3 grid canvases (one sheet per nine times), save each as a JPEG, and read them. SVG stage: element screenshots of `.xp-stage`. Cover each scene's start, midpoint, and end, the main word cues, and two scene boundaries.
-   - Check that the right scene shows, every headline is visible, labels are readable, and nothing overlaps or sits off-stage.
-   - Seek backwards across two scenes and confirm the earlier state renders. Pause and resume. Play the last two seconds.
-   - Set the speed to 2× while playing. Confirm that the clock advances about two seconds per second and the position does not jump.
+6. **QA**: run `<this skill dir>/scripts/qa.sh <abs work dir>`, adding the seconds of the main word cues as extra arguments. It serves the work dir with HTTP Range support, so the audio seeks. It checks for console errors, a `[data-scene]` div per scene, the right scene at each scene's start, midpoint, and end, a backward seek across two scenes, pause and resume, 2× speed, and the last two seconds. It exits 1 on a failure.
+   - Read every contact sheet it prints (`qa/sheet-N.jpg`). Check that every headline is visible, labels are readable, and nothing overlaps or sits off-stage.
    - Fix and recheck at most twice. Then report what still looks wrong.
    - The user listens once. An agent cannot judge pronunciation, a tag that landed wrong, or a cut-off sentence.
 7. **Hand off and publish.** The driver does this step.

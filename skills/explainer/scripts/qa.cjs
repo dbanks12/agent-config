@@ -1,0 +1,125 @@
+// Step 6 checks for a built explainer. Run through qa.sh, which supplies Playwright.
+// Usage: qa.sh <work dir> [extra seconds...]
+// Serves the work dir with HTTP Range support, then checks: console errors, a [data-scene] div per scene,
+// the right scene at each sampled time, a backward seek, pause and resume, 2x speed, and the last two
+// seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
+const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
+const { chromium } = require("playwright");
+
+const dir = path.resolve(process.argv[2] || ".");
+const extra = process.argv.slice(3).map(Number);
+const page_ = fs.existsSync(path.join(dir, "page.html")) ? "page.html" : null;
+if (!page_) { console.error("qa: no page.html in " + dir); process.exit(2); }
+const tm = JSON.parse(fs.readFileSync(path.join(dir, "timings.json"), "utf8"));
+const types = { ".html": "text/html", ".mp3": "audio/mpeg", ".mp4": "audio/mp4", ".json": "application/json" };
+
+const server = http.createServer((req, res) => {
+  const f = path.join(dir, decodeURIComponent(req.url === "/" ? page_ : req.url.slice(1).split("?")[0]));
+  if (!f.startsWith(dir) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+  const size = fs.statSync(f).size;
+  const head = { "Content-Type": types[path.extname(f)] || "application/octet-stream", "Accept-Ranges": "bytes" };
+  const m = /bytes=(\d*)-(\d*)/.exec(req.headers.range || "");
+  if (!m) { res.writeHead(200, { ...head, "Content-Length": size }); return fs.createReadStream(f).pipe(res); }
+  const start = m[1] ? +m[1] : 0, end = m[2] ? +m[2] : size - 1;
+  res.writeHead(206, { ...head, "Content-Range": `bytes ${start}-${end}/${size}`, "Content-Length": end - start + 1 });
+  fs.createReadStream(f, { start, end }).pipe(res);
+}).listen(0, "127.0.0.1");
+
+const failures = [];
+const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (!ok) failures.push(msg); };
+
+(async () => {
+  const browser = await chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] });
+  const page = await browser.newPage({ viewport: { width: 1100, height: 1300 } });
+  const errors = [];
+  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  page.on("pageerror", (e) => errors.push(String(e)));
+  await page.goto(`http://127.0.0.1:${server.address().port}/`);
+  await page.waitForTimeout(300);
+  const hasAudio = await page.$(".xp-audio[src]").then(Boolean);
+  if (hasAudio) await page.waitForFunction(() => document.querySelector(".xp-audio").readyState >= 1, null, { timeout: 15000 });
+
+  const frames = () => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  const seek = async (t) => {
+    if (hasAudio) {
+      await page.evaluate((t) => new Promise((r) => { const a = document.querySelector(".xp-audio"); a.addEventListener("seeked", r, { once: true }); a.currentTime = t; }), t);
+    } else {
+      await page.evaluate((t) => { const b = document.querySelector(".xp-bar"); b.value = t; b.dispatchEvent(new Event("input", { bubbles: true })); }, t);
+    }
+    await frames();
+  };
+  const visible = () => page.$$eval("[data-scene]", (els) => els.filter((e) => !e.hidden).map((e) => e.dataset.scene).join(","));
+  const position = () => hasAudio ? page.$eval(".xp-audio", (a) => a.currentTime) : page.$eval(".xp-bar", (b) => +b.value);
+  const sceneAt = (t) => (tm.scenes.find((s) => t >= s.start && t < s.end) || tm.scenes.at(-1)).id;
+
+  const ids = await page.$$eval("[data-scene]", (els) => els.map((e) => e.dataset.scene));
+  const missing = tm.scenes.map((s) => s.id).filter((i) => !ids.includes(i));
+  check(missing.length === 0, `a [data-scene] div for every scene${missing.length ? ": missing " + missing : ""}`);
+
+  const times = tm.scenes.flatMap((s) => [s.start + Math.min(1, (s.end - s.start) / 4), (s.start + s.end) / 2, s.end - 0.3])
+    .concat(extra).sort((a, b) => a - b);
+  const shots = [];
+  const wrong = [];
+  for (const t of times) {
+    await seek(t);
+    const v = await visible();
+    if (v !== sceneAt(t)) wrong.push(`${t.toFixed(1)}s shows "${v}", expected ${sceneAt(t)}`);
+    shots.push([t, v, (await page.locator(".xp-stage").screenshot()).toString("base64")]);
+  }
+  check(wrong.length === 0, `the right scene at ${times.length} sampled times${wrong.length ? ": " + wrong.join("; ") : ""}`);
+
+  if (tm.scenes.length >= 3) {
+    const later = tm.scenes[tm.scenes.length - 1], earlier = tm.scenes[tm.scenes.length - 3];
+    await seek((later.start + later.end) / 2);
+    const t = (earlier.start + earlier.end) / 2;
+    await seek(t);
+    check(await visible() === earlier.id, `a backward seek across two scenes lands on ${earlier.id}`);
+  }
+
+  const mid = Math.min(tm.duration / 2, tm.duration - 6);
+  await seek(mid);
+  await page.click(".xp-play");
+  await page.waitForTimeout(1200);
+  await page.click(".xp-play");
+  const p1 = await position();
+  await page.waitForTimeout(800);
+  const p2 = await position();
+  check(p1 > mid + 0.5 && Math.abs(p2 - p1) < 0.05, `play advances (${(p1 - mid).toFixed(2)} s) and pause holds (${(p2 - p1).toFixed(2)} s)`);
+
+  await page.click(".xp-play");
+  await page.waitForTimeout(300);
+  await page.selectOption(".xp-speed", "2");
+  const s0 = await position();
+  await page.waitForTimeout(2000);
+  const s1 = await position();
+  check(s1 - s0 > 3.2 && s1 - s0 < 4.8, `2x speed advances ${(s1 - s0).toFixed(2)} s in 2 s`);
+  await page.click(".xp-play");
+  await page.selectOption(".xp-speed", "1");
+
+  await seek(tm.duration - 2);
+  await page.click(".xp-play");
+  await page.waitForTimeout(2800);
+  const end = await position();
+  check(end >= tm.duration - 0.3, `playing the last two seconds reaches the end (${end.toFixed(2)} of ${tm.duration.toFixed(2)} s)`);
+
+  fs.mkdirSync(path.join(dir, "qa"), { recursive: true });
+  const sheets = [];
+  for (let i = 0; i < shots.length; i += 9) {
+    const cells = shots.slice(i, i + 9).map(([t, v, b]) =>
+      `<div style="position:relative"><img src="data:image/png;base64,${b}" style="width:640px;display:block">` +
+      `<span style="position:absolute;left:4px;top:2px;background:#000;color:#fff;font:14px monospace;padding:1px 4px">${t.toFixed(1)}s ${v}</span></div>`).join("");
+    const sheet = await browser.newPage({ viewport: { width: 1932, height: 400 } });
+    await sheet.setContent(`<body style="margin:0;display:grid;grid-template-columns:repeat(3,640px);gap:6px;background:#888">${cells}</body>`);
+    const out = path.join(dir, "qa", `sheet-${i / 9 + 1}.jpg`);
+    await sheet.screenshot({ path: out, type: "jpeg", quality: 80, fullPage: true });
+    await sheet.close();
+    sheets.push(out);
+  }
+  check(errors.length === 0, `no console errors${errors.length ? ": " + errors.join(" | ") : ""}`);
+  console.log(`qa: ${failures.length} failed. Read the contact sheets: ${sheets.join(" ")}`);
+  await browser.close();
+  server.close();
+  process.exit(failures.length ? 1 : 0);
+})().catch((e) => { console.error(e); server.close(); process.exit(2); });

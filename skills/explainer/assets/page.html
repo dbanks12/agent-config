@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>%TITLE%</title>
+<style>
+:root { --bg: #eef0f2; --fg: #1b1f24; --muted: #5d6670; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #15181c; --fg: #e8ebee; --muted: #9aa3ad; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #15181c; --fg: #e8ebee; --muted: #9aa3ad; color-scheme: dark; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; padding: 28px 16px 48px; }
+main { max-width: 960px; margin: 0 auto; display: grid; gap: 16px; }
+h1 { font-size: 1.6rem; margin: 0; text-wrap: balance; }
+.lede { margin: 4px 0 0; color: var(--muted); max-width: 65ch; }
+%CSS%
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>%TITLE%</h1>
+    <p class="lede">%LEDE%</p>
+  </header>
+%SECTION%
+</main>
+</body>
+</html>
