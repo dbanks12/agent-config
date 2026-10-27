@@ -2,7 +2,7 @@
 """Run the explainer skill headless on fixed inputs and measure where the time goes.
 
 Usage:
-  bench.py run [--inputs install,player] [--repeat N] [--label NAME] [--narrated] [--serial]
+  bench.py run [--inputs install,player] [--repeat N] [--label NAME] [--narrated] [--review LEVEL] [--serial]
   bench.py report [RUN_DIR ...]      # default: every run under the results root
 
 Each input runs in its own `claude -p` session, in a fresh copy of bench/inputs/<name>/. The session
@@ -12,7 +12,8 @@ the CLI's JSON result, and the job's work dir, moved out of ~/.local/share/expla
 manifests never join the style history.
 
 Captions mode is the default, so a run spends no ElevenLabs characters. --narrated spends about
-3,000 per input.
+3,000 per input. The script review runs at the skill's default, high. --review LEVEL passes the skill's
+--review option: off, low, medium, high, xhigh, or max.
 """
 import argparse
 import glob
@@ -33,7 +34,7 @@ ROOT = Path.home() / ".local/share/explainer-bench"
 JOBS = Path.home() / ".local/share/explainers"
 TIMEOUT_S = 3600
 
-PROMPT = """/explainer {topic}
+PROMPT = """/explainer {option}{topic}
 
 Sources: the files in {src}. Host: standalone. Mode: {mode}. Use the slug {slug}.
 I will not be around to choose a look: build the style board as step 3 says, then pick the Excalidraw sketch look yourself and keep going without asking.
@@ -46,7 +47,7 @@ def git_rev():
     return r.stdout.strip() + (" (dirty)" if dirty.strip() else "")
 
 
-def run_one(name, sample, run_dir, narrated):
+def run_one(name, sample, run_dir, narrated, review):
     out = run_dir / f"{name}-{sample}"
     src = out / "src"
     shutil.copytree(HERE / "inputs" / name, src)
@@ -54,7 +55,8 @@ def run_one(name, sample, run_dir, narrated):
     slug = f"bench-{name}-{sample}-{run_dir.name[:15]}"
     session = str(uuid.uuid4())
     mode = "narrated" if narrated else "captions only; do not use ElevenLabs"
-    prompt = PROMPT.format(topic=topic, src=src, mode=mode, slug=slug)
+    option = f"--review {review} " if review != "high" else ""
+    prompt = PROMPT.format(option=option, topic=topic, src=src, mode=mode, slug=slug)
     (out / "prompt.txt").write_text(prompt)
     cmd = ["timeout", str(TIMEOUT_S), "claude", "-p", "--permission-mode", "auto", "--session-id", session,
            "--output-format", "json", prompt]
@@ -64,7 +66,7 @@ def run_one(name, sample, run_dir, narrated):
     wall = time.time() - t0
 
     meta = {"input": name, "slug": slug, "session": session, "exit": code, "wall_s": wall, "rev": git_rev(),
-            "narrated": narrated}
+            "narrated": narrated, "review": review}
     transcripts = glob.glob(str(Path.home() / ".claude/projects/*" / f"{session}.jsonl"))
     if transcripts:
         shutil.copy(transcripts[0], out / "transcript.jsonl")
@@ -94,7 +96,7 @@ def cmd_run(a):
     run_dir = ROOT / f"{time.strftime('%Y%m%d-%H%M%S')}-{a.label}"
     run_dir.mkdir(parents=True)
     print(f"bench: {run_dir}", flush=True)
-    jobs = [(n, k, run_dir, a.narrated) for k in range(1, a.repeat + 1) for n in names]
+    jobs = [(n, k, run_dir, a.narrated, a.review) for k in range(1, a.repeat + 1) for n in names]
     if a.serial:
         for j in jobs:
             run_one(*j)
@@ -146,6 +148,8 @@ def main():
     r.add_argument("--repeat", type=int, default=1, help="samples per input")
     r.add_argument("--label", default="run")
     r.add_argument("--narrated", action="store_true")
+    r.add_argument("--review", choices=["off", "low", "medium", "high", "xhigh", "max"], default="high",
+                   help="script review level")
     r.add_argument("--serial", action="store_true", help="run inputs one after another, not in parallel")
     p = sub.add_parser("report")
     p.add_argument("runs", nargs="*")
