@@ -14,10 +14,13 @@ shift
 # Resolve the CLI once: each npx call costs about 1.5 s of CPU, and a batch makes six per scene.
 cli="$(timeout 120 npx -y -p mcp-excalidraw-server@2.1.2 bash -c 'command -v mcp-excalidraw-server')"
 x() { timeout 120 "$cli" "$@"; }
-base=$((4100 + RANDOM % 800))
+# A port the kernel just handed out is free. A fixed or random range can collide with another
+# batch, and then one batch's stop kills the other's canvas, which restarts and never stops.
+free_port() { python3 -c 'import socket; s = socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])'; }
 
 one() {  # one <id> <index>
-  local id=$1 port=$((base + $2))
+  local id=$1 port
+  port=$(free_port)
   (
     export PORT=$port EXPRESS_SERVER_URL=http://127.0.0.1:$port
     trap 'x stop >/dev/null 2>&1 || true' EXIT
