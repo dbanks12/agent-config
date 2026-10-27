@@ -149,6 +149,18 @@
     document.addEventListener("visibilitychange", () => {
       if (document.hidden && playing()) pause();
     });
+    // Left/right arrows and h/l skip 10 s, from inside the player or with nothing focused. Other form fields keep their keys.
+    const skip = { ArrowLeft: -10, h: -10, ArrowRight: 10, l: 10 };
+    document.addEventListener("keydown", (e) => {
+      const d = skip[e.key], el = e.target;
+      if (!d || e.altKey || e.ctrlKey || e.metaKey || el.isContentEditable) return;
+      const ours = root.contains(el)
+        ? el === bar || !el.matches("input, select, textarea")
+        : (el === document.body || el === document.documentElement) && document.querySelector(".xp") === root;
+      if (!ours) return;
+      e.preventDefault();
+      seek(now() + d);
+    });
 
     chapters.replaceChildren(
       ...timings.scenes.map((s) => {
