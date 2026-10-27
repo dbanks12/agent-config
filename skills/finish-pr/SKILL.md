@@ -46,20 +46,27 @@ Rewrite the body to carry only what a reviewer needs:
 - **Context**: the problem, in two to four sentences.
 - **Change**: what the PR does, at the level of concepts, in two to five sentences or bullets.
 - **Diagram**: one Excalidraw diagram of the flow or structure that changed. Draw it with the `excalidraw-skill` skill and render a PNG.
+- **Screenshots**: for a UI change, the before and after captures, in a table with one column per viewport.
 - Any `Fixes <issue>` lines from the old body.
 
 Cut file-by-file lists, test inventories, and history of how the work went.
 
-Host the PNG on an orphan commit, without a checkout, then push it to `<branch>-pr-assets`:
+Upload the images through the GitHub REST API. Do not commit them with local git. Create one blob per image, one tree, one parentless commit, and the ref `<branch>-pr-assets`:
 
 ```bash
-blob=$(git hash-object -w diagram.png)
-tree=$(printf '100644 blob %s\tdiagram.png\n' "$blob" | git mktree)
-sha=$(git commit-tree "$tree" -m "docs: diagram for #<pr>")
-git push origin "$sha:refs/heads/<branch>-pr-assets"
+R=repos/<owner>/<repo>
+blob=$(base64 -w0 diagram.png | jq -Rs '{content: ., encoding: "base64"}' \
+  | gh api $R/git/blobs --input - --jq .sha)
+# Repeat for each image. Put every blob in one tree.
+tree=$(jq -n --arg b "$blob" '{tree: [{path: "diagram.png", mode: "100644", type: "blob", sha: $b}]}' \
+  | gh api $R/git/trees --input - --jq .sha)
+sha=$(gh api $R/git/commits -f message="docs: images for #<pr>" -f tree="$tree" --jq .sha)
+gh api $R/git/refs -f ref="refs/heads/<branch>-pr-assets" -f sha="$sha"
 ```
 
-Embed it as `![<alt text that states the diagram's point>](https://github.com/<owner>/<repo>/blob/<sha>/diagram.png?raw=true)`. Update the body with `gh pr edit --body-file`. Done when the rendered body shows the image and has no section beyond the list above.
+If the ref exists, update it with `gh api -X PATCH $R/git/refs/heads/<branch>-pr-assets -f sha="$sha" -F force=true`.
+
+Embed each image as `https://github.com/<owner>/<repo>/blob/<sha>/<file>?raw=true`. Write alt text that states the image's point. Update the body with `gh api -X PATCH $R/pulls/<pr> -F body=@body.md`. Done when the rendered body (`gh api $R/pulls/<pr> -H "Accept: application/vnd.github.html+json" --jq .body_html`) has every image and no section beyond the list above.
 
 ## 4. Flip ready and address Greptile (`ready`, `greptile`)
 
