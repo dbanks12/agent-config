@@ -13,6 +13,14 @@ Never stack pull requests without `gh stack`. A PR is a stack when its base is a
 - Rebase with `gh stack rebase`. Push with `gh stack push`.
 - Do not use `gh pr create --base <feature-branch-of-an-open-PR>`.
 
+## Linear issues
+
+Every PR in `aztec-labs-eng/obsidion-wallet`, `aztec-labs-eng/oxide`, and `AztecProtocol/claudebox` links a Linear issue.
+
+1. Before you open the PR, search Linear for an open issue that matches the problem or feature.
+2. If none matches, create one in the team that the repo's recent PRs link to. Assign it to me. Start its description with: "Created by Claude because no issue existed for <the problem or feature>."
+3. Link the PR the way Linear's GitHub integration expects. Put the issue ID in the branch name when you create the branch, for example Linear's `gitBranchName`. Put a magic word and the ID in the PR description: `Fixes ZKM-1634` when the PR resolves the issue, `Part of ZKM-1634` when it does not.
+
 # Git identity
 
 Never set the git author or committer by hand. Do not pass `-c user.name`, `-c user.email`, `--author`, or `GIT_AUTHOR_*`/`GIT_COMMITTER_*` variables, and do not run `git config user.*`. Use the identity from the user's global or local git config as is. If no identity is configured, stop and ask.
