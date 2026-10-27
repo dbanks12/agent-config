@@ -8,8 +8,8 @@ for (const [sid, items] of Object.entries(SPEC)) {
     for (const [id, kind, at] of cues) {
       const k = Explainer.seg(t, at - 0.1, at + (kind === "draw" ? 0.9 : 0.35));
       const self = el.querySelector(`[data-id="${id}"]`);
-      // place.py writes labels as free text with ids <id>-label and <id>-title; bound text carries data-container.
-      const parts = [...el.querySelectorAll(`[data-id="${id}-label"],[data-id="${id}-title"],[data-container="${id}"]`)];
+      // place.py writes labels as free text with ids <id>-label, <id>-title, and <id>-body; bound text carries data-container.
+      const parts = [...el.querySelectorAll(`[data-id="${id}-label"],[data-id="${id}-title"],[data-id="${id}-body"],[data-container="${id}"]`)];
       if (kind === "show") {
         self.setAttribute("opacity", k);
         parts.forEach((g) => g.setAttribute("opacity", k));
