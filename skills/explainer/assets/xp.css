@@ -1,0 +1,26 @@
+.xp {
+  --xp-bg: #eef0f2; --xp-card: #ffffff; --xp-fg: #1b1f24; --xp-muted: #5d6670; --xp-line: #d5dae0; --xp-accent: #2d5bd7; --xp-stage: #ffffff;
+  --xp-ui: system-ui, sans-serif; --xp-mono: ui-monospace, monospace;
+  display: grid; gap: 12px; color: var(--xp-fg); font-family: var(--xp-ui);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .xp { --xp-bg: #15181c; --xp-card: #1e2227; --xp-fg: #e8ebee; --xp-muted: #9aa3ad; --xp-line: #30363d; --xp-accent: #7fa2ff; }
+}
+:root[data-theme="dark"] .xp { --xp-bg: #15181c; --xp-card: #1e2227; --xp-fg: #e8ebee; --xp-muted: #9aa3ad; --xp-line: #30363d; --xp-accent: #7fa2ff; }
+.xp [hidden] { display: none !important; }
+.xp-stage { aspect-ratio: 16 / 9; max-width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid var(--xp-line); background: var(--xp-stage); }
+.xp-stage > div { width: 100%; height: 100%; display: grid; place-items: center; }
+.xp-stage > div > svg { display: block; width: 94%; height: 94%; }
+.xp-captions { margin: 0; min-height: 3em; font-size: 1.05rem; }
+.xp-controls { display: flex; gap: 12px; align-items: center; background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 8px; padding: 8px 12px; }
+.xp-play { font: 700 0.9rem var(--xp-ui); color: var(--xp-card); background: var(--xp-fg); border: 0; border-radius: 6px; padding: 6px 16px; cursor: pointer; min-width: 5.5em; }
+.xp :focus-visible { outline: 3px solid var(--xp-accent); outline-offset: 2px; }
+.xp-bar { flex: 1; min-width: 0; accent-color: var(--xp-accent); }
+.xp-time { font: 600 0.85rem var(--xp-mono); font-variant-numeric: tabular-nums; color: var(--xp-muted); white-space: nowrap; }
+.xp-speed { font: 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; }
+.xp-chapters { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.xp-chapters button { font: 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.xp-chapters li[aria-current] button { border-color: var(--xp-accent); color: var(--xp-accent); font-weight: 700; }
+.xp details { background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 8px; padding: 10px 14px; }
+.xp summary { cursor: pointer; font-weight: 700; }
+.xp-transcript p { max-width: 65ch; }

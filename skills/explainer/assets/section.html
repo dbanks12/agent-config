@@ -1,0 +1,25 @@
+<section class="xp" aria-label="Narrated explainer">
+  <div class="xp-stage">
+%STAGE%
+  </div>
+  <p class="xp-captions"></p>
+  <div class="xp-controls">
+    <button class="xp-play" type="button">Play</button>
+    <input class="xp-bar" type="range" min="0" value="0" aria-label="Position">
+    <span class="xp-time"></span>
+    <select class="xp-speed" aria-label="Playback speed"></select>
+  </div>
+  <ol class="xp-chapters"></ol>
+  <details><summary>Transcript</summary><div class="xp-transcript"></div></details>
+  %AUDIO%
+  <script type="application/json" id="xp-timings">%TIMINGS%</script>
+  <script>%PLAYER%</script>
+  <script>
+(() => {
+const TIMINGS = JSON.parse(document.getElementById("xp-timings").textContent);
+%SCENES%
+const root = document.querySelector(".xp");
+Explainer.mount({ root, timings: TIMINGS, audio: root.querySelector(".xp-audio"), scenes: SCENES });
+})();
+  </script>
+</section>
