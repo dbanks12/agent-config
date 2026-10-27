@@ -1,0 +1,1 @@
+How install.sh links this repo into ~/.claude and ~/.codex: it reads the links file, makes one symlink per line, backs up whatever it replaces, and reports drift in --check mode.

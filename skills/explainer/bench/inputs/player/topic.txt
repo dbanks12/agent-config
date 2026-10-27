@@ -1,0 +1,1 @@
+How the explainer player keeps captions, chapters, the scrub bar, and every scene animation in sync with one narration clock, so pause, seek, and speed changes always render the right frame.
