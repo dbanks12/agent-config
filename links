@@ -58,3 +58,5 @@ skills/explainer ~/.claude/skills/explainer
 skills/explainer ~/.codex/skills/explainer
 skills/finish-pr ~/.claude/skills/finish-pr
 skills/finish-pr ~/.codex/skills/finish-pr
+skills/long-explainer ~/.claude/skills/long-explainer
+skills/long-explainer ~/.codex/skills/long-explainer

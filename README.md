@@ -14,7 +14,7 @@ This repo pins two public skill repos as submodules in `vendor/`. `install.sh` c
 | Skill | Also needs |
 |---|---|
 | `excalidraw-skill`, `slide-deck` | Node.js with `npx`. `slide-deck` also needs Pillow and Chrome for PDFs |
-| `explainer` | Bun. Narration also needs `ffprobe` and an ElevenLabs key |
+| `explainer`, `long-explainer` | Bun. Narration also needs `ffprobe` and an ElevenLabs key. `long-explainer` also needs `ffmpeg` |
 | `slack-read` | A Slack user token in `SLACK_TOKEN` |
 | `hunk-review`, `hunk-extensions` | `npm i -g hunkdiff@0.22.0` |
 | `herdr` | Herdr 0.9.0, run with `HERDR_ENV=1` |
@@ -51,7 +51,7 @@ Your local `~/.claude/settings.json` and `~/.codex/config.toml` stay outside thi
 | Pull requests | `create-pr`, `finish-pr`, `code-review`, `tdd` |
 | Cross-tool review | `call-claude`, `call-codex`, `review-with-claude`, `review-with-codex`, `review-by-council` |
 | Thinking and planning | `grilling`, `grill-me`, `grill-me-html`, `to-questionnaire`, `wait-what`, `handoff`, `brief`, `expert-research` |
-| Teaching and visuals | `teach-me`, `teach-me-many-topics`, `explainer`, `slide-deck`, `excalidraw-skill` |
+| Teaching and visuals | `teach-me`, `teach-me-many-topics`, `explainer`, `long-explainer`, `slide-deck`, `excalidraw-skill` |
 | Writing for agents | `writing-for-agents` |
 | Tools | `herdr`, `hunk-review`, `hunk-extensions`, `slack-read` |
 
