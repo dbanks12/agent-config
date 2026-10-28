@@ -2,7 +2,7 @@
 // Usage: qa.sh <work dir> [extra seconds...]
 // Serves the work dir with HTTP Range support, then checks: console errors, a [data-scene] div per scene,
 // the right scene at each sampled time, a backward seek, pause and resume, the 5 s skip keys and buttons, 2x speed,
-// the captions toggle, the ? prompt, and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
+// the captions toggle, full screen, the ? prompt, and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -134,6 +134,15 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   const cc2 = await ccState();
   check(cc0 === (hasAudio ? "hidden" : "shown") && cc1 === (hasAudio ? "shown" : "hidden") && cc2 === cc0,
     `captions start ${cc0}, and the Captions button toggles them (${cc1}, then ${cc2})`);
+
+  const isFull = () => page.evaluate(() => document.fullscreenElement === document.querySelector(".xp"));
+  await page.click(".xp-full");
+  await page.waitForTimeout(300);
+  const fullOn = await isFull();
+  await page.click(".xp-full");
+  await page.waitForTimeout(300);
+  const fullOff = !(await isFull());
+  check(fullOn && fullOff, `the full-screen button enters and leaves full screen`);
 
   await seek(tm.duration - 2);
   await page.click(".xp-play");

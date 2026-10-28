@@ -158,6 +158,16 @@
     };
     showCaptions(!audio);
     cc.addEventListener("click", () => showCaptions(caption.hidden));
+    // Full screen covers the whole player. A frame without allow="fullscreen" disables it, so the button hides there.
+    const full = q(".xp-full");
+    if (!document.fullscreenEnabled) full.hidden = true;
+    full.addEventListener("click", () =>
+      document.fullscreenElement === root ? document.exitFullscreen() : root.requestFullscreen().catch(() => (full.hidden = true)),
+    );
+    document.addEventListener("fullscreenchange", () => {
+      full.title = document.fullscreenElement === root ? "Exit full screen" : "Full screen";
+      full.setAttribute("aria-label", full.title);
+    });
     for (const b of root.querySelectorAll(".xp-skip")) b.addEventListener("click", () => seek(now() + Number(b.dataset.skip)));
     // Left/right arrows and h/l skip 5 s, from inside the player or with nothing focused. Other form fields keep their keys.
     const skip = { ArrowLeft: -5, h: -5, ArrowRight: 5, l: 5 };

@@ -18,6 +18,11 @@
 .xp-skip { font: 600 0.85rem var(--xp-mono); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; padding: 5px 8px; cursor: pointer; flex: none; }
 .xp-cc { font: 600 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; padding: 5px 10px; cursor: pointer; flex: none; }
 .xp-cc[aria-pressed="true"] { color: var(--xp-card); background: var(--xp-fg); border-color: var(--xp-fg); }
+.xp-full { display: grid; place-items: center; color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; padding: 6px 8px; cursor: pointer; flex: none; }
+.xp:fullscreen { background: var(--xp-bg); padding: 16px; box-sizing: border-box; align-content: center; }
+.xp:fullscreen .xp-stage { width: min(100%, calc((100vh - 170px) * 16 / 9)); justify-self: center; }
+.xp:fullscreen .xp-chapters, .xp:fullscreen details { display: none; }
+.xp:fullscreen .xp-captions { text-align: center; font-size: 1.3rem; }
 .xp :focus-visible { outline: 3px solid var(--xp-accent); outline-offset: 2px; }
 .xp-bar { flex: 1; min-width: 0; accent-color: var(--xp-accent); }
 .xp-time { font: 600 0.85rem var(--xp-mono); font-variant-numeric: tabular-nums; color: var(--xp-muted); white-space: nowrap; }
