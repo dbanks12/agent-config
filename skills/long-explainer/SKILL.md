@@ -27,7 +27,12 @@ The [explainer](../explainer/SKILL.md) skill, stretched to 30 minutes. Read its 
 
 **Step 6, QA.** `qa.sh` writes one contact sheet per three scenes. Read every sheet.
 
-**Step 7, hand-off.** The joined MP3 fits the Artifact's 15 MB file limit, so it publishes as `narration.mp3`. Tell the user the length, the character count, and the number of requests.
+**Step 7, hand-off.** At 30,000 characters the joined MP3 is about 12 MB, under the Artifact's 15 MB file limit, so it publishes as `narration.mp3`. Check the sizes first: `wc -c page.html narration.mp3`.
+
+- If `page.html` is over 16,000,000 bytes or `narration.mp3` is over 15,000,000, skip the Artifact. The same applies when a publish refuses a file for its size, in place of the explainer's remux.
+- Instead, leave `page.html` beside `narration.mp3` in the work dir and give its absolute path. Warn the user which file is over which limit, with its size. This fallback needs no confirmation: hand off the path and the warning in the same reply.
+
+Tell the user the length, the character count, and the number of requests.
 
 ## Verified behavior
 
