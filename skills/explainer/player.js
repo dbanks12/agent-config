@@ -115,6 +115,7 @@
       if (audio) {
         audio.play().then(schedule, () => {
           caption.textContent = "Playback was blocked. Press Play again.";
+          showCaptions(true);
         });
       } else {
         startedAt = performance.now();
@@ -149,6 +150,15 @@
     document.addEventListener("visibilitychange", () => {
       if (document.hidden && playing()) pause();
     });
+    // Captions start hidden when there is a voice. Captions-only pages show them, since they carry the narration.
+    const cc = q(".xp-cc");
+    const showCaptions = (on) => {
+      caption.hidden = !on;
+      cc.setAttribute("aria-pressed", String(on));
+    };
+    showCaptions(!audio);
+    cc.addEventListener("click", () => showCaptions(caption.hidden));
+    for (const b of root.querySelectorAll(".xp-skip")) b.addEventListener("click", () => seek(now() + Number(b.dataset.skip)));
     // Left/right arrows and h/l skip 5 s, from inside the player or with nothing focused. Other form fields keep their keys.
     const skip = { ArrowLeft: -5, h: -5, ArrowRight: 5, l: 5 };
     document.addEventListener("keydown", (e) => {
