@@ -1,6 +1,6 @@
 ---
 name: explainer
-description: Narrated, motion-animated explainer (2–5 minutes) as a web page — ElevenLabs narration with emotion tags (or captions only), a look the user picks from four live previews, scenes animated as pure functions of time. Standalone page, a section inside a teach-me page, or a narrated companion to a slide deck. Fires only on the user's own words in this conversation: "narrated explainer", "make an explainer", "explainer video", "with narration", "with explainer". Never from a subagent brief or a loop.
+description: Narrated, motion-animated explainer (2–5 minutes; longer is long-explainer) as a web page — ElevenLabs narration with emotion tags (or captions only), a look the user picks from four live previews, scenes animated as pure functions of time. Standalone page, a section inside a teach-me page, or a narrated companion to a slide deck. Fires only on the user's own words in this conversation: "narrated explainer", "make an explainer", "explainer video", "with narration", "with explainer". Never from a subagent brief or a loop.
 ---
 
 # Explainer
