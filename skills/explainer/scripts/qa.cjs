@@ -1,8 +1,8 @@
 // Step 6 checks for a built explainer. Run through qa.sh, which supplies Playwright.
 // Usage: qa.sh <work dir> [extra seconds...]
 // Serves the work dir with HTTP Range support, then checks: console errors, a [data-scene] div per scene,
-// the right scene at each sampled time, a backward seek, pause and resume, the 10 s skip keys, 2x speed,
-// the ? prompt, and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
+// the right scene at each sampled time, a backward seek, pause and resume, the 5 s skip keys and buttons, 2x speed,
+// the captions toggle, the ? prompt, and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -95,8 +95,13 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   const k1 = await position();
   await page.keyboard.press("h");
   const k2 = await position();
-  const want1 = Math.min(k0 + 10, tm.duration), want2 = Math.max(want1 - 10, 0);
+  const want1 = Math.min(k0 + 5, tm.duration), want2 = Math.max(want1 - 5, 0);
   check(Math.abs(k1 - want1) < 0.1 && Math.abs(k2 - want2) < 0.1, `right arrow skips to ${k1.toFixed(2)} s and h back to ${k2.toFixed(2)} s`);
+  await page.click('.xp-skip[data-skip="5"]');
+  const b1 = await position();
+  await page.click('.xp-skip[data-skip="-5"]');
+  const b2 = await position();
+  check(Math.abs(b1 - Math.min(k2 + 5, tm.duration)) < 0.1 && Math.abs(b2 - Math.max(b1 - 5, 0)) < 0.1, `the +5s button skips to ${b1.toFixed(2)} s and −5s back to ${b2.toFixed(2)} s`);
 
   await page.click(".xp-play");
   await page.waitForTimeout(300);
@@ -120,6 +125,15 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   const askShut = await page.$eval(".xp-ask-panel", (x) => x.hidden);
   check(askOpen && askShut && askTxt.includes(recent) && askTxt.includes("confused") && /Answer in text/.test(askTxt) && /Make an explainer/.test(askExp),
     `the ? button opens a prompt with the last 5 s of narration, switches modes, and closes on Escape`);
+
+  const ccState = () => page.$eval(".xp-captions", (x) => x.hidden ? "hidden" : x.textContent.trim() ? "shown" : "empty");
+  const cc0 = await ccState();
+  await page.click(".xp-cc");
+  const cc1 = await ccState();
+  await page.click(".xp-cc");
+  const cc2 = await ccState();
+  check(cc0 === (hasAudio ? "hidden" : "shown") && cc1 === (hasAudio ? "shown" : "hidden") && cc2 === cc0,
+    `captions start ${cc0}, and the Captions button toggles them (${cc1}, then ${cc2})`);
 
   await seek(tm.duration - 2);
   await page.click(".xp-play");
