@@ -2,7 +2,8 @@
 # Draw, lint, render, and tag Excalidraw scenes in parallel, one private canvas per scene.
 # Usage: render_scenes.sh <scenes dir> [<id>...]
 # <scenes dir>/scenes.py <id> prints one scene's element JSON (place.py output). For each id this writes
-# <id>.excalidraw, <id>.png, <id>.svg, <id>.tagged.svg, and <id>.lint, and tiles every PNG into sheet.jpg.
+# <id>.excalidraw, <id>.png, <id>.svg, <id>.tagged.svg, and <id>.lint, and tiles every PNG into sheet.jpg,
+# or, past 15 scenes, into sheet-1.jpg, sheet-2.jpg, ... of 9 scenes each, printing the ids on each sheet.
 # It prints all lint problems at the end, and its last line names the scenes that failed lint.
 # With no ids it renders every scene in scenes.py's SCENES. Rerun it with only the ids you changed:
 # the sheet still shows every scene in SCENES, in story order. Every canvas server it starts is stopped on exit.
@@ -54,22 +55,36 @@ for p in "${pids[@]}"; do wait "$p" || failed=1; done
 [[ $failed -eq 0 ]] || { echo "render_scenes: a scene failed" >&2; exit 1; }
 
 # 3 columns of 640x360 cells, in SCENES order. A scene that was never rendered has no cell.
+tile() {  # tile <out> <id>...
+  local out=$1 n k inputs=() filters="" labels="" layout="" cols
+  shift
+  n=$#
+  for id in "$@"; do inputs+=(-i "$id.png"); done
+  for ((k = 0; k < n; k++)); do
+    filters+="[$k:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:-1:-1:white[c$k];"
+    labels+="[c$k]"
+  done
+  cols=$(( n < 3 ? n : 3 ))
+  for ((k = 0; k < n; k++)); do layout+="$((k % cols * 640))_$((k / cols * 360))|"; done
+  if [[ $n -eq 1 ]]; then
+    ffmpeg -loglevel error -y "${inputs[@]}" -filter_complex "${filters}[c0]null" "$out"
+  else
+    ffmpeg -loglevel error -y "${inputs[@]}" -filter_complex "${filters}${labels}xstack=inputs=$n:layout=${layout%|}:fill=gray" "$out"
+  fi
+}
 sheet=()
 for id in "${all[@]}"; do if [[ -f "$id.png" ]]; then sheet+=("$id"); fi; done
 n=${#sheet[@]}
-inputs=() filters="" labels=""
-for id in "${sheet[@]}"; do inputs+=(-i "$id.png"); done
-for ((k = 0; k < n; k++)); do
-  filters+="[$k:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:-1:-1:white[c$k];"
-  labels+="[c$k]"
-done
-cols=$(( n < 3 ? n : 3 ))
-layout=""
-for ((k = 0; k < n; k++)); do layout+="$((k % cols * 640))_$((k / cols * 360))|"; done
-if [[ $n -eq 1 ]]; then
-  ffmpeg -loglevel error -y "${inputs[@]}" -filter_complex "${filters}[c0]null" sheet.jpg
+rm -f sheet.jpg sheet-*.jpg
+if [[ $n -le 15 ]]; then
+  tile sheet.jpg "${sheet[@]}"
+  sheets="sheet.jpg shows"
 else
-  ffmpeg -loglevel error -y "${inputs[@]}" -filter_complex "${filters}${labels}xstack=inputs=$n:layout=${layout%|}:fill=gray" sheet.jpg
+  for ((p = 0; p * 9 < n; p++)); do
+    tile "sheet-$((p + 1)).jpg" "${sheet[@]:p*9:9}"
+    echo "render_scenes: sheet-$((p + 1)).jpg shows ${sheet[*]:p*9:9}"
+  done
+  sheets="sheet-1.jpg to sheet-$p.jpg show"
 fi
 # The lint lines come last, so a session that reads only the tail still sees them.
 lint_failed=()
@@ -77,4 +92,4 @@ for id in "$@"; do
   cat "$id.lint"
   if grep -q FAIL "$id.lint"; then lint_failed+=("$id"); fi
 done
-echo "render_scenes: rendered $#, sheet.jpg shows $n, lint ${lint_failed[*]:+FAIL: }${lint_failed[*]:-clean}"
+echo "render_scenes: rendered $#, $sheets $n, lint ${lint_failed[*]:+FAIL: }${lint_failed[*]:-clean}"
