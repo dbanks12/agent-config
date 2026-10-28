@@ -97,11 +97,15 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   const k2 = await position();
   const want1 = Math.min(k0 + 5, tm.duration), want2 = Math.max(want1 - 5, 0);
   check(Math.abs(k1 - want1) < 0.1 && Math.abs(k2 - want2) < 0.1, `right arrow skips to ${k1.toFixed(2)} s and h back to ${k2.toFixed(2)} s`);
+  await page.focus(".xp-speed");
+  await page.keyboard.press("ArrowLeft");
+  const k3 = await position(), rate = await page.$eval(".xp-speed", (x) => x.value);
+  check(Math.abs(k3 - Math.max(k2 - 5, 0)) < 0.1 && rate === "1.5", `with the speed menu focused, left arrow skips to ${k3.toFixed(2)} s and the speed stays ${rate}x`);
   await page.click('.xp-skip[data-skip="5"]');
   const b1 = await position();
   await page.click('.xp-skip[data-skip="-5"]');
   const b2 = await position();
-  check(Math.abs(b1 - Math.min(k2 + 5, tm.duration)) < 0.1 && Math.abs(b2 - Math.max(b1 - 5, 0)) < 0.1, `the +5s button skips to ${b1.toFixed(2)} s and −5s back to ${b2.toFixed(2)} s`);
+  check(Math.abs(b1 - Math.min(k3 + 5, tm.duration)) < 0.1 && Math.abs(b2 - Math.max(b1 - 5, 0)) < 0.1, `the +5s button skips to ${b1.toFixed(2)} s and −5s back to ${b2.toFixed(2)} s`);
 
   const isPlaying = () => page.$eval(".xp-play", (b) => b.textContent === "Pause");
   await page.focus(".xp-speed");
@@ -123,7 +127,7 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   const s1 = await position();
   check(s1 - s0 > 3.2 && s1 - s0 < 4.8, `2x speed advances ${(s1 - s0).toFixed(2)} s in 2 s`);
   await page.click(".xp-play");
-  await page.selectOption(".xp-speed", "1");
+  await page.selectOption(".xp-speed", "1.5");
 
   const a0 = Math.min(20, tm.duration - 1);
   await seek(a0);
