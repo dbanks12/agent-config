@@ -1,7 +1,7 @@
 // Step 6 checks for a built explainer. Run through qa.sh, which supplies Playwright.
 // Usage: qa.sh <work dir> [extra seconds...]
 // Serves the work dir with HTTP Range support, then checks: console errors, a [data-scene] div per scene,
-// the right scene at each sampled time, a backward seek, pause and resume, the 5 s skip keys and buttons, 2x speed,
+// the right scene at each sampled time, a backward seek, pause and resume, the 5 s skip keys and buttons, Space, 2x speed,
 // the captions toggle, full screen, the ? prompt, and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
 const http = require("node:http");
 const fs = require("node:fs");
@@ -102,6 +102,18 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   await page.click('.xp-skip[data-skip="-5"]');
   const b2 = await position();
   check(Math.abs(b1 - Math.min(k2 + 5, tm.duration)) < 0.1 && Math.abs(b2 - Math.max(b1 - 5, 0)) < 0.1, `the +5s button skips to ${b1.toFixed(2)} s and −5s back to ${b2.toFixed(2)} s`);
+
+  const isPlaying = () => page.$eval(".xp-play", (b) => b.textContent === "Pause");
+  await page.focus(".xp-speed");
+  await page.keyboard.press(" ");
+  await page.waitForTimeout(300);
+  const sp1 = await isPlaying();
+  await page.focus('.xp-skip[data-skip="5"]');
+  const sp0 = await position();
+  await page.keyboard.press(" ");
+  await page.waitForTimeout(300);
+  const sp2 = !(await isPlaying()) && (await position()) - sp0 < 1;
+  check(sp1 && sp2, `Space plays and pauses with the speed menu or a skip button focused`);
 
   await page.click(".xp-play");
   await page.waitForTimeout(300);

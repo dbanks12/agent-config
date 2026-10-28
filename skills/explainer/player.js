@@ -169,6 +169,20 @@
       full.setAttribute("aria-label", full.title);
     });
     for (const b of root.querySelectorAll(".xp-skip")) b.addEventListener("click", () => seek(now() + Number(b.dataset.skip)));
+    // Space plays and pauses wherever focus is, so it never opens the speed menu or presses the last button clicked.
+    // Text fields keep it for typing. Capture runs this before the focused element sees the key.
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        const el = e.target;
+        if (e.key !== " " || e.altKey || e.ctrlKey || e.metaKey || el.isContentEditable || el.matches?.("textarea, input:not([type=range], [type=radio], [type=checkbox], [type=button])")) return;
+        if (!root.contains(el) && document.querySelector(".xp") !== root) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (!e.repeat) play.click();
+      },
+      true,
+    );
     // Left/right arrows and h/l skip 5 s, from inside the player or with nothing focused. Other form fields keep their keys.
     const skip = { ArrowLeft: -5, h: -5, ArrowRight: 5, l: 5 };
     document.addEventListener("keydown", (e) => {
