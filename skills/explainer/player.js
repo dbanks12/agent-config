@@ -133,14 +133,15 @@
       if (audio) audio.playbackRate = audio.defaultPlaybackRate = r;
     }
     speed.replaceChildren(
-      ...[0.75, 1, 1.25, 1.5, 2, 3, 4].map((r) => {
+      ...[0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 3.5, 4].map((r) => {
         const o = document.createElement("option");
         o.value = String(r);
         o.textContent = `${r}×`;
-        o.selected = r === 1;
+        o.selected = r === 1.5;
         return o;
       }),
     );
+    setRate(1.5);
     speed.addEventListener("change", () => setRate(Number(speed.value)));
 
     bar.step = "0.05";
@@ -169,13 +170,14 @@
       full.setAttribute("aria-label", full.title);
     });
     for (const b of root.querySelectorAll(".xp-skip")) b.addEventListener("click", () => seek(now() + Number(b.dataset.skip)));
+    const typing = (el) => el.isContentEditable || el.matches?.("textarea, input:not([type=range], [type=radio], [type=checkbox], [type=button])");
     // Space plays and pauses wherever focus is, so it never opens the speed menu or presses the last button clicked.
     // Text fields keep it for typing. Capture runs this before the focused element sees the key.
     document.addEventListener(
       "keydown",
       (e) => {
         const el = e.target;
-        if (e.key !== " " || e.altKey || e.ctrlKey || e.metaKey || el.isContentEditable || el.matches?.("textarea, input:not([type=range], [type=radio], [type=checkbox], [type=button])")) return;
+        if (e.key !== " " || e.altKey || e.ctrlKey || e.metaKey || typing(el)) return;
         if (!root.contains(el) && document.querySelector(".xp") !== root) return;
         e.preventDefault();
         e.stopPropagation();
@@ -183,18 +185,20 @@
       },
       true,
     );
-    // Left/right arrows and h/l skip 5 s, from inside the player or with nothing focused. Other form fields keep their keys.
+    // Left/right arrows and h/l skip 5 s wherever focus is, so they never change the speed menu or a radio. Text fields keep them.
     const skip = { ArrowLeft: -5, h: -5, ArrowRight: 5, l: 5 };
-    document.addEventListener("keydown", (e) => {
-      const d = skip[e.key], el = e.target;
-      if (!d || e.altKey || e.ctrlKey || e.metaKey || el.isContentEditable) return;
-      const ours = root.contains(el)
-        ? el === bar || !(el.matches("input, select, textarea") || el.closest(".xp-ask-panel"))
-        : (el === document.body || el === document.documentElement) && document.querySelector(".xp") === root;
-      if (!ours) return;
-      e.preventDefault();
-      seek(now() + d);
-    });
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        const d = skip[e.key], el = e.target;
+        if (!d || e.altKey || e.ctrlKey || e.metaKey || typing(el)) return;
+        if (!root.contains(el) && document.querySelector(".xp") !== root) return;
+        e.preventDefault();
+        e.stopPropagation();
+        seek(now() + d);
+      },
+      true,
+    );
 
     chapters.replaceChildren(
       ...timings.scenes.map((s) => {
