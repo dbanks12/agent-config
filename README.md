@@ -9,7 +9,7 @@ This repo pins four skill repos as submodules in `vendor/`. `install.sh` clones 
 - [dbanks12/excalidraw-skill](https://github.com/dbanks12/excalidraw-skill): `excalidraw-skill`.
 - [dbanks12/claude-authoring-tools](https://github.com/dbanks12/claude-authoring-tools): `slide-deck`.
 - [dbanks12/pr-map](https://github.com/dbanks12/pr-map): `pr-viz`.
-- [dbanks12/repo-map](https://github.com/dbanks12/repo-map): `repo-viz`. It uses the map engine of pr-map from its own pr-map submodule.
+- [dbanks12/repo-map](https://github.com/dbanks12/repo-map): `repo-viz`. It uses the map renderers, ask box and agent code of pr-map from its own pr-map submodule.
 
 `install.sh` installs no tools. The core set is bash, git, Python 3.11 or later, `jq`, and `gh` with the `gh stack` extension. You also need the `claude` and `codex` CLIs. On macOS, install GNU coreutils for `timeout`.
 
@@ -17,8 +17,8 @@ This repo pins four skill repos as submodules in `vendor/`. `install.sh` clones 
 |---|---|
 | `excalidraw-skill`, `slide-deck` | Node.js with `npx`. `slide-deck` also needs Pillow and Chrome for PDFs |
 | `explainer`, `long-explainer` | Bun. Narration also needs `ffprobe` and an ElevenLabs key. `long-explainer` also needs `ffmpeg` |
-| `pr-viz` | Node.js with `npx` for its browser checks, and `npm` for the first Excalidraw build. Neovim buttons from another machine need `vendor/pr-map/scripts/serve.py` |
-| `repo-viz` | Node.js with `npx` for its browser checks. Go to definition needs the repo's language server, such as `rust-analyzer` or `pyright-langserver` |
+| `pr-viz` | Node.js with `npx` for its browser checks, and `npm` for the first build of each style. Questions about the map need Claude Code and `vendor/pr-map/scripts/serve.py`, as do Neovim buttons from another machine |
+| `repo-viz` | Claude Code. Node.js with `npx` for its browser checks, and `npm` for the first build of each style. Go to definition needs the repo's language server, such as `rust-analyzer` or `pyright-langserver` |
 | `slack-read` | A Slack user token in `SLACK_TOKEN` |
 | `hunk-review`, `hunk-extensions` | `npm i -g hunkdiff@0.22.0` |
 | `herdr` | Herdr 0.9.0, run with `HERDR_ENV=1` |
