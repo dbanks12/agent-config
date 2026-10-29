@@ -20,3 +20,11 @@ The invocation cut of splitting (the sequence cut lives in `SKILL.md`): split of
 ## Router skills
 
 When user-invoked skills multiply past what you can remember, that piled-up cognitive load is cured by a **router skill**: one user-invoked skill that names the others and when to reach for each, so the human has one skill to remember instead of many. It can only hint, never fire them: user-invoked skills have no description, so nothing but the human can reach them.
+
+## Survival
+
+After compaction, Claude Code keeps only the first ~5,000 tokens of each invoked skill, with 25,000 tokens shared across all skills. Everything past that point is gone for the rest of the session. Treat it as the skill's **survival line**: steps and hard rules sit above it, and reference sits below it or behind a pointer. A `SKILL.md` over about 20,000 characters already loses its tail.
+
+## Testing a skill
+
+A description is a hypothesis until a run confirms it. For a model-invoked skill, write one **should-fire** prompt and one **should-not-fire** prompt in the user's own words, without the skill's name. Draw the should-not-fire prompt from the nearest neighbouring skill, where triggers collide. Run both with `claude plugin eval`, grading only whether the `Skill` tool loaded this skill, with one arm (`--ablation none`), since a trigger has no no-skill baseline. The skill is done when the should-fire case invokes it and the should-not-fire case does not. Test the trigger the edit claims to change, not every branch.

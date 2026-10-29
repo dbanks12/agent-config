@@ -1,6 +1,6 @@
 ---
 name: brief
-description: Answer in a small number of short bullets (default 15 words max per bullet, 4 to 15 bullets chosen by content). Use when the user invokes /brief or asks for a brief, terse, or bulleted answer. Arguments override the defaults, e.g. "/brief 3", "/brief 3 20", or "/brief 5x16".
+description: Answer in a small number of short bullets (default 15 words max per bullet, 4 to 15 bullets chosen by content). Use whenever the user asks for a short answer in any wording, such as "keep it short", "tl;dr", or "be brief", or invokes /brief. Arguments override the defaults, e.g. "/brief 3", "/brief 3 20", or "/brief 5x16".
 ---
 
 # Brief
