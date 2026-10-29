@@ -7,3 +7,6 @@
 [submodule "vendor/pr-map"]
 	path = vendor/pr-map
 	url = https://github.com/dbanks12/pr-map.git
+[submodule "vendor/repo-map"]
+	path = vendor/repo-map
+	url = https://github.com/dbanks12/repo-map.git
