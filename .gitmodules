@@ -4,3 +4,6 @@
 [submodule "vendor/excalidraw-skill"]
 	path = vendor/excalidraw-skill
 	url = https://github.com/dbanks12/excalidraw-skill.git
+[submodule "vendor/pr-map"]
+	path = vendor/pr-map
+	url = https://github.com/dbanks12/pr-map.git
