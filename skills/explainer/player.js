@@ -137,11 +137,10 @@
         const o = document.createElement("option");
         o.value = String(r);
         o.textContent = `${r}×`;
-        o.selected = r === 1.5;
+        o.selected = r === 1;
         return o;
       }),
     );
-    setRate(1.5);
     speed.addEventListener("change", () => setRate(Number(speed.value)));
 
     bar.step = "0.05";
