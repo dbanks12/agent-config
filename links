@@ -38,8 +38,8 @@ skills/writing-for-agents ~/.claude/skills/writing-for-agents
 skills/writing-for-agents ~/.codex/skills/writing-for-agents
 skills/tdd ~/.claude/skills/tdd
 skills/tdd ~/.codex/skills/tdd
-skills/code-review ~/.claude/skills/code-review
-skills/code-review ~/.codex/skills/code-review
+skills/review-standards-spec ~/.claude/skills/review-standards-spec
+skills/review-standards-spec ~/.codex/skills/review-standards-spec
 skills/grill-me-html ~/.claude/skills/grill-me-html
 skills/grill-me-html ~/.codex/skills/grill-me-html
 skills/teach-me-many-topics ~/.claude/skills/teach-me-many-topics

@@ -48,7 +48,7 @@ Your local `~/.claude/settings.json` and `~/.codex/config.toml` stay outside thi
 
 | Area | Skills |
 |---|---|
-| Pull requests | `create-pr`, `finish-pr`, `code-review`, `tdd` |
+| Pull requests | `create-pr`, `finish-pr`, `review-standards-spec`, `tdd` |
 | Cross-tool review | `call-claude`, `call-codex`, `review-with-claude`, `review-with-codex`, `review-by-council` |
 | Thinking and planning | `grilling`, `grill-me`, `grill-me-html`, `to-questionnaire`, `wait-what`, `handoff`, `brief`, `expert-research` |
 | Teaching and visuals | `teach-me`, `teach-me-many-topics`, `explainer`, `long-explainer`, `slide-deck`, `excalidraw-skill` |
@@ -71,6 +71,19 @@ The review skills let one tool ask the other for a second opinion. Each layer ca
 
 ![finish-pr runs review, trim, and description steps, then optional ready, CI, and merge steps](docs/finish-pr.png)
 
+### Trigger evals
+
+`evals/triggers/` checks that each model-invoked skill fires on natural phrasing and stays quiet on its nearest neighbour's request. Each skill has a `<skill>--fires` and a `<skill>--quiet` case.
+
+Run the suite after you change a description:
+
+```sh
+evals/run.sh -j 4                          # every case, 3 runs each
+evals/run.sh --case 'teach-me*' --runs 1   # one skill, one quick run
+```
+
+`run.sh` builds a plugin from the skills that `links` installs into Claude Code, then runs `claude plugin eval`. Runs use your Claude plan, at about $0.15 each at list price. Results go to `evals/results/`. The suite tests Claude Code only, not Codex.
+
 ## Layout
 
 - `instructions/`: `AGENTS.md`, linked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`.
@@ -80,12 +93,13 @@ The review skills let one tool ask the other for a second opinion. Each layer ca
 - `claude-hooks/`, `hooks/`: the Claude Code hook and the git pre-commit hook.
 - `cross-review/`, `statusline/`, `linux/`: review runners, the Claude status line, and Linux host setup.
 - `docs/`: README diagrams, with `.excalidraw` sources.
+- `evals/`: skill trigger evals and their runner.
 
 ## License
 
 This repo's own files use the [MIT license](LICENSE). These files come from other projects and keep their own terms:
 
-- `grill-me`, `grilling`, `handoff`, `to-questionnaire`, `wait-what`, `writing-for-agents`, `tdd`, and `code-review` come from [mattpocock/skills](https://github.com/mattpocock/skills). They use the MIT license, with a copy in each folder.
+- `grill-me`, `grilling`, `handoff`, `to-questionnaire`, `wait-what`, `writing-for-agents`, `tdd`, and `review-standards-spec` (renamed from `code-review`) come from [mattpocock/skills](https://github.com/mattpocock/skills). They use the MIT license, with a copy in each folder. `writing-for-agents` adds two local sections to `SKILL-MECHANICS.md`.
 - `hunk-review` and `hunk-extensions` come from the [hunkdiff](https://github.com/modem-dev/hunk) npm package. They use the MIT license, with a copy in each folder.
 - `explainer` is adapted from [alejoamiras/aa-skills](https://github.com/alejoamiras/aa-skills/tree/main/skills/explainer). Its author permits this copy, but no open-source license covers it. See [`skills/explainer/NOTICE`](skills/explainer/NOTICE).
 - `instructions/AGENTS.md` quotes short passages from Google's writing guides under CC BY 4.0, and from other authors. See [writing sources](instructions/writing-sources.md).
