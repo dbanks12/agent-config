@@ -60,3 +60,5 @@ skills/finish-pr ~/.claude/skills/finish-pr
 skills/finish-pr ~/.codex/skills/finish-pr
 skills/long-explainer ~/.claude/skills/long-explainer
 skills/long-explainer ~/.codex/skills/long-explainer
+vendor/pr-map ~/.claude/skills/pr-viz
+vendor/pr-map ~/.codex/skills/pr-viz

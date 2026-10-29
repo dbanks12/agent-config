@@ -4,10 +4,11 @@ Shared instructions, skills, and hooks for Claude Code and Codex. You edit one r
 
 ## Dependencies
 
-This repo pins two public skill repos as submodules in `vendor/`. `install.sh` clones them.
+This repo pins three skill repos as submodules in `vendor/`. `install.sh` clones them.
 
 - [dbanks12/excalidraw-skill](https://github.com/dbanks12/excalidraw-skill): `excalidraw-skill`.
 - [dbanks12/claude-authoring-tools](https://github.com/dbanks12/claude-authoring-tools): `slide-deck`.
+- [dbanks12/pr-map](https://github.com/dbanks12/pr-map): `pr-viz`.
 
 `install.sh` installs no tools. The core set is bash, git, Python 3.11 or later, `jq`, and `gh` with the `gh stack` extension. You also need the `claude` and `codex` CLIs. On macOS, install GNU coreutils for `timeout`.
 
@@ -15,6 +16,7 @@ This repo pins two public skill repos as submodules in `vendor/`. `install.sh` c
 |---|---|
 | `excalidraw-skill`, `slide-deck` | Node.js with `npx`. `slide-deck` also needs Pillow and Chrome for PDFs |
 | `explainer`, `long-explainer` | Bun. Narration also needs `ffprobe` and an ElevenLabs key. `long-explainer` also needs `ffmpeg` |
+| `pr-viz` | Node.js with `npx` for its browser checks, and `npm` for the first Excalidraw build. Neovim buttons from another machine need `vendor/pr-map/scripts/serve.py` |
 | `slack-read` | A Slack user token in `SLACK_TOKEN` |
 | `hunk-review`, `hunk-extensions` | `npm i -g hunkdiff@0.22.0` |
 | `herdr` | Herdr 0.9.0, run with `HERDR_ENV=1` |
@@ -51,7 +53,7 @@ Your local `~/.claude/settings.json` and `~/.codex/config.toml` stay outside thi
 | Pull requests | `create-pr`, `finish-pr`, `review-standards-spec`, `tdd` |
 | Cross-tool review | `call-claude`, `call-codex`, `review-with-claude`, `review-with-codex`, `review-by-council` |
 | Thinking and planning | `grilling`, `grill-me`, `grill-me-html`, `to-questionnaire`, `wait-what`, `handoff`, `brief`, `expert-research` |
-| Teaching and visuals | `teach-me`, `teach-me-many-topics`, `explainer`, `long-explainer`, `slide-deck`, `excalidraw-skill` |
+| Teaching and visuals | `teach-me`, `teach-me-many-topics`, `explainer`, `long-explainer`, `slide-deck`, `excalidraw-skill`, `pr-viz` |
 | Writing for agents | `writing-for-agents` |
 | Tools | `herdr`, `hunk-review`, `hunk-extensions`, `slack-read` |
 
