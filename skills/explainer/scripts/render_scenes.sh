@@ -2,7 +2,8 @@
 # Draw, lint, render, and tag Excalidraw scenes in parallel, one private canvas per scene.
 # Usage: render_scenes.sh <scenes dir> [<id>...]
 # <scenes dir>/scenes.py <id> prints one scene's element JSON (place.py output). For each id this writes
-# <id>.excalidraw, <id>.png, <id>.svg, <id>.tagged.svg, and <id>.lint, and tiles every PNG into sheet.jpg,
+# <id>.excalidraw, <id>.png, <id>.svg, <id>.tagged.svg, and <id>.lint, gives consecutive scenes that share
+# a part one frame (frame_scenes.py), and tiles every PNG into sheet.jpg,
 # or, past 15 scenes, into sheet-1.jpg, sheet-2.jpg, ... of 9 scenes each, printing the ids on each sheet.
 # It prints all lint problems at the end, and its last line names the scenes that failed lint.
 # With no ids it renders every scene in scenes.py's SCENES. Rerun it with only the ids you changed:
@@ -53,6 +54,11 @@ done
 failed=0
 for p in "${pids[@]}"; do wait "$p" || failed=1; done
 [[ $failed -eq 0 ]] || { echo "render_scenes: a scene failed" >&2; exit 1; }
+
+# Consecutive scenes that share a part get one frame, so the part stays in place across the cut.
+framed=()
+for id in "${all[@]}"; do if [[ -f "$id.tagged.svg" ]]; then framed+=("$id"); fi; done
+if [[ ${#framed[@]} -ge 2 ]]; then python3 "$here/frame_scenes.py" . "${framed[@]}"; fi
 
 # 3 columns of 640x360 cells, in SCENES order. A scene that was never rendered has no cell.
 tile() {  # tile <out> <id>...

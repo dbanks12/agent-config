@@ -13,9 +13,9 @@ The [explainer](../explainer/SKILL.md) skill, stretched to 30 minutes. Read its 
 
 - 12–50 scenes, 750–4,500 words, at most 30,000 characters. That is about 5 to 32 minutes: the voice speaks about 15 characters a second. A script under 5 minutes is an explainer job.
 - Group the scenes into **chapters** of 3–8 scenes, one part of the subject each. Name the scene ids `c<chapter>s<n>`, such as `c2s3`.
-- The opening context runs about a minute. Each chapter's first scene tells the listener where they are now. The last scene recaps the chapters in a few sentences.
+- The opening context runs about a minute. Each chapter's first scene tells the listener where they are now. The last scene recaps the chapters in a few sentences, then closes the loop as in explainer step 1.
 - One idea per scene still holds, about 30–45 seconds each. A scene over 6,000 characters is refused.
-- About two audio tags a minute.
+- At most about two audio tags a minute, and at most one per scene.
 
 **Step 4, narration.** Add `--long` to every narration call: `narrate.sh <abs narration.json> <abs work dir> --long`, and `finish.sh <abs work dir> narrated --long [seconds...]` or `captions --long`. Without it the scripts keep the 6,000-character cap: `narrate.sh` exits 1 and `finish.sh` falls back to captions.
 

@@ -4,10 +4,12 @@
 Diagram(<scene id>, title) prefixes every id with the scene id, so the ids below become s1-repo,
 s1-repo--claude (an arrow), s1-repo--claude-label (its label), s2-rules, s2-rules-title, and so on.
 cues.json names these full ids. Positions are top-left corners on a grid you choose: keep a scene
-inside about 900 x 500 so it reads at 640 x 360, and 80-130 px between boxes.
+inside about 900 x 500 so it reads at 640 x 360, and 80-130 px between boxes. A part that recurs across
+scenes keeps its name, label, and position in each, as "repo" does below. In a scene that builds on
+it, change="context" draws it gray so the new parts carry the color.
 
 place.py API (all positions in px, ids without the scene prefix):
-  box(name, x, y, label, sub=None, fam="gray")   diamond(name, x, y, question, fam="blue")
+  box(name, x, y, label, sub=None, fam="gray", change=None)   diamond(name, x, y, question, fam="blue")
   arrow(a, b, label=None, dashed=False, route="straight" | "elbow", via=[(x, y)])
   zone(name, x, y, w, h, title)   panel(name, x, y, title, [lines])   note(name, x, y, text)   start(name, x, y)
   fam: gray, blue, green, orange, purple, red, teal. A diamond doubles its label's size.
@@ -29,12 +31,14 @@ def s1(d):
 
 
 def s2(d):
-    d.diamond("same", 0, 80, "already linked?")
-    d.box("skip", 500, -20, "nothing to do", fam="green")
-    d.box("backup", 500, 200, "move old file", sub="to backups/", fam="orange")
+    d.box("repo", 0, 120, "agent-config repo", sub="one source of truth", change="context")
+    d.diamond("same", 380, 80, "already linked?")
+    d.box("skip", 820, -20, "nothing to do", fam="green")
+    d.box("backup", 820, 200, "move old file", sub="to backups/", fam="orange")
+    d.arrow("repo", "same", "each line")
     d.arrow("same", "skip", "yes")
     d.arrow("same", "backup", "no")
-    d.panel("rules", 0, 260, "Rules", ["never deletes", "--check only reports"])
+    d.panel("rules", 0, 320, "Rules", ["never deletes", "--check only reports"])
 
 
 SCENES = {"s1": ("One repo, two homes", s1), "s2": ("Each line, once", s2)}
