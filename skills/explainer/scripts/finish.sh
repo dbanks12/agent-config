@@ -4,7 +4,8 @@
 # narrated: reuses timings.json when it is newer than narration.json (narrate.sh already ran in the
 # background), else runs narrate.sh. Exit 2 or 3 falls back to captions. Exit 4 stops: the request
 # may be billed, so nothing resubmits. captions: strips the audio tags with jq and runs tts.ts
-# --captions-only. --long passes on to both. Then build_page.py and qa.sh. Exits with qa.sh's status.
+# --captions-only. --long passes on to both. Then pad_scenes.py adds a beat of silence after every
+# narrated scene but the last, and build_page.py and qa.sh run. Exits with qa.sh's status.
 set -euo pipefail
 [[ $# -ge 2 && "$1" == /* && ( "$2" == narrated || "$2" == captions ) ]] || { echo "usage: finish.sh <abs work dir> narrated|captions [--long] [seconds...]" >&2; exit 1; }
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -36,5 +37,6 @@ if [[ $mode == narrated ]]; then
 else
   captions
 fi
+python3 "$here/pad_scenes.py" "$w"
 python3 "$here/build_page.py" "$w"
 exec "$here/qa.sh" "$w" "$@"
