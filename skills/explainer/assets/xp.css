@@ -27,6 +27,9 @@
 .xp-bar { flex: 1; min-width: 0; accent-color: var(--xp-accent); }
 .xp-time { font: 600 0.85rem var(--xp-mono); font-variant-numeric: tabular-nums; color: var(--xp-muted); white-space: nowrap; }
 .xp-speed { font: 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; }
+.xp-view { justify-self: start; font: 600 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+.xp-view[aria-pressed="true"] { color: var(--xp-card); background: var(--xp-fg); border-color: var(--xp-fg); }
+.xp-listen > :not(.xp-view, .xp-controls), .xp-listen .xp-controls > :not(.xp-skip, .xp-play, .xp-bar, .xp-time) { display: none !important; }
 .xp-chapters { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .xp-chapters button { font: 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
 .xp-chapters li[aria-current] button { border-color: var(--xp-accent); color: var(--xp-accent); font-weight: 700; }

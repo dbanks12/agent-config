@@ -159,6 +159,14 @@
     };
     showCaptions(!audio);
     cc.addEventListener("click", () => showCaptions(caption.hidden));
+    // Audio-only view hides everything but −5s, Play, +5s, the bar, and the time. Both views share one clock, so the position carries over.
+    const view = q(".xp-view");
+    view.addEventListener("click", () => {
+      const on = root.classList.toggle("xp-listen");
+      view.setAttribute("aria-pressed", String(on));
+      view.textContent = on ? "Show video" : "Audio only";
+      render();
+    });
     // Full screen covers the whole player. A frame without allow="fullscreen" disables it, so the button hides there.
     const full = q(".xp-full");
     if (!document.fullscreenEnabled) full.hidden = true;
