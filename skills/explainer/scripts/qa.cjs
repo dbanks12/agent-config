@@ -100,7 +100,7 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   await page.focus(".xp-speed");
   await page.keyboard.press("ArrowLeft");
   const k3 = await position(), rate = await page.$eval(".xp-speed", (x) => x.value);
-  check(Math.abs(k3 - Math.max(k2 - 5, 0)) < 0.1 && rate === "1.5", `with the speed menu focused, left arrow skips to ${k3.toFixed(2)} s and the speed stays ${rate}x`);
+  check(Math.abs(k3 - Math.max(k2 - 5, 0)) < 0.1 && rate === "1", `with the speed menu focused, left arrow skips to ${k3.toFixed(2)} s and the speed stays ${rate}x`);
   await page.click('.xp-skip[data-skip="5"]');
   const b1 = await position();
   await page.click('.xp-skip[data-skip="-5"]');
@@ -127,7 +127,7 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   const s1 = await position();
   check(s1 - s0 > 3.2 && s1 - s0 < 4.8, `2x speed advances ${(s1 - s0).toFixed(2)} s in 2 s`);
   await page.click(".xp-play");
-  await page.selectOption(".xp-speed", "1.5");
+  await page.selectOption(".xp-speed", "1");
 
   const a0 = Math.min(20, tm.duration - 1);
   await seek(a0);
