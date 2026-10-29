@@ -6,6 +6,12 @@ set -euo pipefail
 [[ ( $# -eq 2 || ( $# -eq 3 && "$3" == --long ) ) && "$1" == /* && "$2" == /* ]] ||
   { echo "usage: narrate.sh <abs narration.json> <abs out-dir> [--long]" >&2; exit 1; }
 
+# The user never wants a whispered narration. Refuse before the key is read or anything is sent.
+if grep -qi '\[whisper' "$1"; then
+  echo "narrate.sh: $1 has a whisper tag. Remove every [whisper...] tag, then narrate again." >&2
+  exit 1
+fi
+
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 keyfile="${ELEVENLABS_ENV_FILE:-$HOME/.config/elevenlabs/.env}"
 bun="$(command -v bun)"
