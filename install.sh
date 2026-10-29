@@ -31,7 +31,10 @@ link() {
 # a submodule that fails to clone is skipped, with its links
 if [[ $check -eq 0 ]]; then
   for sub in $(git -C "$root" config -f .gitmodules --get-regexp '\.path$' | awk '{print $2}'); do
-    git -C "$root" submodule update --init --quiet -- "$sub" ||
+    # nested submodules, such as repo-map's copy of pr-map, clone too when they can
+    git -C "$root" submodule update --init --recursive --quiet -- "$sub" 2>/dev/null ||
+      { git -C "$root" submodule update --init --quiet -- "$sub" &&
+        echo "warning: $sub cloned, but not all of its nested submodules" >&2; } ||
       echo "warning: $sub did not clone, its skills are skipped" >&2
   done
 fi
