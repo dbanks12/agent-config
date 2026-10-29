@@ -17,8 +17,8 @@ This repo pins four skill repos as submodules in `vendor/`. `install.sh` clones 
 |---|---|
 | `excalidraw-skill`, `slide-deck` | Node.js with `npx`. `slide-deck` also needs Pillow and Chrome for PDFs |
 | `explainer`, `long-explainer` | Bun. Narration also needs `ffprobe` and an ElevenLabs key. `long-explainer` also needs `ffmpeg` |
-| `pr-viz` | Node.js with `npx` for its browser checks, and `npm` for the first build of each style. Questions about the map need Claude Code and `vendor/pr-map/scripts/serve.py`, as do Neovim buttons from another machine |
-| `repo-viz` | Claude Code. Node.js with `npx` for its browser checks, and `npm` for the first build of each style. Go to definition needs the repo's language server, such as `rust-analyzer` or `pyright-langserver` |
+| `pr-viz` | Node.js with `npx` for its browser checks, and `npm` for the first build of each style. Questions about the map need Claude Code and `vendor/pr-map/scripts/serve.py`, as do Neovim buttons from another machine. Diagrams about the map also use `excalidraw-skill` |
+| `repo-viz` | Claude Code. Node.js with `npx` for its browser checks, and `npm` for the first build of each style. Go to definition needs the repo's language server, such as `rust-analyzer` or `pyright-langserver`. Diagrams about the map also use `excalidraw-skill` |
 | `slack-read` | A Slack user token in `SLACK_TOKEN` |
 | `hunk-review`, `hunk-extensions` | `npm i -g hunkdiff@0.22.0` |
 | `herdr` | Herdr 0.9.0, run with `HERDR_ENV=1` |
