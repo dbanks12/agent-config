@@ -2,7 +2,7 @@
 // Usage: qa.sh <work dir> [extra seconds...]
 // Serves the work dir with HTTP Range support, then checks: console errors, a [data-scene] div per scene,
 // the right scene at each sampled time, a backward seek, pause and resume, the 5 s skip keys and buttons, Space, 2x speed,
-// the captions toggle, full screen, the ? prompt, and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
+// the captions toggle, full screen, the audio-only view, the ? prompt, and the last two seconds. Saves labeled 3x3 contact sheets of the stage to <work dir>/qa/sheet-N.jpg. Exits 1 on a failure.
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -159,6 +159,35 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   await page.waitForTimeout(300);
   const fullOff = !(await isFull());
   check(fullOn && fullOff, `the full-screen button enters and leaves full screen`);
+
+  const shown = () => page.$$eval(".xp-stage, .xp-chapters, .xp details, .xp-controls > *", (els) =>
+    els.filter((e) => e.checkVisibility()).map((e) => e.className || e.tagName.toLowerCase()).sort().join(","));
+  const v0 = Math.min(10, tm.duration / 3);
+  await seek(v0);
+  await page.click(".xp-play");
+  await page.waitForTimeout(500);
+  await page.click(".xp-view");
+  const vOn = await shown();
+  const vp1 = await position();
+  await page.waitForTimeout(800);
+  const vp2 = await position();
+  await page.click(".xp-play");
+  const vp3 = await position();
+  await page.click('.xp-skip[data-skip="5"]');
+  const vp4 = await position();
+  await page.click('.xp-skip[data-skip="-5"]');
+  const vp5 = await position();
+  await page.evaluate((t) => { const b = document.querySelector(".xp-bar"); b.value = t; b.dispatchEvent(new Event("input", { bubbles: true })); }, v0 + 8);
+  await frames();
+  const vp6 = await position();
+  await page.click(".xp-view");
+  await frames();
+  const vOff = await shown();
+  const vp7 = await position();
+  const vScene = await visible();
+  check(vOn === "xp-bar,xp-play,xp-skip,xp-skip,xp-time" && vp2 - vp1 > 0.5 && Math.abs(vp4 - vp3 - 5) < 0.1 && Math.abs(vp5 - vp3) < 0.1
+      && Math.abs(vp6 - (v0 + 8)) < 0.1 && Math.abs(vp7 - vp6) < 0.05 && vOff.includes("xp-stage") && vScene === sceneAt(vp7),
+    `audio-only view shows only ${vOn}, keeps playing (${(vp2 - vp1).toFixed(2)} s), skips and seeks, and the video view resumes at ${vp7.toFixed(2)} s on ${vScene}`);
 
   await seek(tm.duration - 2);
   await page.click(".xp-play");
