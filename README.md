@@ -92,7 +92,7 @@ evals/run.sh --case 'teach-me*' --runs 1   # one skill, one quick run
 
 - `instructions/`: `AGENTS.md`, linked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`.
 - `skills/`: shared skills. A tool-specific skill is named `<purpose>-with-<tool>`.
-- `vendor/`: skills from other repos, pinned as submodules. To update one, run `git -C vendor/<name> pull` and commit the new pointer.
+- `vendor/`: skills from other repos, pinned as submodules. To update one, follow "Vendored skill repos" in `instructions/AGENTS.md`.
 - `links`: every managed symlink, as `source target`.
 - `claude-hooks/`, `hooks/`: the Claude Code hook and the git pre-commit hook.
 - `cross-review/`, `statusline/`, `linux/`: review runners, the Claude status line, and Linux host setup.

@@ -2,6 +2,19 @@
 
 This file and the shared skills live in `dbanks12/agent-config`. Paths under `~/.claude` and `~/.codex` are symlinks into that repo. Edit there and commit. Link each skill into both tools unless it is tool-specific.
 
+## Vendored skill repos
+
+Some skills live in their own repos, pinned as git submodules. `agent-config` pins them in `vendor/`, and some skill repos pin others, such as `repo-map` pinning `pr-map`. In the `agent-config` checkout, `git submodule status --recursive` lists every pin.
+
+When the user asks to merge and update a change to one of these repos, carry it up the whole chain:
+
+1. Merge the PR in the source repo.
+2. Bump each repo that pins the source, innermost first, and end with `agent-config`. Make each bump its own PR to that repo's default branch, and merge it before the next. `claude-authoring-tools` uses `master`.
+3. Make each bump in a temporary worktree from `origin/<default branch>`. Set the pin with `git update-index --cacheinfo 160000,<sha>,<path>`. This leaves the live checkout on its own branch.
+4. Update the live copies. Skills run from the `agent-config` working tree, which can be on any branch. In each submodule on the chain, run `git fetch`, then `git checkout --detach origin/<default branch>`, then `git submodule update --init`. Then run `./install.sh --check`.
+
+The chain is done when every pin of the source repo, on each repo's default branch, records the merged commit, and the live copies have that commit checked out. `gh pr merge` can fail at its local step when another worktree holds the default branch. Check the merge with `gh pr view`.
+
 # Pull requests
 
 Always create pull requests as drafts.
