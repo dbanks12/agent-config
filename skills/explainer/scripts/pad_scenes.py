@@ -62,9 +62,13 @@ def main(w, gap):
     if not cuts:
         return
     edges = [0.0, *cuts]
-    parts = [f"[0:a]atrim=start={s}:end={e},asetpts=PTS-STARTPTS,apad=pad_dur={gap}[p{i}]"
+    # 5 ms fades on both sides of each beat, so the step into digital silence never clicks.
+    fade = 0.005
+    fade_in = f"afade=t=in:d={fade},"
+    parts = [f"[0:a]atrim=start={s}:end={e},asetpts=PTS-STARTPTS,{fade_in if i else ''}"
+             f"afade=t=out:st={e - s - fade:.3f}:d={fade},apad=pad_dur={gap}[p{i}]"
              for i, (s, e) in enumerate(zip(edges, edges[1:]))]
-    parts.append(f"[0:a]atrim=start={edges[-1]},asetpts=PTS-STARTPTS[p{len(cuts)}]")
+    parts.append(f"[0:a]atrim=start={edges[-1]},asetpts=PTS-STARTPTS,{fade_in[:-1]}[p{len(cuts)}]")
     graph = ";".join(parts) + ";" + "".join(f"[p{i}]" for i in range(len(cuts) + 1)) + f"concat=n={len(cuts) + 1}:v=0:a=1[out]"
     tmp = f"{audio}.padded.mp3"
     rate = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a:0", "-show_entries", "stream=bit_rate",
