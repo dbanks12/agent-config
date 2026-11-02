@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add a beat of silence at the end of every scene but the last, in narration.mp3 and timings.json.
 
-Usage: pad_scenes.py <abs work dir> [seconds, default 0.6]
+Usage: pad_scenes.py <abs work dir> [seconds, default 1.5]
 
 Learners rarely pause on their own, and eleven_v4 has no break tag. The silence goes into the gap
 between a scene's last word and the next scene's first word, and the scene keeps the screen, so its
@@ -96,4 +96,4 @@ def main(w, gap):
 if __name__ == "__main__":
     if len(sys.argv) not in (2, 3) or not sys.argv[1].startswith("/"):
         sys.exit("usage: pad_scenes.py <abs work dir> [seconds]")
-    main(sys.argv[1], float(sys.argv[2]) if len(sys.argv) == 3 else 0.6)
+    main(sys.argv[1], float(sys.argv[2]) if len(sys.argv) == 3 else 1.5)
