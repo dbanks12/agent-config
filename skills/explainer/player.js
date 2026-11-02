@@ -71,6 +71,7 @@
       bar.value = String(t);
       clock.textContent = `${fmt(t)} / ${fmt(total())}`;
       play.textContent = playing() ? "Pause" : atEnd() ? "Replay" : "Play";
+      if (!playing()) root.classList.remove("xp-idle");
       for (const li of chapters.children) li.toggleAttribute("aria-current", li.dataset.id === scene.id);
     }
 
@@ -171,12 +172,25 @@
     const full = q(".xp-full");
     if (!document.fullscreenEnabled) full.hidden = true;
     full.addEventListener("click", () =>
-      document.fullscreenElement === root ? document.exitFullscreen() : root.requestFullscreen().catch(() => (full.hidden = true)),
+      document.fullscreenElement === root ? document.exitFullscreen() : root.requestFullscreen().then(
+        // Phones show the 16:9 stage largest in landscape. Browsers without an orientation lock ignore it.
+        () => screen.orientation?.lock?.("landscape").catch(() => {}),
+        () => (full.hidden = true),
+      ),
     );
     document.addEventListener("fullscreenchange", () => {
       full.title = document.fullscreenElement === root ? "Exit full screen" : "Full screen";
       full.setAttribute("aria-label", full.title);
     });
+    // In landscape full screen the controls cover the stage, so they hide after 3 s of playback without input.
+    let idle = 0;
+    const wake = () => {
+      root.classList.remove("xp-idle");
+      clearTimeout(idle);
+      idle = setTimeout(() => playing() && root.classList.add("xp-idle"), 3000);
+    };
+    for (const ev of ["pointerdown", "pointermove", "keydown"]) root.addEventListener(ev, wake);
+    play.addEventListener("click", wake);
     for (const b of root.querySelectorAll(".xp-skip")) b.addEventListener("click", () => seek(now() + Number(b.dataset.skip)));
     const typing = (el) => el.isContentEditable || el.matches?.("textarea, input:not([type=range], [type=radio], [type=checkbox], [type=button])");
     // Space plays and pauses wherever focus is, so it never opens the speed menu or presses the last button clicked.

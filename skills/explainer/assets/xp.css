@@ -19,10 +19,25 @@
 .xp-cc { font: 600 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; padding: 5px 10px; cursor: pointer; flex: none; }
 .xp-cc[aria-pressed="true"] { color: var(--xp-card); background: var(--xp-fg); border-color: var(--xp-fg); }
 .xp-full { display: grid; place-items: center; color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; padding: 6px 8px; cursor: pointer; flex: none; }
-.xp:fullscreen { background: var(--xp-bg); padding: 16px; box-sizing: border-box; align-content: center; }
-.xp:fullscreen .xp-stage { width: min(100%, calc((100vh - 170px) * 16 / 9)); justify-self: center; }
-.xp:fullscreen .xp-chapters, .xp:fullscreen details { display: none; }
-.xp:fullscreen .xp-captions { text-align: center; font-size: 1.3rem; }
+/* Full screen: the stage is as large as the screen allows, with captions on it as subtitles. In landscape the
+   controls overlay the stage's bottom edge and hide while playback runs untouched (.xp-idle). */
+.xp:fullscreen { background: var(--xp-bg); box-sizing: border-box; height: 100vh; height: 100dvh; gap: 6px; align-content: center; justify-items: center;
+  padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); }
+.xp:fullscreen .xp-stage { width: min(100%, calc((100vh - 4.5rem) * 16 / 9)); width: min(100%, calc((100dvh - 4.5rem) * 16 / 9)); border: 0; border-radius: 0; }
+.xp:fullscreen .xp-stage, .xp:fullscreen .xp-captions { grid-area: 1 / 1; }
+.xp:fullscreen .xp-controls { justify-self: stretch; }
+.xp:fullscreen .xp-view, .xp:fullscreen .xp-chapters, .xp:fullscreen details { display: none; }
+.xp:fullscreen .xp-captions { align-self: end; z-index: 1; margin: 0 0 12px; max-width: 90%; min-height: 0; padding: 4px 12px; border-radius: 6px;
+  background: rgb(0 0 0 / 0.72); color: #fff; text-align: center; font-size: clamp(1rem, 2.4vw, 1.4rem); }
+.xp:fullscreen .xp-captions:empty { display: none; }
+@media (orientation: landscape) {
+  .xp:fullscreen .xp-stage { width: min(100%, calc((100vh - 12px) * 16 / 9)); width: min(100%, calc((100dvh - 12px) * 16 / 9)); }
+  .xp:fullscreen .xp-controls { grid-area: 1 / 1; align-self: end; z-index: 2; margin: 0 8px 8px; background: color-mix(in srgb, var(--xp-card) 88%, transparent); transition: opacity 0.3s; }
+  .xp:fullscreen .xp-captions { margin-bottom: 72px; max-width: min(90%, calc((100vh - 12px) * 1.6)); max-width: min(90%, calc((100dvh - 12px) * 1.6)); }
+  .xp-idle:fullscreen .xp-controls { opacity: 0; pointer-events: none; }
+  .xp-idle:fullscreen .xp-captions { margin-bottom: 12px; }
+  .xp-idle:fullscreen { cursor: none; }
+}
 .xp :focus-visible { outline: 3px solid var(--xp-accent); outline-offset: 2px; }
 .xp-bar { flex: 1; min-width: 0; accent-color: var(--xp-accent); }
 .xp-time { font: 600 0.85rem var(--xp-mono); font-variant-numeric: tabular-nums; color: var(--xp-muted); white-space: nowrap; }
