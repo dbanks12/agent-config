@@ -89,6 +89,16 @@ Codex has no Artifact tool. Headless Claude Code (`claude --print`) has none eit
 
 4. Delete the brief after Claude Code replies with the URL.
 
+# Shared notes on the phone
+
+The user reads a notes feed on their phone in Sill, their Android assistant app (`~/projects/herdr-android-assistant`). When the user asks for a link or result "in my Notes", post it there.
+
+- Post a note with `~/.local/share/sill/core-rs/sill-core note --from "<sender>" "<text>"`.
+- Name the sender after the job, for example `Explainer` or `Home Assistant`. The default sender is `agent`.
+- Write one or two sentences, then the link. Never put a secret in a note.
+- Read recent notes with `sill-core notes --last 20`.
+- The core stores notes in `~/.local/state/sill-core/notes.jsonl`. Do not edit that file by hand. Python apps in `~/projects/sill-apps` write it with a locked append, as in `eat-clean/notify.py`.
+
 # Karpathy guidelines
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
