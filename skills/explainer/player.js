@@ -26,6 +26,16 @@
     const clock = q(".xp-time");
     const caption = q(".xp-captions");
     const chapters = q(".xp-chapters");
+    // Pages built before the cover lack .xp-cover, so add it after the stage.
+    let cover = q(".xp-cover");
+    if (!cover) {
+      cover = document.createElement("div");
+      cover.className = "xp-cover";
+      cover.innerHTML = '<p class="xp-cover-title"></p><p class="xp-cover-scene"></p>';
+      stage.after(cover);
+    }
+    cover.querySelector(".xp-cover-title").textContent = timings.page?.title || document.title;
+    const coverScene = cover.querySelector(".xp-cover-scene");
     // Pages built before the speed control lack .xp-speed, so add it to the controls.
     let speed = q(".xp-speed");
     if (!speed) {
@@ -71,6 +81,8 @@
       bar.value = String(t);
       clock.textContent = `${fmt(t)} / ${fmt(total())}`;
       play.textContent = playing() ? "Pause" : atEnd() ? "Replay" : "Play";
+      play.dataset.state = playing() ? "pause" : "play";
+      coverScene.textContent = scene.title;
       if (!playing()) root.classList.remove("xp-idle");
       for (const li of chapters.children) li.toggleAttribute("aria-current", li.dataset.id === scene.id);
     }
@@ -159,7 +171,8 @@
     };
     showCaptions(!audio);
     cc.addEventListener("click", () => showCaptions(caption.hidden));
-    // Audio-only view hides everything but −5s, Play, +5s, the bar, and the time. Both views share one clock, so the position carries over.
+    // Audio-only view is a podcast player: a cover with the title and the current scene, then the bar, the time, and large
+    // −5s, Play, +5s. Both views share one clock, so the position carries over.
     const view = q(".xp-view");
     view.addEventListener("click", () => {
       const on = root.classList.toggle("xp-listen");

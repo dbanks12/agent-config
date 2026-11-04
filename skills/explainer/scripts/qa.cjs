@@ -168,6 +168,11 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   await page.waitForTimeout(500);
   await page.click(".xp-view");
   const vOn = await shown();
+  const vCover = await page.evaluate(() => {
+    const c = document.querySelector(".xp-cover"), p = document.querySelector(".xp-play").getBoundingClientRect();
+    const bar = document.querySelector(".xp-bar").getBoundingClientRect();
+    return c.checkVisibility() && c.querySelector(".xp-cover-title").textContent.length > 0 && p.width >= 64 && p.top > bar.bottom;
+  });
   const vp1 = await position();
   await page.waitForTimeout(800);
   const vp2 = await position();
@@ -185,9 +190,9 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   const vOff = await shown();
   const vp7 = await position();
   const vScene = await visible();
-  check(vOn === "xp-bar,xp-play,xp-skip,xp-skip,xp-time" && vp2 - vp1 > 0.5 && Math.abs(vp4 - vp3 - 5) < 0.1 && Math.abs(vp5 - vp3) < 0.1
+  check(vOn === "xp-bar,xp-play,xp-skip,xp-skip,xp-time" && vCover && vp2 - vp1 > 0.5 && Math.abs(vp4 - vp3 - 5) < 0.1 && Math.abs(vp5 - vp3) < 0.1
       && Math.abs(vp6 - (v0 + 8)) < 0.1 && Math.abs(vp7 - vp6) < 0.05 && vOff.includes("xp-stage") && vScene === sceneAt(vp7),
-    `audio-only view shows only ${vOn}, keeps playing (${(vp2 - vp1).toFixed(2)} s), skips and seeks, and the video view resumes at ${vp7.toFixed(2)} s on ${vScene}`);
+    `audio-only view shows the cover and only ${vOn}, with a large Play below the bar, keeps playing (${(vp2 - vp1).toFixed(2)} s), skips and seeks, and the video view resumes at ${vp7.toFixed(2)} s on ${vScene}`);
 
   await seek(tm.duration - 2);
   await page.click(".xp-play");
