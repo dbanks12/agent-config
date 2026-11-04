@@ -45,7 +45,24 @@
 .xp-speed { font: 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; }
 .xp-view { justify-self: start; font: 600 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
 .xp-view[aria-pressed="true"] { color: var(--xp-card); background: var(--xp-fg); border-color: var(--xp-fg); }
-.xp-listen > :not(.xp-view, .xp-controls), .xp-listen .xp-controls > :not(.xp-skip, .xp-play, .xp-bar, .xp-time) { display: none !important; }
+.xp-listen > :not(.xp-view, .xp-cover, .xp-controls), .xp-listen .xp-controls > :not(.xp-skip, .xp-play, .xp-bar, .xp-time) { display: none !important; }
+/* Audio-only view: a podcast player. Cover, then the bar, the time, and large centered −5s, Play, +5s. */
+.xp-cover { display: none; }
+.xp-listen { max-width: 420px; margin-inline: auto; }
+.xp-listen .xp-cover { display: grid; align-content: center; gap: 10px; justify-self: center; width: min(100%, 340px); aspect-ratio: 1; box-sizing: border-box; padding: 28px;
+  border-radius: 14px; background: linear-gradient(145deg, color-mix(in srgb, var(--xp-accent) 75%, #000), color-mix(in srgb, var(--xp-accent) 35%, #000)); color: #fff; text-align: center; }
+.xp-cover-title { margin: 0; font: 800 clamp(1.4rem, 6vw, 2rem)/1.15 var(--xp-ui); text-wrap: balance; }
+.xp-cover-scene { margin: 0; font: 600 1rem var(--xp-ui); opacity: 0.85; }
+.xp-listen .xp-controls { display: grid; grid-template-columns: 1fr auto auto auto 1fr; grid-template-areas: "bar bar bar bar bar" "time time time time time" ". back play fwd ."; gap: 6px 28px; background: none; border: 0; padding: 0; }
+.xp-listen .xp-bar { grid-area: bar; order: 0; }
+.xp-listen .xp-time { grid-area: time; justify-self: center; }
+.xp-listen .xp-skip[data-skip="-5"] { grid-area: back; }
+.xp-listen .xp-skip[data-skip="5"] { grid-area: fwd; }
+.xp-listen .xp-skip { align-self: center; }
+.xp-listen .xp-skip svg { width: 52px; height: 52px; }
+.xp-listen .xp-play { grid-area: play; position: relative; width: 80px; height: 80px; min-width: 0; padding: 0; border-radius: 50%; font-size: 0; margin-top: 8px; }
+.xp-listen .xp-play::before { content: ""; position: absolute; inset: 0; margin: auto; width: 26px; height: 30px; left: 6px; background: currentColor; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.xp-listen .xp-play[data-state="pause"]::before { left: 0; clip-path: none; background: linear-gradient(90deg, currentColor 0 35%, transparent 35% 65%, currentColor 65%); }
 .xp-chapters { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .xp-chapters button { font: 0.85rem var(--xp-ui); color: var(--xp-fg); background: var(--xp-card); border: 1px solid var(--xp-line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
 .xp-chapters li[aria-current] button { border-color: var(--xp-accent); color: var(--xp-accent); font-weight: 700; }

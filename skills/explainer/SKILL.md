@@ -5,7 +5,7 @@ description: Narrated, motion-animated explainer (2–5 minutes; longer is long-
 
 # Explainer
 
-A narrated, animated walk through one mechanism. It is a web page, not a video file. One narration track drives every animation, so play, pause, scrub, and chapters work. An "Audio only" button hides the picture and keeps only −5s, Play, +5s, the progress bar, and the time, for listening like a podcast. Without an ElevenLabs key it runs with captions only.
+A narrated, animated walk through one mechanism. It is a web page, not a video file. One narration track drives every animation, so play, pause, scrub, and chapters work. An "Audio only" button swaps the picture for a podcast player: a cover with the title and the current scene, the progress bar and time, and large −5s, Play, +5s. Without an ElevenLabs key it runs with captions only.
 
 Prose on the page follows the [shared writing rules](../../instructions/AGENTS.md#all-writing). Narration follows the ear rules in step 1.
 
