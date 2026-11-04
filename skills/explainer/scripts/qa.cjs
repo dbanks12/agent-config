@@ -58,6 +58,10 @@ const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); if (
   const missing = tm.scenes.map((s) => s.id).filter((i) => !ids.includes(i));
   check(missing.length === 0, `a [data-scene] div for every scene${missing.length ? ": missing " + missing : ""}`);
 
+  const first = tm.scenes[0];
+  check(first.id === "title" && first.end - first.start >= 2 && ids.includes("title"),
+    `the first scene is the title card and holds ${(first.end - first.start).toFixed(1)} s (at least 2 s)`);
+
   const times = tm.scenes.flatMap((s) => [s.start + Math.min(1, (s.end - s.start) / 4), (s.start + s.end) / 2, s.end - 0.3])
     .concat(extra).sort((a, b) => a - b);
   const shots = [];

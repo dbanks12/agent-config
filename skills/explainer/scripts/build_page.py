@@ -8,6 +8,7 @@ Reads from the work dir:
   page.json      {"title": "...", "lede": "...", "date": "YYYY-MM-DD"}. The first build adds today's date
                  as the date authored, so later rebuilds keep it.
   style.css      optional, appended after assets/xp.css (the player's styles, scoped to .xp)
+  The first scene, id "title", is the title card. This script draws it from page.json's title.
   Then one of:
   cues.json      Excalidraw look: [[scene, element id, "show" | "draw", word, nth?], ...]. Inlines
                  scenes/<id>.tagged.svg. The element appears as the voice reaches the nth use (default 1)
@@ -54,12 +55,14 @@ def excalidraw_stage(w, tm):
         # The player's cue() counts uses across the whole script.
         spec[sid].append([el, kind, norm(word), hits.index(inside[nth - 1])])
     divs = []
-    for n, s in enumerate(tm["scenes"]):
+    for s in tm["scenes"]:
+        if s["id"] == "title":
+            continue
         f = w / "scenes" / f"{s['id']}.tagged.svg"
         if not f.exists():
             fail(f"missing {f}; run render_scenes.sh")
         svg = re.sub(r"<\?xml[^>]*>", "", f.read_text()).strip()
-        if n > 0:
+        if divs:
             # Every export embeds the full font set (about 250 KB). Inline SVGs share one copy.
             svg = re.sub(r'<style class="style-fonts".*?</style>', "", svg, flags=re.S)
         svg = svg.replace("<svg ", f'<svg role="img" aria-label="{esc(s["title"])}" ', 1)
@@ -96,6 +99,9 @@ def main():
         stage, scenes_js = (w / "stage.html").read_text(), (w / "scenes.js").read_text()
     else:
         fail("need cues.json (Excalidraw look) or stage.html + scenes.js")
+    # A non-breaking hyphen keeps "24-hour" on one line of the card.
+    if tm["scenes"][0]["id"] == "title" and 'data-scene="title"' not in stage:
+        stage = f'<div data-scene="title" class="xp-title-card" aria-label="Title" hidden><h2>{esc(meta["title"]).replace("-", "\u2011")}</h2></div>\n{stage}'
     ids = set(re.findall(r'data-scene="([^"]+)"', stage))
     missing = [s["id"] for s in tm["scenes"] if s["id"] not in ids]
     if missing:
