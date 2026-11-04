@@ -5,7 +5,8 @@ Usage: build_page.py <work dir>
 
 Reads from the work dir:
   timings.json   from tts.ts. Audio tags are stripped from the words and scene texts here.
-  page.json      {"title": "...", "lede": "..."}
+  page.json      {"title": "...", "lede": "...", "date": "YYYY-MM-DD"}. The first build adds today's date
+                 as the date authored, so later rebuilds keep it.
   style.css      optional, appended after assets/xp.css (the player's styles, scoped to .xp)
   Then one of:
   cues.json      Excalidraw look: [[scene, element id, "show" | "draw", word, nth?], ...]. Inlines
@@ -18,6 +19,7 @@ Reads from the work dir:
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 SKILL = Path(__file__).resolve().parent.parent
@@ -82,6 +84,10 @@ def main():
     for s in tm["scenes"]:
         s["text"] = re.sub(r"\s+", " ", re.sub(r"\[[a-z ]+\]", " ", s["text"])).strip()
     meta = json.loads((w / "page.json").read_text())
+    if not meta.get("date"):
+        meta["date"] = date.today().isoformat()
+        (w / "page.json").write_text(json.dumps(meta, ensure_ascii=False) + "\n")
+    authored = date.fromisoformat(meta["date"])
     tm["page"] = {"title": meta["title"], "lede": meta.get("lede", "")}
 
     if (w / "cues.json").exists():
@@ -100,6 +106,7 @@ def main():
     section = (SKILL / "assets" / "section.html").read_text()
     # Substituted in this order, so text from one source can never land in another's placeholder.
     section = section.replace("%STAGE%", stage).replace("%AUDIO%", audio)
+    section = section.replace("%DATE%", authored.isoformat()).replace("%DATE_TEXT%", f"{authored:%B} {authored.day}, {authored.year}")
     section = section.replace("%TIMINGS%", json.dumps(tm).replace("<", "\\u003c"))
     section = section.replace("%PLAYER%", (SKILL / "player.js").read_text())
     section = section.replace("%SCENES%", scenes_js)
