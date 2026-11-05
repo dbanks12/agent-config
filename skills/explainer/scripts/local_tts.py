@@ -70,6 +70,10 @@ def main():
     voice = opts["--voice"] or VOICES[engine]
     if voice is None:
         voice = subprocess.run([say, "--default-voice"], capture_output=True, text=True, check=True).stdout.strip()
+    # A clip's name can stay while its contents change, so a clip keys the cache by its contents.
+    clip = Path(voice)
+    key = hashlib.sha256(clip.read_bytes()).hexdigest()[:16] if clip.is_file() else voice
+    name = clip.stem if clip.is_file() else voice
     n = json.loads(Path(args[0]).read_text())
     out = Path(args[1])
     try:
@@ -84,7 +88,7 @@ def main():
     todo = []
     for s in n["scenes"]:
         text = re.sub(r"\s+", " ", re.sub(r"\[[a-z ]+\]", " ", s["text"])).strip()
-        s["base"] = base = cache / (f"{engine}-" + hashlib.sha256(f"{voice}\n{text}".encode()).hexdigest()[:16])
+        s["base"] = base = cache / (f"{engine}-" + hashlib.sha256(f"{key}\n{text}".encode()).hexdigest()[:16])
         if not Path(f"{base}.json").exists():
             todo.append({"text": text, "out": f"{base}.wav"})
     if todo and engine == "chatterbox":
@@ -125,10 +129,10 @@ def main():
     soundfile.write(str(wav), np.concatenate(clips), rate)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(wav), "-ac", "1", "-c:a", "libmp3lame", "-q:a", "4", str(out / "narration.mp3")], check=True)
     wav.unlink()
-    timings = {"audio": "narration.mp3", "duration": round(t, 3), "model": f"{engine}:{voice}", "approx": False,
+    timings = {"audio": "narration.mp3", "duration": round(t, 3), "model": f"{engine}:{name}", "approx": False,
                "requestId": None, "scenes": scenes, "words": words}
     (out / "timings.json").write_text(json.dumps(timings).replace("<", "\\u003c"))
-    print(f"local_tts: {len(scenes)} scenes, {t:.1f} s, {engine} voice {voice}")
+    print(f"local_tts: {len(scenes)} scenes, {t:.1f} s, {engine} voice {name}")
 
 
 if __name__ == "__main__":
