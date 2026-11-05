@@ -3,7 +3,8 @@
 Usage: chatterbox-say [-v VOICE] [-o OUT.wav] [TEXT]     TEXT defaults to stdin
        chatterbox-say [-v VOICE] --batch JOBS.json        [{"text": "...", "out": "a.wav"}, ...], one model load
 
-VOICE is a name in ~/.local/share/chatterbox/voices/ or voices/ (default "am_puck", a male voice), "builtin" for the model's own female voice, or the path to a
+VOICE is a name in ~/.local/share/chatterbox/voices/ or voices/. The default is "eleven", a copy of the user's
+ElevenLabs voice, when that clip exists, else "am_puck", a male voice., "builtin" for the model's own female voice, or the path to a
 clean 10-20 s clip of any voice to clone. Writes 24 kHz mono WAV. Long text is read a few sentences at a time,
 because Turbo stops after about 40 s of speech per request.
 """
@@ -18,6 +19,7 @@ from pathlib import Path
 # Your own clips first, then the ones in this repo. Keep clips of other people's voices out of the repo.
 VOICES = [Path.home() / ".local/share/chatterbox/voices", Path(__file__).resolve().parent / "voices"]
 CHUNK = 300  # characters per request
+DEFAULT = "eleven" if any((VOICES[0] / f"eleven{ext}").is_file() for ext in (".flac", ".wav")) else "am_puck"
 
 
 def chunks(text):
@@ -42,10 +44,14 @@ def voice_path(v):
 def main():
     ap = argparse.ArgumentParser(prog="chatterbox-say", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("text", nargs="?")
-    ap.add_argument("-v", "--voice", default="am_puck")
+    ap.add_argument("-v", "--voice", default=DEFAULT)
     ap.add_argument("-o", "--out", default="speech.wav")
     ap.add_argument("--batch", type=Path)
+    ap.add_argument("--default-voice", action="store_true", help="print the default voice and exit")
     a = ap.parse_args()
+    if a.default_voice:
+        print(DEFAULT)
+        return
     jobs = json.loads(a.batch.read_text()) if a.batch else [{"text": a.text if a.text is not None else sys.stdin.read(), "out": a.out}]
     ref = voice_path(a.voice)
 

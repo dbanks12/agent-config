@@ -22,7 +22,7 @@ chatterbox-say --batch jobs.json   # [{"text": "...", "out": "a.wav"}, ...]
 - A batch loads the model once. The load takes about 15 seconds. After it, speech comes at about three times real time on an RTX 2080 Super, using 3 GB of video memory.
 - `-v` takes a name from `~/.local/share/chatterbox/voices/` or this repo's `voices/`, `builtin` for the model's own female voice, or the path to a clean 10–20 second clip to clone.
 - Keep clips of other people's voices, such as ElevenLabs narration, in `~/.local/share/chatterbox/voices/`. This repo is public.
-- The default voice is `am_puck`, cloned from a clip of Kokoro's Apache-licensed `am_puck` voice. The voice picker page compared all 28 English Kokoro voices.
+- The default voice is `eleven` when `~/.local/share/chatterbox/voices/eleven.flac` exists. That clip is 20 seconds of the user's ElevenLabs narration. Otherwise the default is `am_puck`, cloned from a clip of Kokoro's Apache-licensed `am_puck` voice. The voice picker page compared all 28 English Kokoro voices.
 - Turbo stops after about 40 seconds of speech per request, so `say.py` reads long text a few sentences at a time.
 - Turbo reads paralinguistic tags such as `[laugh]` and `[chuckle]` in the text.
 - Every clip carries Resemble's inaudible Perth watermark.

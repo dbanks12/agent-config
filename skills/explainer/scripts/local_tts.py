@@ -1,7 +1,7 @@
 """Narrate a script on this machine, and time its words with Whisper. Free, and sends nothing.
 
 Usage: local_tts.py <narration.json> <out-dir> [--engine chatterbox|kokoro] [--voice <voice>]
-chatterbox (the default) runs `chatterbox-say` (linux/chatterbox in agent-config) on the GPU, voice am_puck.
+chatterbox (the default) runs `chatterbox-say` (linux/chatterbox in agent-config) on the GPU, in chatterbox-say's default voice.
 kokoro runs in this process, voice am_michael. Run it with the Sill core's Python (finish.sh does): it has
 kokoro-onnx and faster-whisper, and the models sit in ~/.cache/herdr-manager. Writes narration.mp3 and the
 same timings.json as tts.ts. Audio tags are dropped. Each scene's audio and word times are cached by hash
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 MODELS = Path.home() / ".cache" / "herdr-manager"
-VOICES = {"chatterbox": "am_puck", "kokoro": "am_michael"}
+VOICES = {"chatterbox": None, "kokoro": "am_michael"}  # None: chatterbox-say picks, and names it
 JOIN = 0.3  # silence between scenes, so pad_scenes.py finds a quiet cut
 
 
@@ -64,7 +64,12 @@ def main():
     args = [a for a in args if a != "--long"]  # neither engine has a request limit
     if len(args) != 2 or engine not in VOICES:
         fail(1, "usage: local_tts.py <narration.json> <out-dir> [--engine chatterbox|kokoro] [--voice <voice>]")
+    say = shutil.which("chatterbox-say")
+    if engine == "chatterbox" and not say:
+        fail(3, "chatterbox-say is not on PATH; run linux/chatterbox/install.sh in agent-config")
     voice = opts["--voice"] or VOICES[engine]
+    if voice is None:
+        voice = subprocess.run([say, "--default-voice"], capture_output=True, text=True, check=True).stdout.strip()
     n = json.loads(Path(args[0]).read_text())
     out = Path(args[1])
     try:
@@ -83,9 +88,6 @@ def main():
         if not Path(f"{base}.json").exists():
             todo.append({"text": text, "out": f"{base}.wav"})
     if todo and engine == "chatterbox":
-        say = shutil.which("chatterbox-say")
-        if not say:
-            fail(3, "chatterbox-say is not on PATH; run linux/chatterbox/install.sh in agent-config")
         batch = cache / "chatterbox-batch.json"
         batch.write_text(json.dumps(todo))
         if subprocess.run([say, "--voice", voice, "--batch", str(batch)]).returncode:
