@@ -21,7 +21,7 @@ The [explainer](../explainer/SKILL.md) skill, stretched to 30 minutes. Read its 
 
 - With `--long`, `tts.ts` sends the narration as several requests of whole scenes, at most 6,000 characters each, one at a time. It joins their audio into one mono 48 kbps MP3, about 12 MB at 30,000 characters.
 - Each request has its own cache entry and pending marker, so a rerun after a failure sends only the parts that never completed. Exit 4 still means: keep that part's marker, never resubmit, and tell the user.
-- The key's monthly quota is about 50,000 characters, so a full-length narration spends most of it. If the quota runs out partway, the next request fails with an HTTP 4xx and `finish.sh` falls back to captions. The finished parts stay cached for a rerun after the quota resets.
+- The key's monthly quota is about 50,000 characters, so a full-length narration spends most of it. If the quota runs out partway, the next request fails with an HTTP 4xx and `finish.sh` falls back to `local` (Kokoro on this machine), then to captions. The finished parts stay cached for a rerun after the quota resets.
 
 **Step 5, drawing.** Render one chapter per `render_scenes.sh` call by passing its scene ids, so at most 8 canvases run at once. Past 15 scenes it writes `sheet-1.jpg`, `sheet-2.jpg`, and so on, 9 scenes each, and prints the ids on each sheet. Read the sheets that show the chapter you rendered.
 
