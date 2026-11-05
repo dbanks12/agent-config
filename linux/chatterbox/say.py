@@ -3,7 +3,7 @@
 Usage: chatterbox-say [-v VOICE] [-o OUT.wav] [TEXT]     TEXT defaults to stdin
        chatterbox-say [-v VOICE] --batch JOBS.json        [{"text": "...", "out": "a.wav"}, ...], one model load
 
-VOICE is a name in voices/ (default "male"), "builtin" for the model's own female voice, or the path to a
+VOICE is a name in voices/ (default "am_puck", a male voice), "builtin" for the model's own female voice, or the path to a
 clean 10-20 s clip of any voice to clone. Writes 24 kHz mono WAV. Long text is read a few sentences at a time,
 because Turbo stops after about 40 s of speech per request.
 """
@@ -41,7 +41,7 @@ def voice_path(v):
 def main():
     ap = argparse.ArgumentParser(prog="chatterbox-say", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("text", nargs="?")
-    ap.add_argument("-v", "--voice", default="male")
+    ap.add_argument("-v", "--voice", default="am_puck")
     ap.add_argument("-o", "--out", default="speech.wav")
     ap.add_argument("--batch", type=Path)
     a = ap.parse_args()

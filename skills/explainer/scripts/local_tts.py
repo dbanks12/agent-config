@@ -1,7 +1,7 @@
 """Narrate a script on this machine, and time its words with Whisper. Free, and sends nothing.
 
 Usage: local_tts.py <narration.json> <out-dir> [--engine chatterbox|kokoro] [--voice <voice>]
-chatterbox (the default) runs `chatterbox-say` (linux/chatterbox in agent-config) on the GPU, voice "male".
+chatterbox (the default) runs `chatterbox-say` (linux/chatterbox in agent-config) on the GPU, voice am_puck.
 kokoro runs in this process, voice am_michael. Run it with the Sill core's Python (finish.sh does): it has
 kokoro-onnx and faster-whisper, and the models sit in ~/.cache/herdr-manager. Writes narration.mp3 and the
 same timings.json as tts.ts. Audio tags are dropped. Each scene's audio and word times are cached by hash
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 MODELS = Path.home() / ".cache" / "herdr-manager"
-VOICES = {"chatterbox": "male", "kokoro": "am_michael"}
+VOICES = {"chatterbox": "am_puck", "kokoro": "am_michael"}
 JOIN = 0.3  # silence between scenes, so pad_scenes.py finds a quiet cut
 
 
