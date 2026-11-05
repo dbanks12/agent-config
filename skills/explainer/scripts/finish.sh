@@ -3,8 +3,9 @@
 # Usage: finish.sh <abs work dir> narrated|local|captions [--long] [extra QA seconds...]
 # narrated: reuses timings.json when it is newer than narration.json (narrate.sh already ran in the
 # background), else runs narrate.sh. Exit 2 or 3 falls back to local, then to captions. Exit 4 stops:
-# the request may be billed, so nothing resubmits. local: kokoro.py reads the script with Kokoro on
-# this machine, using the Sill core's Python (EXPLAINER_KOKORO_PYTHON overrides it). captions: strips the audio tags with jq and runs tts.ts
+# the request may be billed, so nothing resubmits. local: local_tts.py reads the script on this machine
+# with Chatterbox Turbo on the GPU, else with Kokoro. It runs on the Sill core's Python
+# (EXPLAINER_LOCAL_PYTHON overrides it). captions: strips the audio tags with jq and runs tts.ts
 # --captions-only. --long passes on to both. Then pad_scenes.py adds a beat of silence after every
 # narrated scene but the last, and build_page.py and qa.sh run. Exits with qa.sh's status.
 set -euo pipefail
@@ -21,9 +22,13 @@ captions() {
   bun "$here/tts.ts" "$w/narration.captions.json" "$w" --captions-only "${long[@]}"
 }
 
-py="${EXPLAINER_KOKORO_PYTHON:-$HOME/projects/herdr-android-assistant/core/.venv/bin/python}"
+py="${EXPLAINER_LOCAL_PYTHON:-$HOME/projects/herdr-android-assistant/core/.venv/bin/python}"
 local_voice() {
-  if [[ -x $py ]] && "$py" -I "$here/kokoro.py" "$w/narration.json" "$w"; then return; fi
+  if [[ -x $py ]]; then
+    "$py" -I "$here/local_tts.py" "$w/narration.json" "$w" --engine chatterbox && return
+    echo "finish: Chatterbox failed, falling back to Kokoro. Tell the user." >&2
+    "$py" -I "$here/local_tts.py" "$w/narration.json" "$w" --engine kokoro && return
+  fi
   echo "finish: local narration failed, falling back to captions. Tell the user." >&2
   captions
 }
