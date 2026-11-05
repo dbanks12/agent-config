@@ -3,7 +3,7 @@
 Usage: chatterbox-say [-v VOICE] [-o OUT.wav] [TEXT]     TEXT defaults to stdin
        chatterbox-say [-v VOICE] --batch JOBS.json        [{"text": "...", "out": "a.wav"}, ...], one model load
 
-VOICE is a name in voices/ (default "am_puck", a male voice), "builtin" for the model's own female voice, or the path to a
+VOICE is a name in ~/.local/share/chatterbox/voices/ or voices/ (default "am_puck", a male voice), "builtin" for the model's own female voice, or the path to a
 clean 10-20 s clip of any voice to clone. Writes 24 kHz mono WAV. Long text is read a few sentences at a time,
 because Turbo stops after about 40 s of speech per request.
 """
@@ -15,7 +15,8 @@ import sys
 import warnings
 from pathlib import Path
 
-VOICES = Path(__file__).resolve().parent / "voices"
+# Your own clips first, then the ones in this repo. Keep clips of other people's voices out of the repo.
+VOICES = [Path.home() / ".local/share/chatterbox/voices", Path(__file__).resolve().parent / "voices"]
 CHUNK = 300  # characters per request
 
 
@@ -32,10 +33,10 @@ def chunks(text):
 def voice_path(v):
     if v == "builtin":
         return None
-    for p in (Path(v), VOICES / f"{v}.flac", VOICES / f"{v}.wav"):
+    for p in [Path(v)] + [d / f"{v}{ext}" for d in VOICES for ext in (".flac", ".wav")]:
         if p.is_file():
             return p
-    sys.exit(f"chatterbox-say: no voice {v}; names: builtin, " + ", ".join(sorted(p.stem for p in VOICES.iterdir())))
+    sys.exit(f"chatterbox-say: no voice {v}; names: builtin, " + ", ".join(sorted({p.stem for d in VOICES if d.is_dir() for p in d.iterdir()})))
 
 
 def main():
