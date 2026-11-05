@@ -89,6 +89,10 @@ Codex has no Artifact tool. Headless Claude Code (`claude --print`) has none eit
 
 4. Delete the brief after Claude Code replies with the URL.
 
+# Local text-to-speech
+
+For speech audio that costs nothing and stays on this machine, run `chatterbox-say -o out.wav "text"`. It uses Chatterbox Turbo on the GPU. `chatterbox-say --help` lists the voices and the batch mode. Its source and installer are in `linux/chatterbox/` in this repo.
+
 # Shared notes on the phone
 
 The user reads a notes feed on their phone in Sill, their Android assistant app (`~/projects/herdr-android-assistant`). When the user asks for a link or result "in my Notes", post it there.

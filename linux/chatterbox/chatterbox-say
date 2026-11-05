@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Runs say.py with the Python environment that install.sh made. See say.py for usage.
+set -euo pipefail
+here="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+py="${CHATTERBOX_HOME:-$HOME/.local/share/chatterbox}/venv/bin/python"
+[[ -x $py ]] || { echo "chatterbox-say: no environment at $py; run $here/install.sh" >&2; exit 3; }
+TQDM_DISABLE=1 exec "$py" -I "$here/say.py" "$@"
