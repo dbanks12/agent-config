@@ -1,8 +1,8 @@
 ---
 name: finish-pr
-description: Take an open PR from draft to reviewable. Cross-tool review, a slim description with a diagram, and lean tests. Optionally flip it ready or request Greptile on the draft, address Greptile, watch CI, link a narrated explainer, and merge.
+description: Take an open PR from draft to reviewable. Cross-tool review, a slim description with a diagram, and lean tests. Optionally flip it ready, request Greptile or LabsBox reviews, address them, watch CI, link a narrated explainer, and merge.
 disable-model-invocation: true
-argument-hint: "[ready|greptile] [ci|ci-draft] [explainer [--review <level>]] [merge]"
+argument-hint: "[ready|robots|greptile|labsbox] [ci|ci-draft] [explainer [--review <level>]] [merge]"
 ---
 
 # Finish a pull request
@@ -11,9 +11,10 @@ Run the steps in order on the PR for the current branch. Find it with `gh pr vie
 
 Arguments:
 
-- `ready` (also `ready_and_greptile`): run step 4.
-- `greptile`: run step 4, but keep the PR a draft. Comment `@greptileai` instead of `gh pr ready`.
-- `ci`: run step 5. It works with or without `ready` or `greptile`.
+- `ready` (also `ready_and_greptile`, `robots`): run step 4 with both Greptile and LabsBox.
+- `greptile`: run step 4 with Greptile only, and keep the PR a draft.
+- `labsbox`: run step 4 with LabsBox only. The PR becomes ready, because LabsBox ignores drafts.
+- `ci`: run step 5. It works with or without a step 4 argument.
 - `ci-draft`: run step 5, but first label the PR `ci-draft`.
 - `merge`: run steps 5 and 6. Step 6 runs last.
 - `explainer`: run step 7. It starts after step 3 and finishes before step 6. Options after it, such as `--review medium`, pass to the explainer skill.
@@ -70,20 +71,35 @@ If the ref exists, update it with `gh api -X PATCH $R/git/refs/heads/<branch>-pr
 
 Embed each image as `https://github.com/<owner>/<repo>/blob/<sha>/<file>?raw=true`. Write alt text that states the image's point. Update the body with `gh api -X PATCH $R/pulls/<pr> -F body=@body.md`. Done when the rendered body (`gh api $R/pulls/<pr> -H "Accept: application/vnd.github.html+json" --jq .body_html`) has every image and no section beyond the list above.
 
-## 4. Flip ready and address Greptile (`ready`, `greptile`)
+## 4. Request and address bot reviews (`ready`, `robots`, `greptile`, `labsbox`)
 
-Push all commits. Record the time as `since`. With `ready`, run `gh pr ready`. With `greptile`, run `gh pr comment --body "@greptileai"` and leave the PR a draft.
+Check for LabsBox before you change the PR. Run `gh api repos/<owner>/<repo>/labels/labsbox-review --silent`. A 404 means that the repository has no LabsBox review:
 
-Poll every 30 seconds, with Monitor in Claude Code. Each poll lists the `greptile-apps[bot]` inline comments created after `since`:
+- With `ready` or `robots`, continue with Greptile only and report that LabsBox was skipped.
+- With `labsbox`, leave the PR a draft, report the missing label, and end this step.
+- Never create the label.
+
+Push all commits. Record the time as `since` and the head SHA as `head`. Then request the reviews:
+
+- **Ready**: with every argument except `greptile`, run `gh pr ready`.
+- **Greptile**: with `greptile`, comment `gh pr comment --body "@greptileai"`. With `ready` or `robots` on a PR that was already ready, post the same comment, because `gh pr ready` starts nothing there.
+- **LabsBox**: after the PR is ready, run `gh pr edit --add-label labsbox-review`. If the PR already has the label, remove it first, because only a new `labeled` event starts a review.
+
+Poll every 30 seconds, with Monitor in Claude Code. Each poll lists the bot inline comments created after `since`:
 
 ```bash
 gh api --paginate "repos/<owner>/<repo>/pulls/<pr>/comments?since=<since>" \
-  --jq '.[] | select(.user.login == "greptile-apps[bot]") | "\(.id) \(.path):\(.line)"'
+  --jq '.[] | select(.user.login == "greptile-apps[bot]" or .user.login == "labsbox[bot]") | "\(.id) \(.user.login) \(.path):\(.line)"'
 ```
 
-Address each new comment as soon as it appears. Do not wait for the full review. Keep polling until `gh pr view --json reviews` shows a new review from `greptile-apps` and no new comments arrive for one minute. Time out after 30 minutes and report.
+Address each new comment as soon as it appears. Do not wait for the full review. Time out after 30 minutes and report. Each review finishes as follows:
 
-Fix each real problem in a new commit and reply to its thread with the commit. Reply to the others with a one-line reason. Done when every Greptile comment has a reply.
+- **Greptile**: `gh pr view --json reviews` shows a new review from `greptile-apps`, and no new comments arrive for one minute. With `labsbox`, Greptile may also start when the PR becomes ready. Address its comments that arrive, and do not wait for its review.
+- **LabsBox**: `gh api repos/<owner>/<repo>/pulls/<pr>/reviews` shows a review from `labsbox[bot]` with `commit_id` equal to `head`. Report a body that says LabsBox could not or did not complete the review. If the body lists findings because GitHub rejected the inline comments, address them and answer in one PR comment.
+
+LabsBox reacts `eyes` on the PR when it accepts the label (`gh api repos/<owner>/<repo>/issues/<pr>/reactions`). It rejects a request silently for a fork, more than 200 files, more than 10,000 changed lines, or an author or labeler outside the organization. If no `labsbox[bot]` reaction appears within two minutes, report the rejection and stop waiting for LabsBox.
+
+Fix each real problem in a new commit. While a LabsBox review is pending, hold the push, because LabsBox discards its review when the head moves. Push when LabsBox posts, rejects the request, or times out. Then reply to each thread with the commit. Reply to the other comments with a one-line reason. Done when every requested review has finished and every bot comment has a reply.
 
 ## 5. Watch CI (`ci`, `ci-draft`)
 
@@ -93,13 +109,13 @@ If the cause is clear and the fix is small, fix it in a new commit, push, and wa
 
 ## 6. Merge (`merge`)
 
-Merge only after every earlier step is done, step 7 too with `explainer`, and all required checks pass on the latest pushed commit. If a check failed, a Greptile comment has no reply, or a fix is not pushed, stop and report.
+Merge only after every earlier step is done, step 7 too with `explainer`, and all required checks pass on the latest pushed commit. If a check failed, a bot review comment has no reply, or a fix is not pushed, stop and report.
 
 Merge with the repository's allowed method, for example `gh pr merge --squash`. Do not pass `--admin` and do not bypass branch protection. If a review or other rule blocks the merge, stop and report the blocker. Done when GitHub shows the PR as merged.
 
 ## 7. Link an explainer (`explainer`)
 
-The `explainer` argument is the user's request for one explainer of this PR, so it authorizes that job under the explainer skill's rules. Start it as soon as step 3 is done, as the explainer skill's background worker, so it runs while steps 4 and 5 wait on Greptile and CI.
+The `explainer` argument is the user's request for one explainer of this PR, so it authorizes that job under the explainer skill's rules. Start it as soon as step 3 is done, as the explainer skill's background worker, so it runs while steps 4 and 5 wait on the bot reviews and CI.
 
 - Sources: the slim PR description and the changed files the script describes. Host: standalone.
 - Look: the Excalidraw sketch, to match the PR diagram, so skip the style board. Use another look only when the user named one.
@@ -112,4 +128,4 @@ Done when the PR body shows the link and the explainer's manifest says `ready`.
 
 ## Report
 
-List each review finding and Greptile comment with its disposition, the commits you added, the final CI state, the explainer link, and the merge result.
+List each review finding and bot comment with its disposition, the commits you added, the final CI state, the explainer link, and the merge result.
