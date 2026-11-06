@@ -54,7 +54,7 @@ Your local `~/.claude/settings.json` and `~/.codex/config.toml` stay outside thi
 |---|---|
 | Pull requests | `create-pr`, `finish-pr`, `review-standards-spec`, `tdd` |
 | Cross-tool review | `call-claude`, `call-codex`, `review-with-claude`, `review-with-codex`, `review-by-council` |
-| Thinking and planning | `grilling`, `grill-me`, `grill-me-html`, `to-questionnaire`, `wait-what`, `handoff`, `brief`, `expert-research` |
+| Thinking and planning | `grilling`, `grill-me`, `grill-me-html`, `to-questionnaire`, `wait-what`, `handoff`, `brief`, `expert-research`, `competitor-research`, `user-empathy-research` |
 | Teaching and visuals | `teach-me`, `teach-me-many-topics`, `explainer`, `long-explainer`, `slide-deck`, `excalidraw-skill`, `pr-viz`, `repo-viz` |
 | Writing for agents | `writing-for-agents` |
 | Tools | `herdr`, `hunk-review`, `hunk-extensions`, `slack-read` |
