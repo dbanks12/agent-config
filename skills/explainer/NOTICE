@@ -1,5 +1,11 @@
 This skill is adapted from the explainer skill in alejoamiras/aa-skills
 (https://github.com/alejoamiras/aa-skills/tree/main/skills/explainer, commit b5b5b53).
-The upstream repository has no license. Its author keeps all rights and permits this copy.
-The MIT license of this repository does not apply to this directory.
-Ask the upstream author before you reuse or redistribute these files.
+
+The MIT license of this repository does not apply to this directory yet.
+On 2026-11-06, the upstream repository has no license. Its author keeps all rights and permits this copy.
+The upstream author is being asked to add an MIT license.
+Until upstream adds that license, ask the upstream author before you reuse or redistribute these files.
+
+When upstream adds an MIT license that covers its explainer skill, MIT terms will cover this directory.
+The upstream license will then apply to the upstream material, and a copy will go in this directory.
+The LICENSE file at the root of this repository will apply to David Banks's changes.

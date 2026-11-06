@@ -101,10 +101,12 @@ evals/run.sh --case 'teach-me*' --runs 1   # one skill, one quick run
 
 ## License
 
-This repo's own files use the [MIT license](LICENSE). These files come from other projects and keep their own terms:
+David Banks's own files use the [MIT license](LICENSE). Every skill in `skills/` uses it, except the skills that the list below names. `long-explainer` uses MIT, but it runs the `explainer` skill, which keeps the terms below.
+
+These files come from other projects and keep their own terms:
 
 - `grill-me`, `grilling`, `handoff`, `to-questionnaire`, `wait-what`, `writing-for-agents`, `tdd`, and `review-standards-spec` (renamed from `code-review`) come from [mattpocock/skills](https://github.com/mattpocock/skills). They use the MIT license, with a copy in each folder. `writing-for-agents` adds two local sections to `SKILL-MECHANICS.md`.
 - `hunk-review` and `hunk-extensions` come from the [hunkdiff](https://github.com/modem-dev/hunk) npm package. They use the MIT license, with a copy in each folder.
-- `explainer` is adapted from [alejoamiras/aa-skills](https://github.com/alejoamiras/aa-skills/tree/main/skills/explainer). Its author permits this copy, but no open-source license covers it. See [`skills/explainer/NOTICE`](skills/explainer/NOTICE).
+- `explainer` is adapted from [alejoamiras/aa-skills](https://github.com/alejoamiras/aa-skills/tree/main/skills/explainer). Its author permits this copy, but upstream has no license, so MIT does not cover this skill yet. The upstream author is being asked to add an MIT license. MIT terms will cover the skill when upstream adds that license. See [`skills/explainer/NOTICE`](skills/explainer/NOTICE).
 - `instructions/AGENTS.md` quotes short passages from Google's writing guides under CC BY 4.0, and from other authors. See [writing sources](instructions/writing-sources.md).
-- Each submodule in `vendor/` carries its own license.
+- Each submodule in `vendor/` has its own `LICENSE` file, and all four use the MIT license. The `excalidraw-skill` license also names its upstream authors. `pr-map` includes third-party files under their own terms, and its README lists them.
