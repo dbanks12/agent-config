@@ -13,6 +13,8 @@ skills/create-pr          ~/.claude/skills/create-pr
 skills/create-pr          ~/.codex/skills/create-pr
 skills/herdr              ~/.claude/skills/herdr
 skills/herdr              ~/.codex/skills/herdr
+skills/rdr                ~/.claude/skills/rdr
+skills/rdr                ~/.codex/skills/rdr
 skills/call-codex         ~/.claude/skills/call-codex
 skills/call-codex         ~/.codex/skills/call-codex
 skills/call-claude        ~/.claude/skills/call-claude
