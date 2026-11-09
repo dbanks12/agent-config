@@ -28,6 +28,8 @@ Use the reviewer from the other tool:
 - In Claude Code: the `review-with-codex` skill with `-m gpt-6-astra`.
 - In Codex: the `review-with-claude` skill with `-m opus`.
 
+If the Codex runner fails with `hit your usage limit`, run the same review with Fable. Follow `~/.codex/skills/review-with-claude/SKILL.md` with `-m fable`. Report the fallback, and relay any line from the runner that swaps Fable for Opus.
+
 Review the branch against the PR base. Ask two review questions: which findings could affect users, and which changes fall outside the PR's stated outcome (**scope creep**).
 
 Keep each finding that is a real problem. Fix it in a new commit. Revert scope creep in a new commit, unless the user asked for that change. Done when every finding has a disposition: fixed, reverted, or rejected with a one-line reason.
