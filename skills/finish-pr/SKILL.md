@@ -1,7 +1,6 @@
 ---
 name: finish-pr
-description: Take an open PR from draft to reviewable. Cross-tool review, a slim description with a diagram, and lean tests. Optionally flip it ready, request Greptile or LabsBox reviews, address them, watch CI, link a narrated explainer, and merge.
-disable-model-invocation: true
+description: Finish an open pull request with a cross-tool review, trimmed comments and tests, and a slim description with a diagram. Optional steps mark it ready, request Greptile or LabsBox reviews, watch CI, link an explainer, and merge. Use when the user asks to finish, polish, or wrap up a PR, or to get it ready for review or merge. To open a new PR, use create-pr.
 argument-hint: "[ready|robots|greptile|labsbox] [ci|ci-draft] [explainer [--review <level>]] [merge]"
 ---
 
@@ -18,6 +17,8 @@ Arguments:
 - `ci-draft`: run step 5, but first label the PR `ci-draft`.
 - `merge`: run steps 5 and 6. Step 6 runs last.
 - `explainer`: run step 7. It starts after step 3 and finishes before step 6. Options after it, such as `--review medium`, pass to the explainer skill.
+
+When an agent invokes this skill, take the arguments from the user's own words. For example, "get it merged" means `merge`, and "watch CI" means `ci`. Run steps 1 to 3 only when the user asked for no optional step.
 
 The bar for every fix in this skill is a **real problem**: a defect a user could hit, such as wrong funds movement, a crash, data loss, a security hole, or a broken flow. Style preferences, speculative hardening, and "consider also" ideas are not real problems. Record them as rejected and move on.
 
