@@ -57,7 +57,7 @@ Your local `~/.claude/settings.json` and `~/.codex/config.toml` stay outside thi
 | Thinking and planning | `grilling`, `grill-me`, `grill-me-html`, `to-questionnaire`, `wait-what`, `handoff`, `brief`, `expert-research`, `competitor-research`, `user-empathy-research` |
 | Teaching and visuals | `teach-me`, `teach-me-many-topics`, `explainer`, `long-explainer`, `slide-deck`, `excalidraw-skill`, `pr-viz`, `repo-viz` |
 | Writing for agents | `writing-for-agents` |
-| Tools | `herdr`, `rdr`, `hunk-review`, `hunk-extensions`, `slack-read` |
+| Tools | `herdr`, `rdr`, `migrdr`, `hunk-review`, `hunk-extensions`, `slack-read` |
 
 Each skill is a folder with a `SKILL.md`. Read it for triggers and steps. `instructions/AGENTS.md` is the global instruction file for both tools.
 

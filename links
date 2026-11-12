@@ -15,6 +15,8 @@ skills/herdr              ~/.claude/skills/herdr
 skills/herdr              ~/.codex/skills/herdr
 skills/rdr                ~/.claude/skills/rdr
 skills/rdr                ~/.codex/skills/rdr
+skills/migrdr             ~/.claude/skills/migrdr
+skills/migrdr             ~/.codex/skills/migrdr
 skills/call-codex         ~/.claude/skills/call-codex
 skills/call-codex         ~/.codex/skills/call-codex
 skills/call-claude        ~/.claude/skills/call-claude
