@@ -18,7 +18,6 @@ from datetime import datetime
 CATEGORIES = [
     ("review", r"call-codex|call-claude|codex (exec|review)|\bcodex\b.*-e \w+|claude (-p|--print)|review-?\d*\.prompt"),
     ("narrate", r"narrate\.sh|tts\.ts"),
-    ("style-board", r"styles\.html|build_styles"),
     ("scene-draw", r"place\.py|scenes\.py|draw\.py|\.excalidraw|mcp-excalidraw-server|tag_svg|render-scenes|tag-scenes|sheet\.sh"),
     ("qa", r"playwright|chromium|qa\.(m?js|cjs|py)|/qa/|\bqa\b"),
     ("publish", r"^Artifact"),
