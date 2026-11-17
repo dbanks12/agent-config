@@ -1,6 +1,6 @@
 # agent-config
 
-Shared instructions, skills, and hooks for Claude Code and Codex. You edit one repo, and both tools see each change at once.
+Shared instructions, skills, and hooks for Claude Code and Codex. You edit one repo, and both tools see each change at once. `install-capy.sh` also copies the skills and instructions into Capy.
 
 ## Dependencies
 
@@ -48,6 +48,19 @@ Your local `~/.claude/settings.json` and `~/.codex/config.toml` stay outside thi
 }
 ```
 
+### Capy
+
+Capy reads skills from Capy Drive, not from `~/.claude` or `~/.codex`. In a Capy thread, run:
+
+```sh
+./install-capy.sh          # copy skills and instructions into your personal Capy Drive
+./install-capy.sh --check  # report drift, change nothing
+```
+
+`install-capy.sh` copies each skill that `links` installs, except the skills in its `host_only` list. Those are the Herdr and Hunk skills, which drive this host's terminal, and `slack-read`, because Capy has its own Slack tools. The copies point `~/.claude/skills` paths at the drive. The script also writes the drive's `AGENTS.md`: `instructions/AGENTS.md`, then the Capy-only rules in `instructions/capy.md`. The copies do not follow the repo, so run the script again after each change.
+
+Skills that need this host's tools, such as the cross-review scripts or the ElevenLabs key, work only in Capy threads on this host. On a Capy cloud machine, `call-claude` and `call-codex` run a Capy subagent when Capy has the model.
+
 ## Skills
 
 | Area | Skills |
@@ -90,7 +103,7 @@ evals/run.sh --case 'teach-me*' --runs 1   # one skill, one quick run
 
 ## Layout
 
-- `instructions/`: `AGENTS.md`, linked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`.
+- `instructions/`: `AGENTS.md`, linked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`, and `capy.md`, which `install-capy.sh` adds for Capy.
 - `skills/`: shared skills. A tool-specific skill is named `<purpose>-with-<tool>`.
 - `vendor/`: skills from other repos, pinned as submodules. To update one, follow "Vendored skill repos" in `instructions/AGENTS.md`.
 - `links`: every managed symlink, as `source target`.

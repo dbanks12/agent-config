@@ -40,6 +40,8 @@ Every seat is a separate process with no memory of this session. The chair gives
 
 Prepare `/tmp/council-request.txt` with the exact target, shared review criteria, and scope context. Omit skipped seats from this example. If the user explicitly named Fable, add `--pin` to its command. For a design or document, set `codex_mode=prompt`.
 
+In Capy, launch the seats as parallel subagents in place of this script. Use the Capy sections of `call-claude` and `call-codex`, with the request file as each task. Wait for all of them. Skip a seat whose model Capy cannot reach, and name it in the report. Run the Fable check only if `~/.config/cross-review/fable-usage.sh` exists.
+
 ```bash
 cd "$(git rev-parse --show-toplevel)" || exit 1
 prompt=/tmp/council-request.txt

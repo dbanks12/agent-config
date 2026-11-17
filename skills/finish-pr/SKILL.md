@@ -28,6 +28,7 @@ Use the reviewer from the other tool:
 
 - In Claude Code: the `review-with-codex` skill with `-m gpt-6-astra`.
 - In Codex: the `review-with-claude` skill with `-m opus`.
+- In Capy: the `review-with-codex` skill with `-m gpt-6-astra`. If Capy cannot reach that model, use the `review-with-claude` skill with `-m fable`, and report the swap.
 
 If the Codex runner fails with `hit your usage limit`, run the same review with Fable. Follow `~/.codex/skills/review-with-claude/SKILL.md` with `-m fable`. Report the fallback, and relay any line from the runner that swaps Fable for Opus.
 
