@@ -30,6 +30,8 @@ python3 /absolute/skill/scripts/interview.py start --dir /absolute/runtime --tit
 ```
 
 Use `--agent codex` in Codex or `--agent claude` in Claude.
+In Capy, use `--agent claude` without `--session-id`.
+On a Capy cloud machine, use [grilling](../grilling/SKILL.md) in chat instead. The helper accepts answers only from a `127.0.0.1` page, so a port preview cannot submit them.
 Codex reads its session id from `CODEX_THREAD_ID` or `CODEX_SESSION_ID` when available.
 For Claude, pass `--session-id` with the substituted value below:
 

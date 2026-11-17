@@ -68,7 +68,9 @@ If multiple issues are relevant, add one `Fixes` line per issue.
 
 ## Step 3: Create the PR
 
-Run in parallel as needed:
+In Capy, open the PR with `tools.pr.create` as a draft, with the title and body from step 2. It pushes the branch, and Capy wakes the thread on the PR's checks and reviews. Use it in place of the push and `gh pr create` below.
+
+Elsewhere, run in parallel as needed:
 
 - Push to remote with `-u` if needed
 - Create PR with `gh pr create --draft`
@@ -91,7 +93,7 @@ EOF
 
 ## Step 3b: Dependent PRs form a GitHub stack
 
-If this branch builds on another branch whose PR is not merged, target that branch with `--base`, then link the chain as a native GitHub stack. Do not leave dependent PRs as loose base-branch chains.
+If this branch builds on another branch whose PR is not merged, target that branch with `--base` (`base` with `tools.pr.create`), then link the chain as a native GitHub stack. Do not leave dependent PRs as loose base-branch chains.
 
 ```bash
 gh extension list | grep -q gh-stack || gh extension install github/gh-stack

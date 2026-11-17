@@ -1,6 +1,6 @@
 # Agent config
 
-This file and the shared skills live in `dbanks12/agent-config`. Paths under `~/.claude` and `~/.codex` are symlinks into that repo. Edit there and commit. Link each skill into both tools unless it is tool-specific.
+This file and the shared skills live in `dbanks12/agent-config`. Paths under `~/.claude` and `~/.codex` are symlinks into that repo. Edit there and commit. Link each skill into both tools unless it is tool-specific. `install-capy.sh` copies each linked skill into Capy, except those in its `host_only` list.
 
 ## Vendored skill repos
 

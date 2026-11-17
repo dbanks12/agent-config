@@ -27,6 +27,12 @@ PROMPT
 
 Use a quoted heredoc to prevent shell expansion. Every mode is read-only. The script runs from the Git worktree root.
 
+## In Capy
+
+In Capy, run the call as a subagent on the shared machine. Pick the newest OpenAI model in your subagent model list that `-m` names. With `-m` unset, use the newest OpenAI model in the list. Set its reasoning mode from `-e`. Give it the prompt as its task. For `code-review`, ask it to review the exact target. Tell it that the call is read-only and that it starts no agents. Its final report is the output.
+
+If the list has no such model and `~/.config/cross-review/codex.sh` exists, run the script as above. Otherwise, tell the user that Capy cannot reach the model.
+
 ## Model
 
 `-m` takes a short name from `~/.config/cross-review/models` (astra, sol, terra, luna) or an exact Codex model. The script resolves short names to the CLI model. Leave `-m` unset when the user names no model or names only the family (Codex, GPT). If the user gives a version, pass the exact model.
