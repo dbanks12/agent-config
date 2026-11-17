@@ -27,7 +27,7 @@ Use a quoted heredoc to prevent shell expansion. Every mode is read-only. The sc
 
 ## In Capy
 
-In Capy, run the call as a subagent on the shared machine. Pick the newest model in your subagent model list that `-m` names. With `-m` unset, use this thread's model. Set its reasoning mode from `-e`. Give it the prompt as its task. For `code-review`, ask it to review the exact target. Tell it that the call is read-only and that it starts no agents. Its final report is the output.
+In Capy, run the call as a subagent on the shared machine. Pick the Anthropic model that `-m` names from your subagent model list, at its newest version. With `-m` unset, use Fable. Set its reasoning mode from `-e`. Give it the prompt as its task. For `code-review`, ask it to review the exact target. Tell it that the call is read-only and that it starts no agents. Its final report is the output.
 
 If the list has no such model and `~/.config/cross-review/claude.sh` exists, run the script as above. Otherwise, tell the user that Capy cannot reach the model.
 
