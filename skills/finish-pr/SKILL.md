@@ -122,7 +122,7 @@ Merge with the repository's allowed method, for example `gh pr merge --squash`. 
 The `explainer` argument is the user's request for one explainer of this PR, so it authorizes that job under the explainer skill's rules. Start it as soon as step 3 is done, as the explainer skill's background worker, so it runs while steps 4 and 5 wait on the bot reviews and CI.
 
 - Sources: the slim PR description and the changed files the script describes. Host: standalone.
-- Look: the Excalidraw sketch, to match the PR diagram, so skip the style board. Use another look only when the user named one.
+- Look: the Excalidraw sketch, to match the PR diagram. Use another look only when the user named one.
 - Mode: `narrated` when the explainer skill's preflight passes, else `captions`.
 - Publish the page as a private Artifact. In Codex, follow "Artifacts from Codex" in `AGENTS.md`.
 - Add one line under the diagram: `▶ [Narrated explainer, <m:ss>](<artifact url>)`, or `Captioned explainer` in `captions` mode. Update the body the way step 3 does.
