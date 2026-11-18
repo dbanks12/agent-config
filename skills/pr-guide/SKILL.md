@@ -119,6 +119,13 @@ Make them only when the user asks, with `--explain` or in words. `--explain` alo
    It adds a "Watch the explainer" button under each stage's heading and prints the `files` map of narration audio for the Artifact tool.
 4. Publish the same page path again with that `files` map.
 
+### Embed an explainer that already exists
+
+An explainer of the change may already exist, made by the `explainer` skill as its own Artifact. Embed it in the guide rather than only linking it, under the stage it covers. When the user asks to add, embed or attach an explainer to a guide, this is the step: no separate Artifact is needed.
+
+1. Find its work dir, `~/.local/share/explainers/<slug>/`, which holds `page.html` and `narration.mp3`.
+2. Run `embed_explainers.py <page.html> <stage>=<work dir>` and publish the guide with the `files` map it prints, as in steps 3 and 4.
+
 ## After delivering
 
 Answer follow-up questions in chat. Edit the page only when the user asks for a change, or when the PR gets new commits and the user asks for a refresh. Republish to the same path.
