@@ -9,7 +9,7 @@ Each input runs in its own `claude -p` session, in a fresh copy of bench/inputs/
 uses the skill as checked out in this repo, through the ~/.claude/skills symlink. Results go to
 ~/.local/share/explainer-bench/<time>-<label>/<input>/: the transcript, timeline.json, report.txt,
 the CLI's JSON result, and the job's work dir, moved out of ~/.local/share/explainers so bench
-manifests never join the style history.
+manifests never join the rejected looks.
 
 Captions mode is the default, so a run spends no ElevenLabs characters. --narrated spends about
 3,000 per input. The script review runs at the skill's default, high. --review LEVEL passes the skill's
@@ -37,7 +37,7 @@ TIMEOUT_S = 3600
 PROMPT = """/explainer {option}{topic}
 
 Sources: the files in {src}. Host: standalone. Mode: {mode}. Use the slug {slug}.
-I will not be around to choose a look: build the style board as step 3 says, then pick the Excalidraw sketch look yourself and keep going without asking.
+Use the Excalidraw sketch look.
 There is no Artifact tool in this session, so finish step 7 by leaving page.html in the work dir and printing its path."""
 
 
