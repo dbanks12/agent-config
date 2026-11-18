@@ -1,0 +1,325 @@
+<title>{{TITLE}}</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Schibsted+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: a sticky stage nav, one reading column, wide figures for diagrams and code. */
+:root {
+  --bg: #f4f6f8; --surface: #ffffff; --fg: #18202a; --muted: #5b6876; --line: #d6dde5; --code-bg: #f0f3f6;
+  --accent: #1d5fbf; --accent-soft: #dfeafb;
+  --touched: #b45309; --touched-soft: #fdecd2;
+  --risk: #b3261e; --risk-soft: #fbe3e1;
+  --ok: #17734a; --ok-soft: #dcf2e6;
+  --hl-key: #8a3ab9; --hl-str: #17734a; --hl-num: #b45309; --hl-fn: #1d5fbf; --hl-type: #0f766e; --hl-com: #7a8794;
+  --mark: #fff3bf; --shadow: 0 10px 40px rgba(20, 30, 45, .18);
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11151a; --surface: #191f26; --fg: #e5eaf0; --muted: #96a3b1; --line: #2d3742; --code-bg: #141a20;
+  --accent: #7fb0f5; --accent-soft: #1c2f4a;
+  --touched: #f0b057; --touched-soft: #3b2a10;
+  --risk: #f28b82; --risk-soft: #41201d;
+  --ok: #6fd3a0; --ok-soft: #14352a;
+  --hl-key: #c792ea; --hl-str: #8fd9a8; --hl-num: #f0b057; --hl-fn: #7fb0f5; --hl-type: #5eead4; --hl-com: #7a8794;
+  --mark: #4a3f12; --shadow: 0 10px 40px rgba(0, 0, 0, .55); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11151a; --surface: #191f26; --fg: #e5eaf0; --muted: #96a3b1; --line: #2d3742; --code-bg: #141a20;
+  --accent: #7fb0f5; --accent-soft: #1c2f4a;
+  --touched: #f0b057; --touched-soft: #3b2a10;
+  --risk: #f28b82; --risk-soft: #41201d;
+  --ok: #6fd3a0; --ok-soft: #14352a;
+  --hl-key: #c792ea; --hl-str: #8fd9a8; --hl-num: #f0b057; --hl-fn: #7fb0f5; --hl-type: #5eead4; --hl-com: #7a8794;
+  --mark: #4a3f12; --shadow: 0 10px 40px rgba(0, 0, 0, .55); color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); }
+.wrap { max-width: 920px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { padding-block: 40px 20px; display: flex; flex-direction: column; gap: 12px; }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 2rem; font-weight: 700; }
+h2 { font-size: 1.4rem; font-weight: 700; }
+h3 { font-size: 1.08rem; font-weight: 500; }
+p { margin: 0; max-width: 70ch; }
+a { color: var(--accent); }
+code { font: .86em var(--mono); background: var(--code-bg); padding: .08em .35em; border-radius: 3px; overflow-wrap: anywhere; }
+.eyebrow { font: 500 .74rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 18px; font: .8rem var(--mono); color: var(--muted); }
+.lede { font-size: 1.1rem; }
+#definitions details > summary { cursor: pointer; list-style: none; }
+#definitions details > summary::-webkit-details-marker { display: none; }
+#definitions details > summary h2 { display: inline; }
+#definitions details > summary::after { content: " ▸ show"; color: var(--accent); font: 500 .9rem var(--body); }
+#definitions details[open] > summary::after { content: " ▾ hide"; }
+
+nav.stages { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+nav.stages ol { list-style: none; margin: 0; padding: 10px 0; display: flex; gap: 6px 18px; flex-wrap: wrap; counter-reset: stage; }
+nav.stages li { counter-increment: stage; font: .82rem var(--mono); }
+nav.stages li::before { content: counter(stage) " "; color: var(--muted); }
+nav.stages a { text-decoration: none; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+
+main { display: flex; flex-direction: column; gap: 56px; padding-block: 32px 80px; }
+main > section { display: flex; flex-direction: column; gap: 16px; min-width: 0; scroll-margin-top: 60px; }
+ul, ol.steps { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; max-width: 70ch; }
+
+/* definitions */
+dl.defs { margin: 0; display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: 0; background: var(--surface); border: 1px solid var(--line); }
+dl.defs dt, dl.defs dd { margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--line); min-width: 0; }
+dl.defs dt { font-weight: 600; overflow-wrap: anywhere; }
+dl.defs dt:last-of-type, dl.defs dd:last-of-type { border-bottom: 0; }
+@media (max-width: 560px) { dl.defs { grid-template-columns: 1fr; } dl.defs dt { border-bottom: 0; padding-bottom: 0; } }
+
+/* clickable terms: a dotted underline opens the definition panel */
+button.t { all: unset; cursor: pointer; color: inherit; border-bottom: 1.5px dotted var(--accent); padding-bottom: 1px; }
+button.t:hover, button.t:focus-visible { background: var(--accent-soft); color: var(--accent); border-bottom-style: solid; outline: none; }
+.hint { font-size: .86rem; color: var(--muted); }
+#backdrop { position: fixed; inset: 0; background: rgba(10, 15, 20, .35); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+#backdrop.show { opacity: 1; pointer-events: auto; }
+#panel { position: fixed; top: env(safe-area-inset-top, 0px); right: 0; bottom: 0; width: min(400px, 92vw); background: var(--surface);
+  border-left: 1px solid var(--line); box-shadow: var(--shadow); transform: translateX(105%); transition: transform .22s ease; z-index: 50;
+  display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom, 0px); }
+#panel.open { transform: translateX(0); }
+.panel-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.panel-actions { display: flex; gap: 6px; }
+.panel-actions button { all: unset; cursor: pointer; font: .8rem var(--mono); padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--fg); }
+.panel-actions button:hover, .panel-actions button:focus-visible { border-color: var(--accent); color: var(--accent); }
+.panel-actions button[hidden] { display: none; }
+.panel-body { padding: 22px 22px 32px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.panel-body h3 { font-size: 1.5rem; font-weight: 700; overflow-wrap: anywhere; }
+.panel-body .golink a { font-weight: 500; }
+.panel-body .also { margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.panel-body .also .eyebrow { width: 100%; }
+.panel-body .also button.t { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font: .76rem var(--mono); }
+@media (max-width: 640px) {
+  #panel { top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-height: 70vh; border-left: 0; border-top: 1px solid var(--line); border-radius: 14px 14px 0 0; transform: translateY(105%); }
+  #panel.open { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) { #panel, #backdrop { transition: none; } }
+
+/* components */
+.comps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.comp-card { background: var(--surface); border: 1px solid var(--line); padding: 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; scroll-margin-top: 60px; }
+.comp-card.touched { border-color: var(--touched); }
+.comp-card p { font-size: .93rem; }
+.tag { font: .72rem var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+.pill { display: inline-block; font: 500 .7rem var(--mono); padding: 1px 7px; border-radius: 99px; background: var(--code-bg); color: var(--muted); }
+.pill.touched { background: var(--touched-soft); color: var(--touched); }
+a.comp { font: 500 .8rem var(--mono); text-decoration: none; background: var(--touched-soft); color: var(--touched); padding: 1px 7px; border-radius: 99px; white-space: nowrap; }
+
+/* diagrams: Excalidraw SVG from scripts/diagram.py, on paper in both themes */
+figure { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+figure.diagram > div { overflow-x: auto; background: #fff; border: 1px solid var(--line); padding: 14px; }
+figure.diagram svg { display: block; min-width: 560px; width: 100%; max-height: 640px; height: auto; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) figure.diagram > div { filter: invert(.92) hue-rotate(180deg); } }
+:root[data-theme="dark"] figure.diagram > div { filter: invert(.92) hue-rotate(180deg); }
+
+/* tables */
+.scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; min-width: 560px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 .7rem var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* walkthrough */
+article.stop { display: flex; flex-direction: column; gap: 12px; padding-top: 20px; border-top: 1px solid var(--line); min-width: 0; }
+article.stop > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+.claim { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 12px 16px; }
+.risk { background: var(--risk-soft); border-left: 3px solid var(--risk); padding: 12px 16px; }
+.risk::before { content: "Risk"; display: block; font: 500 .7rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--risk); margin-bottom: 4px; }
+.risk.none { background: var(--ok-soft); border-color: var(--ok); } .risk.none::before { content: "Risk: none found"; color: var(--ok); }
+
+/* code */
+figure.code { background: var(--surface); border: 1px solid var(--line); gap: 0; }
+figure.code > figcaption { max-width: none; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; padding: 9px 12px; border-bottom: 1px solid var(--line); color: var(--fg); }
+figure.code > figcaption b { font-weight: 600; }
+figure.code > figcaption .src { font: .76rem var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+figure.code pre { margin: 0; overflow-x: auto; background: var(--code-bg); padding: 12px 0; font: .82rem/1.55 var(--mono); tab-size: 2; }
+figure.code pre code { display: block; background: none; padding: 0; font: inherit; overflow-wrap: normal; white-space: pre; min-width: max-content; }
+figure.code .l { display: block; padding: 0 12px 0 0; }
+figure.code .l::before { content: attr(data-n); display: inline-block; width: 4ch; margin-right: 12px; text-align: right; color: var(--hl-com); user-select: none; }
+figure.code .l.mark { background: var(--mark); }
+figure.code.old > figcaption .src::after { content: " (removed)"; color: var(--risk); }
+figure.code > p { padding: 9px 12px; border-top: 1px solid var(--line); font-size: .92rem; max-width: none; }
+.hljs-keyword, .hljs-built_in, .hljs-literal, .hljs-meta { color: var(--hl-key); }
+.hljs-string, .hljs-regexp, .hljs-addition { color: var(--hl-str); }
+.hljs-number, .hljs-symbol, .hljs-attr, .hljs-variable.constant_ { color: var(--hl-num); }
+.hljs-title, .hljs-title.function_, .hljs-section { color: var(--hl-fn); }
+.hljs-type, .hljs-title.class_, .hljs-params .hljs-type { color: var(--hl-type); }
+.hljs-comment, .hljs-quote { color: var(--hl-com); font-style: italic; }
+.hljs-deletion { color: var(--risk); }
+
+/* explainer videos, added by embed_explainers.py */
+button.xp-open { align-self: flex-start; font: 500 .85rem var(--body); color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 99px; padding: 6px 14px; cursor: pointer; }
+button.xp-open:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#xp-modal { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, .7); display: flex; align-items: center; justify-content: center; padding: 16px; }
+#xp-modal[hidden] { display: none; }
+#xp-modal .box { width: min(1100px, 100%); height: min(700px, 100%); background: var(--surface); display: flex; flex-direction: column; }
+#xp-modal iframe { flex: 1; border: 0; width: 100%; }
+#xp-modal button { align-self: flex-end; margin: 8px; }
+</style>
+
+<header class="top wrap">
+  <div class="eyebrow">{{EYEBROW}}</div> <!-- e.g. "PR guide · owner/repo #123" or "Stack guide · #101 to #109" -->
+  <h1>{{HEADLINE}}</h1> <!-- what the change does, as a statement -->
+  <p class="lede">{{LEDE}}</p> <!-- the intro: a few sentences on what this guide covers -->
+  <div class="meta">{{META}}</div> <!-- <span>author</span><span>N files</span><span>+A −D</span><span>head sha</span><span>read DATE</span> -->
+</header>
+
+<nav class="stages" aria-label="Stages"><div class="wrap"><ol>
+  <li><a href="#definitions">Definitions</a></li>
+  <li><a href="#codebase">Codebase</a></li>
+  <li><a href="#changes">The change</a></li>
+  <li><a href="#walkthrough">Code walkthrough</a></li>
+  <li><a href="#wrapup">Wrap-up</a></li>
+</ol></div></nav>
+
+<main class="wrap">
+  <section id="definitions">
+    <details> <!-- collapsed by default: a reader opens a term inline, or the whole list here -->
+      <summary><h2>{{DEFINITIONS_HEADING}}</h2></summary>
+      <p class="hint">A term with a dotted underline, like <button class="t" data-t="{{EXAMPLE_SLUG}}">{{EXAMPLE_TERM}}</button>, opens its definition anywhere on the page.</p>
+      <dl class="defs" id="defs"></dl> <!-- filled from the glossary below -->
+    </details>
+  </section>
+
+  <section id="codebase">
+    <h2>{{CODEBASE_HEADING}}</h2>
+    <figure class="diagram">
+      <div>
+        {{CODEBASE_DIAGRAM}} <!-- scripts/diagram.py embed puts the Excalidraw SVG here -->
+      </div>
+      <figcaption>{{CODEBASE_DIAGRAM_CLAIM}}</figcaption>
+    </figure>
+    <div class="comps">
+      <div class="comp-card touched" id="c-example">
+        <h3>Component name <span class="pill touched">touched</span></h3>
+        <span class="tag">path/to/it</span>
+        <p>What it is and what job it does. Not how it changed.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="changes">
+    <h2>{{CHANGES_HEADING}}</h2>
+    <p class="claim">{{CLAIM}}</p>
+    <!-- Prose, then a data-flow figure.diagram: a figure.diagram whose div holds a marker of its own for scripts/diagram.py embed.
+         For a stack, a .scroll table: PR, what it does, components. -->
+  </section>
+
+  <section id="walkthrough">
+    <h2>{{WALKTHROUGH_HEADING}}</h2>
+    <article class="stop">
+      <header><h3>1. What this stop shows</h3><a class="comp" href="#c-example">Component name</a></header>
+      <p>Why a reviewer reads this first, and what to check.</p>
+      <!-- paste snippet.py output here -->
+      <p class="risk">What can go wrong here, and what it costs.</p>
+    </article>
+    <article class="stop">
+      <header><h3>The rest</h3></header>
+      <ul><li>Each remaining source change in one sentence, without code.</li></ul>
+    </article>
+  </section>
+
+  <section id="wrapup">
+    <h2>{{WRAPUP_HEADING}}</h2>
+    <p class="claim">{{CLAIM}}</p>
+    <!-- A .scroll table of risks: risk, where it lives (a.comp + file), severity.
+         Then open questions, then what was not verified. -->
+  </section>
+</main>
+
+<!-- definition panel -->
+<div id="backdrop"></div>
+<aside id="panel" aria-label="Definition" aria-hidden="true">
+  <div class="panel-bar">
+    <span class="eyebrow">Definition</span>
+    <div class="panel-actions">
+      <button id="backBtn" type="button" hidden>&larr; Back</button>
+      <button id="closeBtn" type="button" aria-label="Close definition">Close</button>
+    </div>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</aside>
+
+<!-- The glossary, in stage 1's order: domain terms first, then names from the code. JSON only.
+     name and def may hold inline HTML such as <code>. also: slugs of related terms. link: optional {url, label}. -->
+<script type="application/json" id="glossary">
+{
+  "example-slug": { "name": "Display name", "def": "One to two sentences, in the code's own names.", "also": [] }
+}
+</script>
+<script>
+// Stage 1's list and the definition panel both read the glossary, so each definition is written once.
+(() => {
+  const G = JSON.parse(document.getElementById("glossary").textContent)
+  const panel = document.getElementById("panel"), body = document.getElementById("panelBody")
+  const backdrop = document.getElementById("backdrop"), backBtn = document.getElementById("backBtn"), closeBtn = document.getElementById("closeBtn")
+  const trail = []
+  let lastTrigger = null
+  const defs = document.getElementById("defs")
+  for (const [slug, g] of Object.entries(G)) {
+    const also = (g.also || []).filter((k) => G[k]).map((k) => `<button class="t" type="button" data-t="${k}">${G[k].name}</button>`).join(", ")
+    defs.insertAdjacentHTML("beforeend", `<dt id="t-${slug}">${g.name}</dt><dd>${g.def}${also ? ` <span class="hint">See also ${also}.</span>` : ""}</dd>`)
+  }
+  function render(id) {
+    const g = G[id]
+    const also = (g.also || []).filter((k) => G[k]).map((k) => `<button class="t" type="button" data-t="${k}">${G[k].name}</button>`).join("")
+    const link = g.link && /^https:\/\//.test(g.link.url)
+      ? `<p class="golink"><a href="${g.link.url}" target="_blank" rel="noopener">${g.link.label || "Open the source"} &rarr;</a></p>` : ""
+    body.innerHTML = `<h3>${g.name}</h3><p>${g.def}</p>${link}` + (also ? `<div class="also"><span class="eyebrow">See also</span>${also}</div>` : "")
+    backBtn.hidden = trail.length < 2
+    body.scrollTop = 0
+  }
+  function open(id, trigger) {
+    if (!G[id]) return
+    if (trigger && !panel.contains(trigger)) lastTrigger = trigger
+    trail.push(id)
+    render(id)
+    panel.classList.add("open")
+    panel.setAttribute("aria-hidden", "false")
+    backdrop.classList.add("show")
+    closeBtn.focus({ preventScroll: true })
+  }
+  function close() {
+    panel.classList.remove("open")
+    panel.setAttribute("aria-hidden", "true")
+    backdrop.classList.remove("show")
+    trail.length = 0
+    if (lastTrigger) { lastTrigger.focus({ preventScroll: true }); lastTrigger = null }
+  }
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("button.t")
+    if (t) open(t.dataset.t, t)
+  })
+  closeBtn.addEventListener("click", close)
+  backdrop.addEventListener("click", close)
+  backBtn.addEventListener("click", () => { if (trail.length > 1) { trail.pop(); render(trail[trail.length - 1]) } })
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && panel.classList.contains("open")) close() })
+  document.querySelectorAll("button.t").forEach((b) => { b.type = "button" })
+})()
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- A language outside the common set loads after the main script, for example:
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/solidity.min.js"></script> -->
+<script>
+// Highlight each snippet, then split it into numbered lines so marks and line numbers line up.
+document.querySelectorAll("figure.code code").forEach((code) => {
+  const lang = [...code.classList].find((c) => c.startsWith("language-"))?.slice(9)
+  if (window.hljs && lang && hljs.getLanguage(lang)) {
+    try { code.innerHTML = hljs.highlight(code.textContent, { language: lang }).value } catch {}
+  }
+  const start = Number(code.dataset.start || 1)
+  const marks = new Set((code.dataset.mark || "").split(",").filter(Boolean).map(Number))
+  // a highlight span can cross a line break: close it at the break and reopen it on the next line
+  const open = []
+  const lines = code.innerHTML.split("\n").map((line, i) => {
+    const head = open.join("")
+    for (const m of line.matchAll(/<(\/?)span[^>]*>/g)) m[1] ? open.pop() : open.push(m[0])
+    const n = start + i
+    return `<span class="l${marks.has(n) ? " mark" : ""}" data-n="${n}">${head}${line}${"</span>".repeat(open.length)}</span>`
+  })
+  code.innerHTML = lines.join("")
+})
+</script>

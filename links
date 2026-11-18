@@ -73,3 +73,5 @@ vendor/pr-map ~/.claude/skills/pr-viz
 vendor/pr-map ~/.codex/skills/pr-viz
 vendor/repo-map ~/.claude/skills/repo-viz
 vendor/repo-map ~/.codex/skills/repo-viz
+skills/pr-guide ~/.claude/skills/pr-guide
+skills/pr-guide ~/.codex/skills/pr-guide
