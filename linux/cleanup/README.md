@@ -123,39 +123,46 @@ The reaper does not target `mcp-excalidraw-server` or `codex-linux-sandbox`. Add
 
 ## Timers
 
-The units run the scripts from `~/projects/agent-config`. The services run in dry-run mode and log to the journal.
+The units run the scripts from `~/projects/agent-config` and log to the journal. The tmp and disk janitors delete. The orphan reaper runs in dry-run mode.
+
+| Timer | Runs |
+| --- | --- |
+| `agent-tmp-janitor.timer` | every hour |
+| `agent-disk-janitor.timer` | every night at 04:30 |
+| `agent-disk-alert.timer` | every hour |
+| `agent-orphan-reaper.timer` | every 30 minutes |
 
 1. Link the units:
 
    ```sh
-   systemctl --user link ~/projects/agent-config/linux/cleanup/systemd/agent-{tmp-janitor,orphan-reaper}.{service,timer}
+   systemctl --user link ~/projects/agent-config/linux/cleanup/systemd/agent-{tmp-janitor,disk-janitor,disk-alert,orphan-reaper}.{service,timer}
    ```
 
 2. Start the timers:
 
    ```sh
-   systemctl --user enable --now agent-tmp-janitor.timer agent-orphan-reaper.timer
+   systemctl --user enable --now agent-{tmp-janitor,disk-janitor,disk-alert,orphan-reaper}.timer
    ```
 
-3. Read the reports for a few days:
+3. Read the reports:
 
    ```sh
-   journalctl --user -u agent-tmp-janitor -u agent-orphan-reaper --since today
+   journalctl --user -u 'agent-*' --since today
    ```
 
-4. To make a service delete or kill, add an override and append `--apply` to its command:
+4. To make the orphan reaper kill, add an override and append `--apply` to its command:
 
    ```sh
-   systemctl --user edit agent-tmp-janitor.service
+   systemctl --user edit agent-orphan-reaper.service
    ```
 
    ```ini
    [Service]
    ExecStart=
-   ExecStart=%h/projects/agent-config/linux/cleanup/tmp-janitor.py --max-age 24 --apply
+   ExecStart=%h/projects/agent-config/linux/cleanup/orphan-reaper.py --min-age 2 --apply
    ```
 
-To remove the timers, run `systemctl --user disable --now` on both timers. Then delete the links in `~/.config/systemd/user/`.
+To remove the timers, run `systemctl --user disable --now` on each timer. Then delete the links in `~/.config/systemd/user/`.
 
 ## Size cap for /tmp
 
