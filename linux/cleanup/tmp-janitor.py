@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Remove stale agent scratch, the pnpm store, and pytest dirs from /tmp.
+"""Remove stale agent scratch, the pnpm store, pytest dirs, and leaked run dirs from /tmp.
 
 Dry run by default. Pass --apply to delete.
 
@@ -8,6 +8,9 @@ Units of deletion:
   /tmp/claude-$UID/<entry>              any other top-level file or dir
   /tmp/.pnpm-store                      the whole store
   /tmp/pytest-of-$USER/pytest-N         one pytest run
+  /tmp/robolectric-nativeruntime*       one Robolectric run's unpacked native runtime
+  /tmp/oxide-runner-XXXXXX              one oxide migration runner home
+  /tmp/puppeteer_dev_chrome_profile-*   one Puppeteer Chrome profile
 
 A unit is kept when any of these is true:
   - its newest mtime is younger than --max-age
@@ -34,6 +37,8 @@ CLAUDE_TMP = TMP / f"claude-{UID}"
 PNPM_STORE = TMP / ".pnpm-store"
 PYTEST_ROOT = TMP / f"pytest-of-{getpass.getuser()}"
 SESSIONS = Path.home() / ".claude" / "sessions"
+# Tools that create a dir per run in /tmp and never remove it.
+LEAKS = re.compile(r"robolectric-nativeruntime\d+|oxide-runner-[A-Za-z0-9]{6}|puppeteer_dev_chrome_profile-\w+")
 
 
 def encode(path):
@@ -131,6 +136,9 @@ def candidates():
         for entry in sorted(PYTEST_ROOT.glob("pytest-*")):
             if entry.name != "pytest-current":
                 yield entry, "pytest"
+    for entry in sorted(TMP.iterdir()):
+        if LEAKS.fullmatch(entry.name):
+            yield entry, "leaked-run"
 
 
 def keep_reason(path, kind, ctx, cutoff):

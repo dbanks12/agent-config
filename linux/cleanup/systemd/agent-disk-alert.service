@@ -1,0 +1,7 @@
+[Unit]
+Description=Post a Sill note when / or /data is more than 85% full
+Documentation=file://%h/projects/agent-config/linux/cleanup/README.md
+
+[Service]
+Type=oneshot
+ExecStart=%h/projects/agent-config/linux/cleanup/disk-alert.py
