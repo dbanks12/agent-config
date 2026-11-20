@@ -1,4 +1,4 @@
-# Cleanup for /tmp and orphan processes
+# Cleanup for /tmp, disk, and orphan processes
 
 ## Problem
 
@@ -15,13 +15,22 @@ Leaked processes held more RAM. Their parents had exited, so PID 1 adopted them:
 - a QA sandbox stack of 44 node, bash, and `bb` processes (0.9 GiB RSS)
 - `cargo-mutants` runs that agents started in herdr panes
 
-This directory holds four mitigations. None of them is installed.
+On 2026-11-20, `/` was 100% full and `/data` was 91% full. Nothing removed what agents built:
+
+- a 300 GiB Cargo target dir in `~/.cache/sill-check`, half of it incremental cache
+- about 130 GiB of KOTOR build dirs in `/data/kotor-overhaul/build/wt` whose worktrees were gone
+- 42 leaked Robolectric runtimes in `/tmp`, 205 MiB each
+- 293 stale git worktrees. The merged-worktree cleaner in sill-core handles worktrees, not this directory.
+
+This directory holds these mitigations:
 
 | File | Purpose |
 | --- | --- |
-| `tmp-janitor.py` | Removes stale agent scratch, the pnpm store, and old pytest dirs |
+| `tmp-janitor.py` | Removes stale agent scratch, the pnpm store, old pytest dirs, and leaked run dirs from `/tmp` |
+| `disk-janitor.py` | Removes oversized or stale Cargo target dirs |
+| `disk-alert.py` | Posts a Sill note when `/` or `/data` is more than 85% full |
 | `orphan-reaper.py` | Stops leaked build and QA process trees |
-| `systemd/` | User timers for both scripts. The services run in dry-run mode. |
+| `systemd/` | User timers for the scripts. The orphan reaper runs in dry-run mode. The others delete. |
 | `proposed-etc/` | A proposed 4G cap for the `/tmp` tmpfs |
 
 The agent guidance is in `instructions/AGENTS.md` under "Long jobs and cleanup".
@@ -40,6 +49,7 @@ The janitor deletes one unit at a time:
 - any other top-level entry in `/tmp/claude-$UID`
 - the whole `/tmp/.pnpm-store`
 - one `pytest-N` dir in `/tmp/pytest-of-$USER`
+- one leaked run dir: `/tmp/robolectric-nativeruntime*`, `/tmp/oxide-runner-XXXXXX`, or `/tmp/puppeteer_dev_chrome_profile-*`
 
 It keeps a unit in these cases:
 
@@ -55,6 +65,36 @@ The janitor removes the pnpm store as one unit. A partial delete can leave index
 The janitor does not follow symlinks. After `--apply`, it also removes project dirs that are empty.
 
 The 2026-10-19 dry run listed 6 GiB to remove. It kept 55 live sessions and 75 session dirs of active worktrees.
+
+## disk-janitor.py
+
+```sh
+linux/cleanup/disk-janitor.py             # dry run
+linux/cleanup/disk-janitor.py --apply
+```
+
+The janitor deletes these units:
+
+- A Cargo target dir that nothing touched for `--stale-days` days, 7 by default. Cargo writes `.rustc_info.json` at the root of each target dir. The janitor looks for that file up to 4 levels below `~/.cache`, `~/projects`, `/data/worktrees`, and `/data/kotor-overhaul`.
+- The `incremental` dirs of a Cargo target dir that is larger than `--cargo-cap` GiB, 40 by default. If the target dir is still larger than the cap, the janitor deletes all of it. The next build rebuilds it.
+
+It keeps a unit in these cases:
+
+- A live process of yours has its cwd or an open file in the unit.
+- A `cargo` or `rustc` process of yours is running. The janitor then deletes nothing.
+
+The janitor does not handle build dirs outside a worktree. Keep each worktree's build output inside the worktree, in a gitignored dir. Then removing the worktree removes its build.
+
+The 2026-11-20 dry run listed 149 GiB for the `sill-check` target, 31 GiB of `sill-ship-next` incremental cache, and two stale target dirs.
+
+## disk-alert.py
+
+```sh
+linux/cleanup/disk-alert.py                       # check / and /data at 85%
+linux/cleanup/disk-alert.py --threshold 90 /data
+```
+
+The script prints the usage of each mount. When a mount is fuller than `--threshold` percent, it posts a note with `sill-core note --from Disk`. It posts at most once per `--every` hours for each mount, 12 by default. It keeps the send times in `~/.local/state/agent-cleanup/disk-alert.json`.
 
 ## orphan-reaper.py
 

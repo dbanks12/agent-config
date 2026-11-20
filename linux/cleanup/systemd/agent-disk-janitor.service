@@ -1,0 +1,9 @@
+[Unit]
+Description=Remove oversized or stale Cargo target dirs
+Documentation=file://%h/projects/agent-config/linux/cleanup/README.md
+
+[Service]
+Type=oneshot
+ExecStart=%h/projects/agent-config/linux/cleanup/disk-janitor.py --apply
+Nice=10
+IOSchedulingClass=idle
