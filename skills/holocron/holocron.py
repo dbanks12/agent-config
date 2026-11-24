@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Holocron: local pages served on one port, as a stand-in for claude.ai Artifacts.
 
-Each page lives in ~/holocron/<slug>/ and is served at http://localhost:<port>/<slug>/.
+Each page lives in ~/holocron/<slug>/ and is served at http://<tailscale name>:<port>/<slug>/.
+The server answers only this host and devices on the tailnet.
 The index at / lists every page and deletes the ones you select.
 
   holocron publish <file-or-dir> --slug <slug> [--title <title>]
@@ -13,10 +14,12 @@ The index at / lists every page and deletes the ones you select.
 import argparse
 import datetime as dt
 import html
+import ipaddress
 import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -26,6 +29,19 @@ ROOT = Path(os.environ.get("HOLOCRON_ROOT", Path.home() / "holocron"))
 PORT = int(os.environ.get("HOLOCRON_PORT", "7777"))
 META = ".holocron.json"
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{0,79}$")
+TAILNET = ipaddress.ip_network("100.64.0.0/10")
+
+
+def tailscale_name() -> str | None:
+    try:
+        out = subprocess.run(["tailscale", "status", "--json"], capture_output=True, text=True, timeout=5).stdout
+        return json.loads(out)["Self"]["DNSName"].rstrip(".") or None
+    except (OSError, ValueError, KeyError, subprocess.SubprocessError):
+        return None
+
+
+def base_url() -> str:
+    return os.environ.get("HOLOCRON_URL") or f"http://{tailscale_name() or 'localhost'}:{PORT}"
 
 
 def now() -> str:
@@ -58,8 +74,8 @@ def pages() -> list[dict]:
     return sorted(found, key=lambda m: m["updated"], reverse=True)
 
 
-def url(slug: str) -> str:
-    return f"http://localhost:{PORT}/{slug}/"
+def url(slug: str, base: str | None = None) -> str:
+    return f"{base or base_url()}/{slug}/"
 
 
 def title_of(index: Path) -> str | None:
@@ -204,10 +220,18 @@ class Handler(SimpleHTTPRequestHandler):
         super().end_headers()
 
     def local_host(self) -> bool:
+        # The server listens on all addresses, so refuse clients outside this host and the tailnet.
+        client = ipaddress.ip_address(self.client_address[0])
+        if not (client.is_loopback or client in TAILNET):
+            return False
         # A page on another site can make the browser send requests here. A Host header for
-        # another name means DNS rebinding, so refuse it.
-        host = (self.headers.get("Host") or "").rsplit(":", 1)[0]
-        return host in ("localhost", "127.0.0.1", "[::1]")
+        # another name means DNS rebinding, so accept only an IP, a MagicDNS name, or localhost.
+        host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip("[]")
+        try:
+            ipaddress.ip_address(host)
+            return True
+        except ValueError:
+            return host == "localhost" or "." not in host or host.endswith(".ts.net")
 
     def send_body(self, status: int, body: bytes, ctype: str):
         self.send_response(status)
@@ -221,7 +245,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if not self.local_host():
-            return self.send_error(HTTPStatus.FORBIDDEN, "Use http://localhost")
+            return self.send_error(HTTPStatus.FORBIDDEN)
         path = self.path.split("?", 1)[0]
         if path == "/":
             return self.send_body(HTTPStatus.OK, INDEX.encode(), "text/html; charset=utf-8")
@@ -295,20 +319,21 @@ def main():
     sub.add_parser("list", help="print each page: updated, URL, title")
     d = sub.add_parser("delete", help="delete pages by slug")
     d.add_argument("slugs", nargs="+")
-    sub.add_parser("serve", help=f"serve {ROOT} on 127.0.0.1:{PORT}")
+    sub.add_parser("serve", help=f"serve {ROOT} on port {PORT} to this host and the tailnet")
     args = ap.parse_args()
     try:
         if args.cmd == "publish":
             print(publish(args.src, args.slug, args.title))
         elif args.cmd == "list":
+            base = base_url()
             for m in pages():
-                print(f"{m['updated']}  {url(m['slug'])}  {m['title']}")
+                print(f"{m['updated']}  {url(m['slug'], base)}  {m['title']}")
         elif args.cmd == "delete":
             for slug in delete(args.slugs):
                 print(f"deleted {slug}")
         else:
             ROOT.mkdir(parents=True, exist_ok=True)
-            ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
+            ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
     except ValueError as e:
         sys.exit(f"holocron: {e}")
 

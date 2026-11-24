@@ -1,14 +1,14 @@
 ---
 name: holocron
-description: Publish an HTML page to the user's local holocron server instead of as a claude.ai Artifact, and reply with its localhost link. Use when the user asks for a holocron, or asks for another skill's output (an explainer, a teach-me page, a PR guide) as a holocron.
+description: Publish an HTML page to the user's local holocron server instead of as a claude.ai Artifact, and reply with its tailnet link. Use when the user asks for a holocron, or asks for another skill's output (an explainer, a teach-me page, a PR guide) as a holocron.
 ---
 
 # Holocron
 
-A holocron is a local stand-in for an Artifact. One server on this host serves every page on one port. The user forwards that port to their laptop once, so each link works with no new setup.
+A holocron is a local stand-in for an Artifact. One server on this host serves every page on one port to the user's tailnet, so each link opens on the user's laptop and phone with no setup.
 
-- Each page lives in `~/holocron/<slug>/`, and its link is `http://localhost:7777/<slug>/`.
-- The index at `http://localhost:7777/` lists the pages. The user selects pages there, or selects all pages older than N days, and deletes them.
+- Each page lives in `~/holocron/<slug>/`. Its link is `http://<tailscale name>:7777/<slug>/`, which `holocron publish` prints.
+- The index at `/` lists the pages. The user selects pages there, or selects all pages older than N days, and deletes them.
 - The `holocron` command publishes, lists, and deletes pages. Run `holocron --help` for its usage.
 
 ## Make a holocron
@@ -31,11 +31,12 @@ Do these steps once per host. Run them only when the server is missing.
 
 1. Run `./install.sh` in `~/projects/agent-config`. It links the skill, `~/.local/bin/holocron`, and the user service.
 2. Run `systemctl --user daemon-reload`, then `systemctl --user enable --now holocron`.
-3. On the laptop, add `LocalForward 7777 localhost:7777` to the host's entry in `~/.ssh/config`.
+3. Make sure that Tailscale runs on this host and on the user's devices.
 
 ## Limits
 
-- The server listens on `127.0.0.1` only. The SSH tunnel is the only way to reach it from another machine. Every user with a shell on this host can read the pages.
+- The server answers this host and tailnet addresses (`100.64.0.0/10`) only. Every device on the tailnet, and every user with a shell on this host, can read the pages. Tailscale ACLs can limit the devices.
+- The server refuses a `Host` header that is not an IP address, `localhost`, a MagicDNS short name, or a `.ts.net` name. This check stops DNS rebinding.
 - The server sends byte ranges, so audio and video seek correctly.
-- `HOLOCRON_PORT` and `HOLOCRON_ROOT` override the port and the folder. Set the same values for the service and the command.
+- `HOLOCRON_PORT` and `HOLOCRON_ROOT` override the port and the folder. Set the same values for the service and the command. `HOLOCRON_URL` overrides the link base, which comes from `tailscale status`.
 - Pages stay until the user deletes them. Delete a page only when the user asks.
