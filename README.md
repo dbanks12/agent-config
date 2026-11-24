@@ -22,6 +22,7 @@ This repo pins four skill repos as submodules in `vendor/`. `install.sh` clones 
 | `slack-read` | A Slack user token in `SLACK_TOKEN` |
 | `hunk-review`, `hunk-extensions` | `npm i -g hunkdiff@0.22.0` |
 | `herdr` | Herdr 0.9.0, run with `HERDR_ENV=1` |
+| `holocron` | systemd user services. See its [setup](skills/holocron/SKILL.md#setup) |
 
 On Ubuntu, Codex needs a Bubblewrap profile. See [Linux setup](linux/README.md). For `/tmp` cleanup, see [Linux cleanup](linux/cleanup/README.md).
 
@@ -57,7 +58,7 @@ Capy reads skills from Capy Drive, not from `~/.claude` or `~/.codex`. In a Capy
 ./install-capy.sh --check  # report drift, change nothing
 ```
 
-`install-capy.sh` copies each skill that `links` installs, except the skills in its `host_only` list. Those are the Herdr and Hunk skills, which drive this host's terminal, and `slack-read`, because Capy has its own Slack tools. The copies point `~/.claude/skills` paths at the drive. The script also writes the drive's `AGENTS.md`: `instructions/AGENTS.md`, then the Capy-only rules in `instructions/capy.md`. The copies do not follow the repo, so run the script again after each change.
+`install-capy.sh` copies each skill that `links` installs, except the skills in its `host_only` list. Those are the Herdr and Hunk skills, which drive this host's terminal, `slack-read`, because Capy has its own Slack tools, and `holocron`, because its server runs on this host. The copies point `~/.claude/skills` paths at the drive. The script also writes the drive's `AGENTS.md`: `instructions/AGENTS.md`, then the Capy-only rules in `instructions/capy.md`. The copies do not follow the repo, so run the script again after each change.
 
 Skills that need this host's tools, such as the cross-review scripts or the ElevenLabs key, work only in Capy threads on this host. On a Capy cloud machine, `call-claude` and `call-codex` run a Capy subagent when Capy has the model.
 
@@ -70,7 +71,7 @@ Skills that need this host's tools, such as the cross-review scripts or the Elev
 | Thinking and planning | `grilling`, `grill-me`, `grill-me-html`, `to-questionnaire`, `wait-what`, `handoff`, `brief`, `expert-research`, `competitor-research`, `user-empathy-research` |
 | Teaching and visuals | `teach-me`, `teach-me-many-topics`, `explainer`, `long-explainer`, `slide-deck`, `excalidraw-skill`, `pr-viz`, `repo-viz` |
 | Writing for agents | `writing-for-agents` |
-| Tools | `herdr`, `rdr`, `migrdr`, `hunk-review`, `hunk-extensions`, `slack-read` |
+| Tools | `herdr`, `rdr`, `migrdr`, `hunk-review`, `hunk-extensions`, `slack-read`, `holocron` |
 
 Each skill is a folder with a `SKILL.md`. Read it for triggers and steps. `instructions/AGENTS.md` is the global instruction file for both tools.
 

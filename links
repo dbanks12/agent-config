@@ -27,6 +27,10 @@ skills/review-by-council  ~/.claude/skills/review-by-council
 skills/review-by-council  ~/.codex/skills/review-by-council
 skills/teach-me           ~/.claude/skills/teach-me
 skills/teach-me           ~/.codex/skills/teach-me
+skills/holocron           ~/.claude/skills/holocron
+skills/holocron           ~/.codex/skills/holocron
+skills/holocron/holocron.py ~/.local/bin/holocron
+skills/holocron/systemd/holocron.service ~/.config/systemd/user/holocron.service
 cross-review              ~/.config/cross-review
 statusline/claude.py       ~/.claude/statusline.py
 

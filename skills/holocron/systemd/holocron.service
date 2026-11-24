@@ -1,0 +1,10 @@
+[Unit]
+Description=Holocron: local pages on one port
+Documentation=file://%h/projects/agent-config/skills/holocron/SKILL.md
+
+[Service]
+ExecStart=/usr/bin/python3 -I %h/.local/bin/holocron serve
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

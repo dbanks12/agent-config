@@ -3,7 +3,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-host_only="herdr rdr migrdr hunk-review hunk-extensions slack-read"   # need this host's terminal tools, or Capy has its own
+host_only="herdr rdr migrdr hunk-review hunk-extensions slack-read holocron"   # need this host's terminal tools, or Capy has its own
 marker="<!-- Written by agent-config/install-capy.sh. Edit instructions/ in that repo, then run the script again. -->"
 usage="usage: $0 [--check] [--drive <dir>]"
 check=0; drive=""
